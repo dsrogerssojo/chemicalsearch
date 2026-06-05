@@ -1,4 +1,5 @@
 (() => {
+  const SOJO_LOGO_URL = "https://techcouncilventures.com/wp-content/uploads/2023/10/Sojo-Logo.png";
   const existing = document.getElementById("sojo-inspired-theme");
   if (existing) existing.remove();
 
@@ -43,8 +44,10 @@
     .hotline.critical { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
 
     .hero { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; }
-    .hero-inner { padding: 26px 16px 22px !important; position: relative !important; min-height: 310px !important; display: grid !important; grid-template-columns: minmax(0, 1fr) 310px !important; align-items: center !important; gap: 48px !important; }
-    .hero-inner::after { content: "" !important; width: 290px !important; height: 180px !important; justify-self: end !important; align-self: center !important; background-image: url("assets/sojo-logo.svg") !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; opacity: .95 !important; }
+    .hero-inner { padding: 26px 16px 22px !important; min-height: 310px !important; display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(240px, 360px) !important; align-items: center !important; gap: 48px !important; }
+    .hero-inner::after { display: none !important; content: none !important; }
+    .hero-logo-panel { justify-self: end !important; align-self: center !important; display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-width: 240px !important; }
+    .hero-logo-panel img { display: block !important; width: min(340px, 28vw) !important; max-width: 100% !important; height: auto !important; object-fit: contain !important; }
     .hero .eyebrow { background: transparent !important; color: var(--sojo-purple) !important; padding: 0 !important; border-radius: 0 !important; font-size: .78rem !important; letter-spacing: .08em !important; }
     .hero h1 { color: #ffffff !important; text-transform: uppercase !important; letter-spacing: -.045em !important; font-size: clamp(2rem, 4vw, 4rem) !important; line-height: .92 !important; max-width: 760px !important; margin: 6px 0 12px !important; }
     .hero .lead { color: #ffffff !important; max-width: 720px !important; font-size: 1rem !important; line-height: 1.5 !important; }
@@ -96,7 +99,8 @@
 
     @media (max-width: 900px) {
       .hero-inner { grid-template-columns: 1fr !important; min-height: auto !important; gap: 20px !important; }
-      .hero-inner::after { width: 190px !important; height: 118px !important; justify-self: start !important; }
+      .hero-logo-panel { justify-self: start !important; min-width: 0 !important; }
+      .hero-logo-panel img { width: 190px !important; }
     }
 
     @media (max-width: 820px) {
@@ -108,4 +112,20 @@
   `;
 
   document.head.appendChild(style);
+
+  function addHeroLogo() {
+    const heroInner = document.querySelector(".hero-inner");
+    if (!heroInner || heroInner.querySelector(".hero-logo-panel")) return;
+    const panel = document.createElement("div");
+    panel.className = "hero-logo-panel";
+    const img = document.createElement("img");
+    img.src = SOJO_LOGO_URL;
+    img.alt = "SOJO";
+    img.loading = "eager";
+    panel.appendChild(img);
+    heroInner.appendChild(panel);
+  }
+
+  addHeroLogo();
+  new MutationObserver(addHeroLogo).observe(document.body, { childList: true, subtree: true });
 })();
