@@ -58,8 +58,12 @@
     .eyebrow { background: transparent !important; color: var(--sojo-purple) !important; padding: 0 !important; letter-spacing: .08em !important; }
     .panel h1,.panel h2,.panel h3,.chemical-name,.summary-list dt,.label,.detail-title,.incident-card h3 { color: var(--sojo-text) !important; }
 
+    .search-panel .search-row { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 12px !important; width: 100% !important; max-width: 100% !important; }
+    .search-panel .search-input { order: 1 !important; flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; max-width: none !important; height: 52px !important; }
+    .search-panel .search-row .button,.search-panel .search-row button[type='submit'] { order: 2 !important; flex: 0 0 auto !important; width: auto !important; min-width: 128px !important; height: 52px !important; padding: 0 26px !important; }
     .search-input,.field,.textarea,.sort-control select { background: #ffffff !important; color: #101419 !important; border: 1px solid #c8d0da !important; border-radius: 12px !important; }
     .search-input::placeholder,.field::placeholder,.textarea::placeholder { color: #596577 !important; }
+    .quick-searches { justify-content: flex-start !important; }
     .filter-toolbar { border-bottom: 1px solid var(--sojo-line-soft) !important; padding-bottom: 12px !important; }
 
     .chemical-card { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; border-top: 1px solid var(--sojo-line) !important; border-bottom: 0 !important; background: transparent !important; }
@@ -91,6 +95,8 @@
     @media (max-width: 820px) {
       .hero h1 { font-size: clamp(2rem, 12vw, 3.2rem) !important; }
       .results-panel,.search-panel,.incident-card,.sds-section-grid .panel,.hazard-overview .panel,.detail-header { border-radius: 14px !important; }
+      .search-panel .search-row { flex-direction: column !important; align-items: stretch !important; }
+      .search-panel .search-input,.search-panel .search-row .button,.search-panel .search-row button[type='submit'] { width: 100% !important; min-width: 0 !important; }
     }
   `;
 
