@@ -6,17 +6,34 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260605-sojo" />
+    <link rel="stylesheet" href="styles.css?v=20260605-logo2" />
   </head>
   <body>
     <div id="app"></div>
-    <script src="sds-data-1.js?v=20260605-sojo"></script>
-    <script src="sds-data-2.js?v=20260605-sojo"></script>
-    <script src="sds-data-3.js?v=20260605-sojo"></script>
-    <script src="sds-data-4.js?v=20260605-sojo"></script>
-    <script src="sds-data-5.js?v=20260605-sojo"></script>
-    <script src="sds-data-6.js?v=20260605-sojo"></script>
-    <script src="app.js?v=20260605-sojo"></script>
-    <script src="enhancements.js?v=20260605-sojo"></script>
+    <script src="sds-data-1.js?v=20260605-logo2"></script>
+    <script src="sds-data-2.js?v=20260605-logo2"></script>
+    <script src="sds-data-3.js?v=20260605-logo2"></script>
+    <script src="sds-data-4.js?v=20260605-logo2"></script>
+    <script src="sds-data-5.js?v=20260605-logo2"></script>
+    <script src="sds-data-6.js?v=20260605-logo2"></script>
+    <script src="app.js?v=20260605-logo2"></script>
+    <script src="enhancements.js?v=20260605-logo2"></script>
+    <script>
+      function placeHeroLogo() {
+        var label = document.querySelector('.hero .eyebrow');
+        if (!label || label.querySelector('img')) return;
+        label.textContent = '';
+        var img = document.createElement('img');
+        img.src = 'assets/sojo-logo.png';
+        img.alt = 'SOJO';
+        img.style.width = '120px';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+        label.appendChild(img);
+        label.style.background = 'transparent';
+      }
+      placeHeroLogo();
+      new MutationObserver(placeHeroLogo).observe(document.body, { childList: true, subtree: true });
+    </script>
   </body>
 </html>
