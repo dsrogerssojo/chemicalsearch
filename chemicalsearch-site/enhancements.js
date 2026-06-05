@@ -43,7 +43,8 @@
     .hotline.critical { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
 
     .hero { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; }
-    .hero-inner { padding: 26px 16px 22px !important; }
+    .hero-inner { padding: 26px 16px 22px !important; position: relative !important; min-height: 310px !important; display: grid !important; grid-template-columns: minmax(0, 1fr) 310px !important; align-items: center !important; gap: 48px !important; }
+    .hero-inner::after { content: "" !important; width: 290px !important; height: 180px !important; justify-self: end !important; align-self: center !important; background-image: url("assets/sojo-logo.svg") !important; background-repeat: no-repeat !important; background-position: center !important; background-size: contain !important; opacity: .95 !important; }
     .hero .eyebrow { background: transparent !important; color: var(--sojo-purple) !important; padding: 0 !important; border-radius: 0 !important; font-size: .78rem !important; letter-spacing: .08em !important; }
     .hero h1 { color: #ffffff !important; text-transform: uppercase !important; letter-spacing: -.045em !important; font-size: clamp(2rem, 4vw, 4rem) !important; line-height: .92 !important; max-width: 760px !important; margin: 6px 0 12px !important; }
     .hero .lead { color: #ffffff !important; max-width: 720px !important; font-size: 1rem !important; line-height: 1.5 !important; }
@@ -92,6 +93,11 @@
     .summary-list div { border-bottom-color: var(--sojo-line) !important; }
     .nfpa-cell { border-color: #05070b !important; }
     .footer { background: #05070b !important; border-top: 1px solid var(--sojo-line) !important; }
+
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr !important; min-height: auto !important; gap: 20px !important; }
+      .hero-inner::after { width: 190px !important; height: 118px !important; justify-self: start !important; }
+    }
 
     @media (max-width: 820px) {
       .hero h1 { font-size: clamp(2rem, 12vw, 3.2rem) !important; }
