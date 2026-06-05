@@ -6,17 +6,122 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260605-logoformat" />
+    <link rel="stylesheet" href="styles.css?v=20260605-final-logo-fix" />
   </head>
   <body>
     <div id="app"></div>
-    <script src="sds-data-1.js?v=20260605-logoformat"></script>
-    <script src="sds-data-2.js?v=20260605-logoformat"></script>
-    <script src="sds-data-3.js?v=20260605-logoformat"></script>
-    <script src="sds-data-4.js?v=20260605-logoformat"></script>
-    <script src="sds-data-5.js?v=20260605-logoformat"></script>
-    <script src="sds-data-6.js?v=20260605-logoformat"></script>
-    <script src="app.js?v=20260605-logoformat"></script>
-    <script src="enhancements.js?v=20260605-logoformat"></script>
+    <script src="sds-data-1.js?v=20260605-final-logo-fix"></script>
+    <script src="sds-data-2.js?v=20260605-final-logo-fix"></script>
+    <script src="sds-data-3.js?v=20260605-final-logo-fix"></script>
+    <script src="sds-data-4.js?v=20260605-final-logo-fix"></script>
+    <script src="sds-data-5.js?v=20260605-final-logo-fix"></script>
+    <script src="sds-data-6.js?v=20260605-final-logo-fix"></script>
+    <script src="app.js?v=20260605-final-logo-fix"></script>
+    <script src="enhancements.js?v=20260605-final-logo-fix"></script>
+    <style id="final-hero-logo-layout">
+      .hero-inner {
+        display: block !important;
+        position: relative !important;
+        min-height: 330px !important;
+        padding: 42px 390px 38px 16px !important;
+      }
+
+      .hero-inner::after {
+        display: none !important;
+        content: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        background-image: none !important;
+        background: none !important;
+      }
+
+      .hero-logo-panel {
+        position: absolute !important;
+        right: 16px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 320px !important;
+        max-width: 28vw !important;
+        min-width: 220px !important;
+        height: auto !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background: transparent !important;
+        pointer-events: none !important;
+      }
+
+      .hero-logo-panel img {
+        width: 100% !important;
+        max-width: 320px !important;
+        height: auto !important;
+        display: block !important;
+        object-fit: contain !important;
+        background: transparent !important;
+        border: 0 !important;
+      }
+
+      .hero h1 {
+        max-width: 760px !important;
+      }
+
+      .hero .lead {
+        max-width: 760px !important;
+      }
+
+      @media (max-width: 900px) {
+        .hero-inner {
+          min-height: auto !important;
+          padding: 28px 16px !important;
+        }
+
+        .hero-logo-panel {
+          position: static !important;
+          transform: none !important;
+          width: 190px !important;
+          max-width: 190px !important;
+          min-width: 0 !important;
+          justify-content: flex-start !important;
+          margin-top: 22px !important;
+        }
+      }
+    </style>
+    <script>
+      (function () {
+        var SOJO_LOGO_URL = 'https://techcouncilventures.com/wp-content/uploads/2023/10/Sojo-Logo.png';
+        var fixing = false;
+
+        function fixHeroLogo() {
+          if (fixing) return;
+          fixing = true;
+          try {
+            var hero = document.querySelector('.hero-inner');
+            if (!hero) return;
+
+            hero.querySelectorAll('.hero-logo-panel').forEach(function (node) {
+              node.remove();
+            });
+
+            var panel = document.createElement('div');
+            panel.className = 'hero-logo-panel';
+
+            var img = document.createElement('img');
+            img.src = SOJO_LOGO_URL;
+            img.alt = 'SOJO';
+            img.loading = 'eager';
+
+            panel.appendChild(img);
+            hero.appendChild(panel);
+          } finally {
+            fixing = false;
+          }
+        }
+
+        fixHeroLogo();
+        new MutationObserver(function () {
+          window.requestAnimationFrame(fixHeroLogo);
+        }).observe(document.getElementById('app') || document.body, { childList: true, subtree: true });
+      })();
+    </script>
   </body>
 </html>
