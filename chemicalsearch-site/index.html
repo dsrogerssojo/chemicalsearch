@@ -12,52 +12,13 @@
     <link rel="stylesheet" href="styles.css" />
     <style>
       .trust-row,
-      .filter-row,
-      .hazard-rail,
-      .badge,
-      .detail-kicker,
-      .banner.warning {
+      .filter-row {
         display: none !important;
-      }
-
-      .chemical-card {
-        grid-template-columns: 1fr !important;
-      }
-
-      .detail-header {
-        grid-template-columns: minmax(0, 1fr) auto !important;
       }
     </style>
   </head>
   <body>
     <div id="app"></div>
     <script src="app.js"></script>
-    <script>
-      (() => {
-        const cleanLegacyLabels = () => {
-          document.querySelectorAll(".trust-row, .filter-row, .hazard-rail, .badge, .detail-kicker, .banner.warning").forEach((node) => node.remove());
-          document.querySelectorAll("#resultsTitle").forEach((node) => {
-            node.textContent = "Search Results";
-          });
-          document.querySelectorAll("h2").forEach((node) => {
-            if (node.textContent.trim() === "Sources / Verification") node.textContent = "Sources";
-          });
-          document.querySelectorAll(".detail-meta").forEach((node) => {
-            node.textContent = node.textContent.replace(/\s\|\sSignal word:.*$/, "");
-          });
-          document.querySelectorAll(".detail-main .meta").forEach((node) => {
-            node.textContent = node.textContent.replace(/^Reviewed by .*?\s\|\s/, "");
-          });
-          document.querySelectorAll(".card-footer span:first-child").forEach((node) => {
-            node.textContent = node.textContent.replace(/^[^|]+\|\s*/, "");
-          });
-        };
-
-        const scheduleClean = () => window.requestAnimationFrame(cleanLegacyLabels);
-        scheduleClean();
-        window.addEventListener("load", scheduleClean);
-        window.addEventListener("hashchange", scheduleClean);
-      })();
-    </script>
   </body>
 </html>
