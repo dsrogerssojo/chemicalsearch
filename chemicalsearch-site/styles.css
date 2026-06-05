@@ -1,1 +1,62 @@
 body { }
+
+.results-panel > .search-panel,
+.search-panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 18px 0 !important;
+  padding: 18px !important;
+  box-sizing: border-box !important;
+}
+
+.search-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.search-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 52px !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+.search-row .button,
+.search-row button[type='submit'] {
+  height: 52px !important;
+  min-width: 118px !important;
+  padding: 0 24px !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.quick-searches {
+  margin-top: 12px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+.quick-chip {
+  height: 36px !important;
+  padding: 0 14px !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 720px) {
+  .search-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .search-row .button,
+  .search-row button[type='submit'] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
