@@ -2,15 +2,13 @@ const DB_KEY = "chemicalSafetyPrototype.v3";
 const REVIEW_EMAIL = "safety-review@example.com";
 const REVIEW_ACTION_BASE_URL = "https://your-domain.example/review";
 
-const verifiedChemicals = [
+const chemicalRecords = [
   {
     id: "acetone",
     name: "Acetone",
     aliases: ["propanone", "dimethyl ketone"],
     formula: "C3H6O",
     cas_number: "67-64-1",
-    hazard_level: "High",
-    signal_word: "Danger",
     hazards: [
       "Highly flammable liquid and vapor.",
       "Causes serious eye irritation.",
@@ -37,8 +35,6 @@ const verifiedChemicals = [
     ],
     sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Acetone#datasheet=LCSS",
     sds_keywords: ["sds", "safety data sheet", "flammable solvent"],
-    verification_status: "verified",
-    verified_by: "Internal EHS review",
     reviewed_at: "2026-06-04",
     updated_at: "2026-06-04"
   },
@@ -48,8 +44,6 @@ const verifiedChemicals = [
     aliases: ["caustic soda", "lye"],
     formula: "NaOH",
     cas_number: "1310-73-2",
-    hazard_level: "Extreme",
-    signal_word: "Danger",
     hazards: [
       "Causes severe skin burns and eye damage.",
       "Corrosive to metals.",
@@ -76,8 +70,6 @@ const verifiedChemicals = [
     ],
     sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Sodium-hydroxide#datasheet=LCSS",
     sds_keywords: ["sds", "safety data sheet", "corrosive", "caustic"],
-    verification_status: "verified",
-    verified_by: "Internal EHS review",
     reviewed_at: "2026-06-04",
     updated_at: "2026-06-04"
   },
@@ -87,8 +79,6 @@ const verifiedChemicals = [
     aliases: ["ethyl alcohol"],
     formula: "C2H6O",
     cas_number: "64-17-5",
-    hazard_level: "High",
-    signal_word: "Danger",
     hazards: [
       "Highly flammable liquid and vapor.",
       "Causes serious eye irritation.",
@@ -115,8 +105,6 @@ const verifiedChemicals = [
     ],
     sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Ethanol#datasheet=LCSS",
     sds_keywords: ["sds", "safety data sheet", "flammable alcohol"],
-    verification_status: "verified",
-    verified_by: "Internal EHS review",
     reviewed_at: "2026-06-04",
     updated_at: "2026-06-04"
   }
@@ -129,8 +117,6 @@ const trustedSourceCache = [
     aliases: ["muriatic acid", "hydrogen chloride solution"],
     formula: "HCl",
     cas_number: "7647-01-0",
-    hazard_level: "Extreme",
-    signal_word: "Danger",
     hazards: ["Corrosive; causes severe skin burns and eye damage.", "May cause respiratory irritation."],
     symptoms: ["Burning pain after skin or eye contact.", "Coughing or breathing difficulty after inhalation."],
     first_aid: [
@@ -148,8 +134,6 @@ const trustedSourceCache = [
     ],
     sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Hydrochloric-acid#datasheet=LCSS",
     sds_keywords: ["sds", "safety data sheet", "acid", "corrosive"],
-    verification_status: "unverified",
-    verified_by: "Imported from allowlisted public source cache",
     reviewed_at: "",
     updated_at: "2026-06-04"
   }
@@ -161,16 +145,8 @@ const exposureGuidance = [
   "Follow the current SDS and your site safety procedures."
 ];
 
-const hazardRank = {
-  Extreme: 1,
-  High: 2,
-  Moderate: 3,
-  Low: 4
-};
-
 let state = loadState();
 let currentQuery = "";
-let currentFilter = "all";
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -178,7 +154,7 @@ function clone(value) {
 
 function defaultState() {
   return {
-    chemicals: clone(verifiedChemicals),
+    chemicals: clone(chemicalRecords),
     missing_chemical_requests: [],
     add_chemical_requests: [],
     source_imports: []
@@ -220,8 +196,6 @@ function searchableValues(chemical) {
     chemical.name,
     chemical.formula,
     chemical.cas_number,
-    chemical.signal_word,
-    chemical.hazard_level,
     chemical.sds_url,
     ...(chemical.sds_keywords || []),
     ...(chemical.aliases || [])
@@ -245,13 +219,6 @@ function findExact(query, collection = state.chemicals) {
   return collection.find((chemical) => searchableValues(chemical).some((value) => normalize(value) === q));
 }
 
-function filterMatches(chemical) {
-  if (currentFilter === "all") return true;
-  if (currentFilter === "verified") return chemical.verification_status === "verified";
-  if (currentFilter === "review") return chemical.verification_status !== "verified";
-  return normalize(chemical.hazard_level) === currentFilter;
-}
-
 function resultScore(chemical) {
   const q = normalize(currentQuery);
   if (!q) return 4;
@@ -265,25 +232,10 @@ function resultScore(chemical) {
 function searchResults() {
   return state.chemicals
     .filter((chemical) => matchesChemical(chemical, currentQuery))
-    .filter(filterMatches)
     .sort((a, b) => {
       return resultScore(a) - resultScore(b)
-        || (hazardRank[a.hazard_level] || 9) - (hazardRank[b.hazard_level] || 9)
         || a.name.localeCompare(b.name);
     });
-}
-
-function stats() {
-  const verified = state.chemicals.filter((chemical) => chemical.verification_status === "verified").length;
-  const pending = state.chemicals.filter((chemical) => chemical.verification_status !== "verified").length;
-  return {
-    total: state.chemicals.length,
-    verified,
-    pending,
-    missing: state.missing_chemical_requests.length,
-    addRequests: state.add_chemical_requests?.length || 0,
-    imports: state.source_imports.length
-  };
 }
 
 function escapeHtml(value) {
@@ -293,14 +245,6 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-}
-
-function hazardClass(level) {
-  return normalize(level).replace(/\s+/g, "-");
-}
-
-function statusClass(status) {
-  return normalize(status).replace(/\s+/g, "-");
 }
 
 function statusLabel(status) {
@@ -379,7 +323,6 @@ function layout(content, options = {}) {
 }
 
 function hero() {
-  const summary = stats();
   return `
     <section class="hero">
       <div class="hero-inner">
@@ -387,11 +330,6 @@ function hero() {
           <span class="eyebrow">Internal library</span>
           <h1>Search chemical safety profiles and SDS references.</h1>
           <p class="lead">Search by name, formula, CAS number, alias, or SDS keyword.</p>
-          <div class="trust-row" aria-label="Database summary">
-            <span>${summary.verified} verified records</span>
-            <span>${summary.pending} pending review</span>
-            <span>${summary.addRequests} add requests</span>
-          </div>
         </div>
         <div class="search-panel">
           <form id="searchForm" class="search-row" role="search">
@@ -413,17 +351,10 @@ function renderHome() {
     <section class="panel results-panel">
       <div class="section-heading">
         <div>
-          <h2 id="resultsTitle">Verified Chemical Database</h2>
+          <h2 id="resultsTitle">Search Results</h2>
           <p id="resultsMeta" class="meta"></p>
         </div>
         <button class="button secondary compact" id="resetDemo">Reset demo</button>
-      </div>
-      <div class="filter-row" aria-label="Result filters">
-        ${filterButton("all", "All")}
-        ${filterButton("verified", "Verified")}
-        ${filterButton("review", "Needs review")}
-        ${filterButton("extreme", "Extreme")}
-        ${filterButton("high", "High")}
       </div>
       <div id="resultsList" class="cards" aria-live="polite"></div>
     </section>
@@ -458,26 +389,13 @@ function renderHome() {
     });
   });
 
-  document.querySelectorAll("[data-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      currentFilter = button.dataset.filter;
-      renderResults();
-    });
-  });
-
   document.getElementById("resetDemo").addEventListener("click", () => {
     state = defaultState();
     saveState(state);
     currentQuery = "";
-    currentFilter = "all";
     location.hash = "#/";
     renderHome();
   });
-}
-
-function filterButton(value, label) {
-  const selected = currentFilter === value ? "is-selected" : "";
-  return `<button class="filter-chip ${selected}" data-filter="${escapeHtml(value)}">${escapeHtml(label)}</button>`;
 }
 
 function renderResults() {
@@ -488,34 +406,28 @@ function renderResults() {
 
   if (!title || !meta || !list) return;
 
-  title.textContent = currentQuery ? "Search Results" : "Verified Chemical Database";
-  meta.textContent = `${results.length} match${results.length === 1 ? "" : "es"} in ${stats().total} records.`;
-  document.querySelectorAll("[data-filter]").forEach((button) => {
-    button.classList.toggle("is-selected", button.dataset.filter === currentFilter);
-  });
+  title.textContent = "Search Results";
+  meta.textContent = `${results.length} result${results.length === 1 ? "" : "s"} in ${state.chemicals.length} records.`;
   list.innerHTML = results.length ? results.map(chemicalCard).join("") : notFoundPrompt(currentQuery);
   bindRouteButtons(list);
 }
 
 function chemicalCard(chemical) {
-  const isUnverified = chemical.verification_status !== "verified";
   return `
-    <button class="chemical-card hazard-${hazardClass(chemical.hazard_level)}" data-chemical-id="${escapeHtml(chemical.id)}">
-      <span class="hazard-rail" aria-hidden="true"></span>
+    <button class="chemical-card" data-chemical-id="${escapeHtml(chemical.id)}">
       <span class="card-content">
         <span class="card-top">
           <span>
             <strong class="chemical-name">${escapeHtml(chemical.name)}</strong>
             <span class="meta">${escapeHtml(chemical.formula)} | CAS ${escapeHtml(chemical.cas_number)}</span>
           </span>
-          <span class="badge ${isUnverified ? "pending-review" : hazardClass(chemical.hazard_level)}">${escapeHtml(isUnverified ? "Review" : chemical.hazard_level)}</span>
         </span>
         <span class="card-preview">
           <span><strong>Primary symptom:</strong> ${escapeHtml((chemical.symptoms || [])[0] || "Not listed")}</span>
           <span><strong>PPE:</strong> ${escapeHtml((chemical.ppe || [])[0] || "Not listed")}</span>
         </span>
         <span class="card-footer">
-          <span>${escapeHtml(statusLabel(chemical.verification_status))} | Updated ${escapeHtml(formatDate(chemical.updated_at))}</span>
+          <span>Updated ${escapeHtml(formatDate(chemical.updated_at))}</span>
           <span class="open-label">Open profile</span>
         </span>
       </span>
@@ -545,24 +457,12 @@ function renderChemical(id) {
     return;
   }
 
-  const isUnverified = chemical.verification_status !== "verified";
   layout(`
-    ${isUnverified ? `
-      <div class="banner warning">
-        <strong>UNVERIFIED temporary profile</strong>
-        This record is pending internal review. Use emergency contacts, SDS, and source links. Do not treat this as approved medical guidance.
-      </div>
-    ` : ""}
-    <section class="detail-header hazard-${hazardClass(chemical.hazard_level)}">
-      <span class="hazard-rail" aria-hidden="true"></span>
+    <section class="detail-header">
       <div class="detail-main">
-        <div class="detail-kicker">
-          <span class="badge ${isUnverified ? "pending-review" : hazardClass(chemical.hazard_level)}">${escapeHtml(isUnverified ? "UNVERIFIED" : chemical.hazard_level)}</span>
-          <span class="badge status-${statusClass(chemical.verification_status)}">${escapeHtml(statusLabel(chemical.verification_status))}</span>
-        </div>
         <h1 class="detail-title">${escapeHtml(chemical.name)}</h1>
-        <p class="detail-meta">${escapeHtml(chemical.formula)} | CAS ${escapeHtml(chemical.cas_number)} | Signal word: ${escapeHtml(chemical.signal_word || "Not listed")}</p>
-        <p class="meta">Reviewed by ${escapeHtml(chemical.verified_by || "Pending reviewer")} | Updated ${escapeHtml(formatDate(chemical.updated_at))}</p>
+        <p class="detail-meta">${escapeHtml(chemical.formula)} | CAS ${escapeHtml(chemical.cas_number)}</p>
+        <p class="meta">Updated ${escapeHtml(formatDate(chemical.updated_at))}</p>
       </div>
       <div class="detail-actions">
         ${chemical.sds_url ? `<a class="button primary" href="${escapeHtml(chemical.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}
@@ -579,7 +479,7 @@ function renderChemical(id) {
       <section class="panel"><h2>Storage</h2>${listItems(chemical.storage)}</section>
       <section class="panel"><h2>Disposal</h2>${listItems(chemical.disposal)}</section>
       <section class="panel"><h2>SDS Reference</h2>${sdsPanel(chemical)}</section>
-      <section class="panel"><h2>Sources / Verification</h2>${sourceLinks(chemical.source_links)}</section>
+      <section class="panel"><h2>Sources</h2>${sourceLinks(chemical.source_links)}</section>
     </div>
   `, { pageClass: "detail-page" });
 }
@@ -646,7 +546,7 @@ function renderAddChemical(prefill = currentQuery) {
         <div>
           <span class="eyebrow">Request review</span>
           <h1>Add Chemical</h1>
-          <p class="lead">Submit a chemical or SDS reference for reviewer approval before it appears as verified in the internal library.</p>
+          <p class="lead">Submit a chemical or SDS reference for reviewer approval before it appears in the internal library.</p>
         </div>
       </div>
       <div class="banner info">
