@@ -12,8 +12,27 @@
     <link rel="stylesheet" href="styles.css" />
     <style>
       .trust-row,
-      .filter-row {
+      .filter-row,
+      .hazard-rail,
+      .badge,
+      .detail-kicker,
+      .banner.warning {
         display: none !important;
+      }
+
+      .chemical-card {
+        display: block !important;
+        grid-template-columns: 1fr !important;
+      }
+
+      .detail-header {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+      }
+
+      @media (max-width: 820px) {
+        .detail-header {
+          grid-template-columns: minmax(0, 1fr) !important;
+        }
       }
     </style>
   </head>
