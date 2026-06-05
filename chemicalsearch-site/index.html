@@ -15,7 +15,8 @@
       .filter-row,
       .hazard-rail,
       .badge,
-      .detail-kicker {
+      .detail-kicker,
+      .banner.warning {
         display: none !important;
       }
 
@@ -52,8 +53,10 @@
           });
         };
 
-        cleanLegacyLabels();
-        new MutationObserver(cleanLegacyLabels).observe(document.getElementById("app"), { childList: true, subtree: true });
+        const scheduleClean = () => window.requestAnimationFrame(cleanLegacyLabels);
+        scheduleClean();
+        window.addEventListener("load", scheduleClean);
+        window.addEventListener("hashchange", scheduleClean);
       })();
     </script>
   </body>
