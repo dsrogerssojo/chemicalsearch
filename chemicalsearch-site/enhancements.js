@@ -44,14 +44,39 @@
     .hotline.critical { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
 
     .hero { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; }
-    .hero-inner { padding: 26px 16px 22px !important; min-height: 310px !important; display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(240px, 360px) !important; align-items: center !important; gap: 48px !important; }
-    .hero-inner::after { display: none !important; content: none !important; }
-    .hero-logo-panel { justify-self: end !important; align-self: center !important; display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-width: 240px !important; }
-    .hero-logo-panel img { display: block !important; width: min(340px, 28vw) !important; max-width: 100% !important; height: auto !important; object-fit: contain !important; }
+    .hero-inner {
+      padding: 42px 390px 38px 16px !important;
+      min-height: 330px !important;
+      display: block !important;
+      position: relative !important;
+    }
+    .hero-inner::after { display: none !important; content: none !important; background-image: none !important; }
+    .hero-logo-panel {
+      position: absolute !important;
+      top: 50% !important;
+      right: 16px !important;
+      transform: translateY(-50%) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 320px !important;
+      max-width: 28vw !important;
+      min-width: 220px !important;
+      pointer-events: none !important;
+    }
+    .hero-logo-panel img {
+      display: block !important;
+      width: 100% !important;
+      max-width: 320px !important;
+      height: auto !important;
+      object-fit: contain !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
     .hero .eyebrow { background: transparent !important; color: var(--sojo-purple) !important; padding: 0 !important; border-radius: 0 !important; font-size: .78rem !important; letter-spacing: .08em !important; }
-    .hero h1 { color: #ffffff !important; text-transform: uppercase !important; letter-spacing: -.045em !important; font-size: clamp(2rem, 4vw, 4rem) !important; line-height: .92 !important; max-width: 760px !important; margin: 6px 0 12px !important; }
-    .hero .lead { color: #ffffff !important; max-width: 720px !important; font-size: 1rem !important; line-height: 1.5 !important; }
-    .trust-row { margin-top: 14px !important; gap: 8px !important; }
+    .hero h1 { color: #ffffff !important; text-transform: uppercase !important; letter-spacing: -.045em !important; font-size: clamp(2rem, 4vw, 4rem) !important; line-height: .92 !important; max-width: 790px !important; margin: 10px 0 18px !important; }
+    .hero .lead { color: #ffffff !important; max-width: 760px !important; font-size: 1rem !important; line-height: 1.5 !important; }
+    .trust-row { margin-top: 18px !important; gap: 8px !important; }
     .trust-row span { background: #ffffff !important; color: #111827 !important; border: 0 !important; border-radius: 999px !important; padding: 7px 13px !important; font-weight: 700 !important; }
 
     .main { padding-top: 18px !important; gap: 16px !important; }
@@ -98,8 +123,8 @@
     .footer { background: #05070b !important; border-top: 1px solid var(--sojo-line) !important; }
 
     @media (max-width: 900px) {
-      .hero-inner { grid-template-columns: 1fr !important; min-height: auto !important; gap: 20px !important; }
-      .hero-logo-panel { justify-self: start !important; min-width: 0 !important; }
+      .hero-inner { padding: 28px 16px !important; min-height: auto !important; }
+      .hero-logo-panel { position: static !important; transform: none !important; width: 190px !important; min-width: 0 !important; max-width: 190px !important; justify-content: flex-start !important; margin-top: 22px !important; }
       .hero-logo-panel img { width: 190px !important; }
     }
 
@@ -115,7 +140,11 @@
 
   function addHeroLogo() {
     const heroInner = document.querySelector(".hero-inner");
-    if (!heroInner || heroInner.querySelector(".hero-logo-panel")) return;
+    if (!heroInner) return;
+    heroInner.querySelectorAll(".hero-logo-panel").forEach((node, index) => {
+      if (index > 0) node.remove();
+    });
+    if (heroInner.querySelector(".hero-logo-panel")) return;
     const panel = document.createElement("div");
     panel.className = "hero-logo-panel";
     const img = document.createElement("img");
