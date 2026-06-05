@@ -1,242 +1,12 @@
-const DB_KEY = "chemicalSafetyPrototype.v3";
 const REVIEW_EMAIL = "safety-review@example.com";
 const REVIEW_ACTION_BASE_URL = "https://your-domain.example/review";
+const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
 
-const chemicalRecords = [
-  {
-    id: "acetone",
-    name: "Acetone",
-    aliases: ["propanone", "dimethyl ketone"],
-    formula: "C3H6O",
-    cas_number: "67-64-1",
-    hazards: [
-      "Highly flammable liquid and vapor.",
-      "Causes serious eye irritation.",
-      "May cause drowsiness or dizziness."
-    ],
-    symptoms: [
-      "Eye, nose, and throat irritation.",
-      "Headache, dizziness, nausea, or drowsiness after inhalation.",
-      "Dry or irritated skin after repeated contact."
-    ],
-    first_aid: [
-      "Eye exposure: rinse cautiously with water for several minutes and remove contact lenses if present and easy to do.",
-      "Skin exposure: remove contaminated clothing and wash exposed skin with water.",
-      "Inhalation: move person to fresh air and keep comfortable for breathing.",
-      "Ingestion: contact Poison Control or medical personnel for instructions."
-    ],
-    ppe: ["Chemical splash goggles.", "Nitrile gloves.", "Lab coat.", "Use local exhaust or a fume hood for vapor control."],
-    storage: ["Store in a flammable liquids cabinet.", "Keep container tightly closed and away from ignition sources."],
-    disposal: ["Collect as hazardous organic solvent waste.", "Do not pour into sinks or regular trash."],
-    emergency_contacts: ["Emergency: 911", "Poison Control: 1-800-222-1222", "Site Safety Officer: add local contact"],
-    source_links: [
-      { name: "NIOSH Pocket Guide", url: "https://www.cdc.gov/niosh/npg/npgd0004.html" },
-      { name: "PubChem", url: "https://pubchem.ncbi.nlm.nih.gov/compound/Acetone" }
-    ],
-    sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Acetone#datasheet=LCSS",
-    sds_keywords: ["sds", "safety data sheet", "flammable solvent"],
-    reviewed_at: "2026-06-04",
-    updated_at: "2026-06-04"
-  },
-  {
-    id: "sodium-hydroxide",
-    name: "Sodium Hydroxide",
-    aliases: ["caustic soda", "lye"],
-    formula: "NaOH",
-    cas_number: "1310-73-2",
-    hazards: [
-      "Causes severe skin burns and eye damage.",
-      "Corrosive to metals.",
-      "Reacts with acids and some metals."
-    ],
-    symptoms: [
-      "Severe burning pain, redness, blistering, or tissue damage.",
-      "Serious eye pain, watering, blurred vision, or vision injury.",
-      "Coughing or breathing difficulty if mist or dust is inhaled."
-    ],
-    first_aid: [
-      "Eye exposure: immediately rinse with water for at least 15 minutes and seek urgent medical care.",
-      "Skin exposure: immediately remove contaminated clothing and rinse skin with water for at least 15 minutes.",
-      "Inhalation: move to fresh air and get medical attention if symptoms occur.",
-      "Ingestion: do not induce vomiting; call Poison Control or emergency medical services immediately."
-    ],
-    ppe: ["Chemical splash goggles and face shield.", "Chemical-resistant gloves.", "Lab coat or chemical apron.", "Closed-toe shoes."],
-    storage: ["Store tightly closed in a corrosion-resistant container.", "Separate from acids, metals, and incompatible materials."],
-    disposal: ["Dispose through approved hazardous waste procedures.", "Neutralization only by trained personnel under approved procedures."],
-    emergency_contacts: ["Emergency: 911", "Poison Control: 1-800-222-1222", "Site Safety Officer: add local contact"],
-    source_links: [
-      { name: "NIOSH Pocket Guide", url: "https://www.cdc.gov/niosh/npg/npgd0565.html" },
-      { name: "PubChem", url: "https://pubchem.ncbi.nlm.nih.gov/compound/Sodium-hydroxide" }
-    ],
-    sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Sodium-hydroxide#datasheet=LCSS",
-    sds_keywords: ["sds", "safety data sheet", "corrosive", "caustic"],
-    reviewed_at: "2026-06-04",
-    updated_at: "2026-06-04"
-  },
-  {
-    id: "ethanol",
-    name: "Ethanol",
-    aliases: ["ethyl alcohol"],
-    formula: "C2H6O",
-    cas_number: "64-17-5",
-    hazards: [
-      "Highly flammable liquid and vapor.",
-      "Causes serious eye irritation.",
-      "May cause respiratory irritation at high vapor concentrations."
-    ],
-    symptoms: [
-      "Eye irritation, redness, or tearing.",
-      "Headache, dizziness, or drowsiness from vapor exposure.",
-      "Dry skin after repeated contact."
-    ],
-    first_aid: [
-      "Eye exposure: rinse cautiously with water for several minutes.",
-      "Skin exposure: wash with water and remove contaminated clothing.",
-      "Inhalation: move to fresh air.",
-      "Ingestion: call Poison Control or medical personnel for instructions."
-    ],
-    ppe: ["Safety glasses or chemical splash goggles.", "Nitrile gloves.", "Lab coat.", "Use ventilation away from ignition sources."],
-    storage: ["Store in a flammable liquids cabinet.", "Keep away from heat, sparks, open flames, and oxidizers."],
-    disposal: ["Collect as hazardous flammable solvent waste.", "Follow site hazardous waste procedures."],
-    emergency_contacts: ["Emergency: 911", "Poison Control: 1-800-222-1222", "Site Safety Officer: add local contact"],
-    source_links: [
-      { name: "NIOSH Pocket Guide", url: "https://www.cdc.gov/niosh/npg/npgd0262.html" },
-      { name: "PubChem", url: "https://pubchem.ncbi.nlm.nih.gov/compound/Ethanol" }
-    ],
-    sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Ethanol#datasheet=LCSS",
-    sds_keywords: ["sds", "safety data sheet", "flammable alcohol"],
-    reviewed_at: "2026-06-04",
-    updated_at: "2026-06-04"
-  }
-];
+const records = Array.isArray(globalThis.SDS_RECORDS)
+  ? [...globalThis.SDS_RECORDS].sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
+  : [];
 
-const trustedSourceCache = [
-  {
-    id: "hydrochloric-acid-temp",
-    name: "Hydrochloric Acid",
-    aliases: ["muriatic acid", "hydrogen chloride solution"],
-    formula: "HCl",
-    cas_number: "7647-01-0",
-    hazards: ["Corrosive; causes severe skin burns and eye damage.", "May cause respiratory irritation."],
-    symptoms: ["Burning pain after skin or eye contact.", "Coughing or breathing difficulty after inhalation."],
-    first_aid: [
-      "Eye or skin exposure: immediately flush affected area with water.",
-      "Inhalation: move to fresh air.",
-      "For severe symptoms, call emergency services or Poison Control."
-    ],
-    ppe: ["Chemical splash goggles and face shield.", "Acid-resistant gloves.", "Lab coat or chemical apron.", "Use in fume hood."],
-    storage: ["Store in a compatible acid cabinet.", "Separate from bases, oxidizers, and incompatible metals."],
-    disposal: ["Manage as corrosive hazardous waste under site procedures."],
-    emergency_contacts: ["Emergency: 911", "Poison Control: 1-800-222-1222", "Site Safety Officer: add local contact"],
-    source_links: [
-      { name: "NIOSH Pocket Guide", url: "https://www.cdc.gov/niosh/npg/npgd0332.html" },
-      { name: "PubChem", url: "https://pubchem.ncbi.nlm.nih.gov/compound/Hydrochloric-acid" }
-    ],
-    sds_url: "https://pubchem.ncbi.nlm.nih.gov/compound/Hydrochloric-acid#datasheet=LCSS",
-    sds_keywords: ["sds", "safety data sheet", "acid", "corrosive"],
-    reviewed_at: "",
-    updated_at: "2026-06-04"
-  }
-];
-
-const exposureGuidance = [
-  "For severe symptoms or life-threatening exposure, call 911.",
-  "For exposure questions, call Poison Control at 1-800-222-1222.",
-  "Follow the current SDS and your site safety procedures."
-];
-
-let state = loadState();
 let currentQuery = "";
-
-function clone(value) {
-  return JSON.parse(JSON.stringify(value));
-}
-
-function defaultState() {
-  return {
-    chemicals: clone(chemicalRecords),
-    missing_chemical_requests: [],
-    add_chemical_requests: [],
-    source_imports: []
-  };
-}
-
-function loadState() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(DB_KEY));
-    if (stored && Array.isArray(stored.chemicals)) {
-      stored.missing_chemical_requests ||= [];
-      stored.add_chemical_requests ||= [];
-      stored.source_imports ||= [];
-      return stored;
-    }
-  } catch (error) {
-    console.warn("Unable to load stored data", error);
-  }
-  const freshState = defaultState();
-  saveState(freshState);
-  return freshState;
-}
-
-function saveState(nextState) {
-  localStorage.setItem(DB_KEY, JSON.stringify(nextState));
-}
-
-function makeId(prefix) {
-  if (globalThis.crypto && globalThis.crypto.randomUUID) return globalThis.crypto.randomUUID();
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function normalize(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-function searchableValues(chemical) {
-  return [
-    chemical.name,
-    chemical.formula,
-    chemical.cas_number,
-    chemical.sds_url,
-    ...(chemical.sds_keywords || []),
-    ...(chemical.aliases || [])
-  ];
-}
-
-function matchesChemical(chemical, query) {
-  const q = normalize(query);
-  if (!q) return true;
-  return searchableValues(chemical).some((value) => normalize(value).includes(q));
-}
-
-function sourceMatches(chemical, query) {
-  const q = normalize(query);
-  return Boolean(q) && matchesChemical(chemical, q);
-}
-
-function findExact(query, collection = state.chemicals) {
-  const q = normalize(query);
-  if (!q) return undefined;
-  return collection.find((chemical) => searchableValues(chemical).some((value) => normalize(value) === q));
-}
-
-function resultScore(chemical) {
-  const q = normalize(currentQuery);
-  if (!q) return 4;
-  const values = searchableValues(chemical).map(normalize);
-  if (values.some((value) => value === q)) return 0;
-  if (values.some((value) => value.startsWith(q))) return 1;
-  if (values.some((value) => value.includes(q))) return 2;
-  return 3;
-}
-
-function searchResults() {
-  return state.chemicals
-    .filter((chemical) => matchesChemical(chemical, currentQuery))
-    .sort((a, b) => {
-      return resultScore(a) - resultScore(b)
-        || a.name.localeCompare(b.name);
-    });
-}
 
 function escapeHtml(value) {
   return String(value || "")
@@ -247,48 +17,107 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-function statusLabel(status) {
-  return String(status || "pending_review").replace(/_/g, " ").toUpperCase();
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function cleanValue(value) {
+  const text = String(value || "").trim();
+  if (!text || text.toLowerCase() === "n/a") return "";
+  return text;
+}
+
+function displayValue(value) {
+  return escapeHtml(cleanValue(value) || "Not listed");
+}
+
+function makeId(prefix) {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function loadRequests() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(REQUEST_KEY));
+    return Array.isArray(stored) ? stored : [];
+  } catch (error) {
+    console.warn("Unable to load saved requests", error);
+    return [];
+  }
+}
+
+function saveRequests(requests) {
+  localStorage.setItem(REQUEST_KEY, JSON.stringify(requests));
 }
 
 function formatDate(value) {
-  if (!value) return "Not reviewed";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    const [year, month, day] = value.split("-").map(Number);
+  const text = cleanValue(value);
+  if (!text) return "Not listed";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    const [year, month, day] = text.split("-").map(Number);
     return new Date(year, month - 1, day).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   }
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return text;
 }
 
-function listItems(items) {
-  return `<ul class="list">${(items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+function searchableValues(record) {
+  return [
+    "sds",
+    "safety data sheet",
+    record.name,
+    record.company,
+    record.product_code,
+    record.use,
+    record.sds_number,
+    record.sds_version,
+    record.issue_date,
+    record.revision_date,
+    record.supersedes_date,
+    record.composition,
+    record.hfrp_info,
+    record.sds_reference,
+    record.sds_url
+  ];
 }
 
-function sourceLinks(links) {
-  if (!links || !links.length) return `<p class="empty">No source links attached.</p>`;
-  return `<ul class="source-list">${links
-    .map((source) => `<li><a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.name)}</a></li>`)
-    .join("")}</ul>`;
+function matchesRecord(record, query) {
+  const q = normalize(query);
+  if (!q) return true;
+  return searchableValues(record).some((value) => normalize(value).includes(q));
 }
 
-function sdsPanel(chemical) {
-  if (!chemical.sds_url) {
-    return `<p class="empty">No SDS link is attached to this internal record.</p>`;
-  }
-  return `
-    <p class="meta">Use the current manufacturer SDS as the controlling document for site procedures.</p>
-    <a class="button secondary" href="${escapeHtml(chemical.sds_url)}" target="_blank" rel="noreferrer">Open SDS reference</a>
-  `;
+function resultScore(record) {
+  const q = normalize(currentQuery);
+  if (!q) return 3;
+  const values = searchableValues(record).map(normalize);
+  if (values.some((value) => value === q)) return 0;
+  if (values.some((value) => value.startsWith(q))) return 1;
+  if (values.some((value) => value.includes(q))) return 2;
+  return 3;
 }
 
-function exposureGuidancePanel() {
-  return `
-    <div class="guidance-list">
-      ${exposureGuidance.map((item) => `<div class="guidance-item">${escapeHtml(item)}</div>`).join("")}
-    </div>
-  `;
+function searchResults() {
+  return records
+    .filter((record) => matchesRecord(record, currentQuery))
+    .sort((a, b) => resultScore(a) - resultScore(b) || String(a.name || "").localeCompare(String(b.name || "")));
+}
+
+function bindRouteButtons(scope = document) {
+  scope.querySelectorAll("[data-route]:not([data-bound])").forEach((button) => {
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      const route = button.dataset.route;
+      if (route === "home") location.hash = "#/";
+      if (route === "add-chemical") location.hash = "#/add-chemical";
+    });
+  });
+
+  scope.querySelectorAll("[data-chemical-id]:not([data-bound])").forEach((button) => {
+    button.dataset.bound = "true";
+    button.addEventListener("click", () => {
+      location.hash = `#/chemical/${button.dataset.chemicalId}`;
+    });
+  });
 }
 
 function layout(content, options = {}) {
@@ -301,7 +130,7 @@ function layout(content, options = {}) {
             <span class="brand-mark" aria-hidden="true">CS</span>
             <span class="brand-copy">
               <span class="brand-title">Chemical Safety</span>
-              <span class="brand-subtitle">Internal safety library</span>
+              <span class="brand-subtitle">Internal SDS library</span>
             </span>
           </button>
           <nav class="nav-actions" aria-label="Primary">
@@ -314,7 +143,7 @@ function layout(content, options = {}) {
       <main class="main">${content}</main>
       <footer class="footer">
         <div class="footer-inner">
-          Internal reference only. Confirm details against the current SDS and your site safety procedures.
+          Internal reference only. Confirm procedures against the current SDS and your site requirements.
         </div>
       </footer>
     </div>
@@ -328,17 +157,17 @@ function hero() {
       <div class="hero-inner">
         <div class="hero-copy">
           <span class="eyebrow">Internal library</span>
-          <h1>Search chemical safety profiles and SDS references.</h1>
-          <p class="lead">Search by name, formula, CAS number, alias, or SDS keyword.</p>
+          <h1>Search SDS records by product, use, company, or SDS details.</h1>
+          <p class="lead">Open a record to see basic details, composition, and the linked SDS reference.</p>
         </div>
         <div class="search-panel">
           <form id="searchForm" class="search-row" role="search">
-            <label class="sr-only" for="searchInput">Search chemical</label>
-            <input id="searchInput" class="search-input" value="${escapeHtml(currentQuery)}" placeholder="Search acetone, NaOH, 67-64-1, SDS..." autocomplete="off" />
+            <label class="sr-only" for="searchInput">Search SDS records</label>
+            <input id="searchInput" class="search-input" value="${escapeHtml(currentQuery)}" placeholder="Search cleaner, Loctite, product code, SDS..." autocomplete="off" />
             <button class="button primary" type="submit">Search</button>
           </form>
           <div class="quick-searches" aria-label="Common searches">
-            ${["Acetone", "NaOH", "Ethanol", "SDS"].map((query) => `<button class="quick-chip" data-query="${escapeHtml(query)}">${escapeHtml(query)}</button>`).join("")}
+            ${["Cleaner", "Lubricant", "Bleach", "Loctite"].map((query) => `<button class="quick-chip" data-query="${escapeHtml(query)}">${escapeHtml(query)}</button>`).join("")}
           </div>
         </div>
       </div>
@@ -354,7 +183,6 @@ function renderHome() {
           <h2 id="resultsTitle">Search Results</h2>
           <p id="resultsMeta" class="meta"></p>
         </div>
-        <button class="button secondary compact" id="resetDemo">Reset demo</button>
       </div>
       <div id="resultsList" class="cards" aria-live="polite"></div>
     </section>
@@ -364,13 +192,7 @@ function renderHome() {
 
   document.getElementById("searchForm").addEventListener("submit", (event) => {
     event.preventDefault();
-    const query = document.getElementById("searchInput").value.trim();
-    currentQuery = query;
-    const exact = findExact(query);
-    if (exact) {
-      location.hash = `#/chemical/${exact.id}`;
-      return;
-    }
+    currentQuery = document.getElementById("searchInput").value.trim();
     renderResults();
   });
 
@@ -388,47 +210,38 @@ function renderHome() {
       input.focus();
     });
   });
-
-  document.getElementById("resetDemo").addEventListener("click", () => {
-    state = defaultState();
-    saveState(state);
-    currentQuery = "";
-    location.hash = "#/";
-    renderHome();
-  });
 }
 
 function renderResults() {
   const results = searchResults();
-  const title = document.getElementById("resultsTitle");
   const meta = document.getElementById("resultsMeta");
   const list = document.getElementById("resultsList");
+  if (!meta || !list) return;
 
-  if (!title || !meta || !list) return;
-
-  title.textContent = "Search Results";
-  meta.textContent = `${results.length} result${results.length === 1 ? "" : "s"} in ${state.chemicals.length} records.`;
-  list.innerHTML = results.length ? results.map(chemicalCard).join("") : notFoundPrompt(currentQuery);
+  meta.textContent = `${results.length} result${results.length === 1 ? "" : "s"} in ${records.length} SDS records.`;
+  list.innerHTML = results.length ? results.map(recordCard).join("") : notFoundPrompt(currentQuery);
   bindRouteButtons(list);
 }
 
-function chemicalCard(chemical) {
+function recordCard(record) {
+  const subline = [record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : ""].filter(Boolean).join(" | ");
+  const composition = cleanValue(record.composition) || "See SDS for composition details.";
   return `
-    <button class="chemical-card" data-chemical-id="${escapeHtml(chemical.id)}">
+    <button class="chemical-card" data-chemical-id="${escapeHtml(record.id)}">
       <span class="card-content">
         <span class="card-top">
           <span>
-            <strong class="chemical-name">${escapeHtml(chemical.name)}</strong>
-            <span class="meta">${escapeHtml(chemical.formula)} | CAS ${escapeHtml(chemical.cas_number)}</span>
+            <strong class="chemical-name">${escapeHtml(record.name)}</strong>
+            <span class="meta">${escapeHtml(subline || "Product details")}</span>
           </span>
         </span>
         <span class="card-preview">
-          <span><strong>Primary symptom:</strong> ${escapeHtml((chemical.symptoms || [])[0] || "Not listed")}</span>
-          <span><strong>PPE:</strong> ${escapeHtml((chemical.ppe || [])[0] || "Not listed")}</span>
+          <span><strong>Use:</strong> ${displayValue(record.use)}</span>
+          <span><strong>Composition:</strong> ${escapeHtml(composition)}</span>
         </span>
         <span class="card-footer">
-          <span>Updated ${escapeHtml(formatDate(chemical.updated_at))}</span>
-          <span class="open-label">Open profile</span>
+          <span>Updated ${escapeHtml(formatDate(record.updated_at))}</span>
+          <span class="open-label">Open record</span>
         </span>
       </span>
     </button>
@@ -439,8 +252,8 @@ function notFoundPrompt(query) {
   return `
     <div class="not-found-block">
       <div class="banner">
-        <strong>No internal record found</strong>
-        No internal record matched "${escapeHtml(query || "your search")}".
+        <strong>No SDS record found</strong>
+        No record matched "${escapeHtml(query || "your search")}".
       </div>
       <div class="not-found-actions">
         <button class="button primary" data-route="add-chemical">Request this chemical</button>
@@ -450,36 +263,66 @@ function notFoundPrompt(query) {
   `;
 }
 
-function renderChemical(id) {
-  const chemical = state.chemicals.find((item) => item.id === id);
-  if (!chemical) {
+function summaryRows(rows) {
+  return `
+    <dl class="summary-list compact-list">
+      ${rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${displayValue(value)}</dd></div>`).join("")}
+    </dl>
+  `;
+}
+
+function sdsPanel(record) {
+  const reference = cleanValue(record.sds_reference);
+  if (!record.sds_url) {
+    return `
+      <p class="empty">No clickable SDS link is attached to this record.</p>
+      ${reference ? `<p class="meta">PDF reference: ${escapeHtml(reference)}</p>` : ""}
+    `;
+  }
+  return `
+    <p class="meta">Open the linked SDS for the controlling product safety document.</p>
+    <a class="button secondary" href="${escapeHtml(record.sds_url)}" target="_blank" rel="noreferrer">Open SDS reference</a>
+    ${reference ? `<p class="meta">PDF reference: ${escapeHtml(reference)}</p>` : ""}
+  `;
+}
+
+function renderRecord(id) {
+  const record = records.find((item) => item.id === id);
+  if (!record) {
     renderNotFound(currentQuery);
     return;
   }
 
+  const detailMeta = [record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", record.use].filter(Boolean).join(" | ");
+  const details = [
+    ["Company", record.company],
+    ["Product code", record.product_code],
+    ["Use", record.use],
+    ["SDS number", record.sds_number],
+    ["SDS version", record.sds_version],
+    ["Issue date", record.issue_date],
+    ["Revision date", record.revision_date],
+    ["Supersedes date", record.supersedes_date],
+    ["HFRP info", record.hfrp_info]
+  ];
+
   layout(`
     <section class="detail-header">
       <div class="detail-main">
-        <h1 class="detail-title">${escapeHtml(chemical.name)}</h1>
-        <p class="detail-meta">${escapeHtml(chemical.formula)} | CAS ${escapeHtml(chemical.cas_number)}</p>
-        <p class="meta">Updated ${escapeHtml(formatDate(chemical.updated_at))}</p>
+        <h1 class="detail-title">${escapeHtml(record.name)}</h1>
+        <p class="detail-meta">${escapeHtml(detailMeta || "SDS record")}</p>
+        <p class="meta">Updated ${escapeHtml(formatDate(record.updated_at))}</p>
       </div>
       <div class="detail-actions">
-        ${chemical.sds_url ? `<a class="button primary" href="${escapeHtml(chemical.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}
+        ${record.sds_url ? `<a class="button primary" href="${escapeHtml(record.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}
         <button class="button secondary" data-route="add-chemical">Suggest update</button>
       </div>
     </section>
-    <div class="grid priority-grid">
-      <section class="panel priority"><h2>Symptoms of Exposure</h2>${listItems(chemical.symptoms)}</section>
-      <section class="panel priority"><h2>First Aid / Treatment</h2>${listItems(chemical.first_aid)}</section>
-    </div>
     <div class="grid">
-      <section class="panel"><h2>Hazards</h2>${listItems(chemical.hazards)}</section>
-      <section class="panel"><h2>PPE</h2>${listItems(chemical.ppe)}</section>
-      <section class="panel"><h2>Storage</h2>${listItems(chemical.storage)}</section>
-      <section class="panel"><h2>Disposal</h2>${listItems(chemical.disposal)}</section>
-      <section class="panel"><h2>SDS Reference</h2>${sdsPanel(chemical)}</section>
-      <section class="panel"><h2>Sources</h2>${sourceLinks(chemical.source_links)}</section>
+      <section class="panel"><h2>Basic Details</h2>${summaryRows(details)}</section>
+      <section class="panel"><h2>Chemical Composition</h2><p>${escapeHtml(cleanValue(record.composition) || "See SDS for composition details.")}</p></section>
+      <section class="panel"><h2>SDS Reference</h2>${sdsPanel(record)}</section>
+      <section class="panel"><h2>Handling Notes</h2><p>Use the linked SDS and your site procedures for PPE, storage, handling, and disposal details.</p></section>
     </div>
   `, { pageClass: "detail-page" });
 }
@@ -490,7 +333,7 @@ function renderNotFound(query = "") {
       <div class="section-heading">
         <div>
           <span class="eyebrow">Not in library</span>
-          <h1>No internal record found</h1>
+          <h1>No SDS record found</h1>
           <p class="lead">Request a new record and include an SDS link or manufacturer details if you have them.</p>
         </div>
       </div>
@@ -500,13 +343,8 @@ function renderNotFound(query = "") {
       </div>
     </section>
     <section class="panel">
-      <div class="section-heading">
-        <div>
-          <h2>Exposure Note</h2>
-          <p class="meta">If this lookup is related to an active exposure, use the current SDS and site response procedure.</p>
-        </div>
-      </div>
-      ${exposureGuidancePanel()}
+      <h2>Reference Note</h2>
+      <p class="meta">If this lookup relates to an active exposure, use the current SDS and your site response procedure.</p>
     </section>
   `);
 }
@@ -516,7 +354,7 @@ function buildReviewEmail(request) {
   const rejectUrl = `${REVIEW_ACTION_BASE_URL}?request=${encodeURIComponent(request.id)}&action=reject`;
   const subject = `Chemical library request: ${request.chemical_name || "New chemical"}`;
   const body = [
-    "A new chemical has been requested for the internal safety library.",
+    "A new chemical or SDS update was requested for the internal SDS library.",
     "",
     `Request ID: ${request.id}`,
     `Chemical name: ${request.chemical_name || "Not provided"}`,
@@ -546,17 +384,17 @@ function renderAddChemical(prefill = currentQuery) {
         <div>
           <span class="eyebrow">Request review</span>
           <h1>Add Chemical</h1>
-          <p class="lead">Submit a chemical or SDS reference for reviewer approval before it appears in the internal library.</p>
+          <p class="lead">Submit a chemical, product code, or SDS reference for reviewer approval.</p>
         </div>
       </div>
       <div class="banner info">
         <strong>Email approval workflow</strong>
-        This prototype opens a prefilled email to ${escapeHtml(REVIEW_EMAIL)}. A production version should send this form through a backend email service and make the approval links secure.
+        This prototype opens a prefilled email to ${escapeHtml(REVIEW_EMAIL)}. A production version should connect this form to a secure backend approval endpoint.
       </div>
       <form id="addChemicalForm" class="form-grid">
-        <label class="label">Chemical name <input class="field" name="chemical_name" value="${escapeHtml(prefill || "")}" required /></label>
-        <label class="label">Formula <input class="field" name="formula" placeholder="Example: C3H6O" /></label>
-        <label class="label">CAS number <input class="field" name="cas_number" placeholder="Example: 67-64-1" /></label>
+        <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill || "")}" required /></label>
+        <label class="label">Formula <input class="field" name="formula" placeholder="Optional" /></label>
+        <label class="label">CAS number <input class="field" name="cas_number" placeholder="Optional" /></label>
         <label class="label">Manufacturer / supplier <input class="field" name="manufacturer" placeholder="Optional but useful for SDS matching" /></label>
         <label class="label">SDS link <input class="field" name="sds_url" placeholder="Paste manufacturer SDS URL or internal document link" /></label>
         <label class="label">Your email <input class="field" name="requested_by" type="email" placeholder="name@example.com" /></label>
@@ -581,14 +419,13 @@ function renderAddChemical(prefill = currentQuery) {
       sds_url: form.get("sds_url").trim(),
       requested_by: form.get("requested_by").trim(),
       notes: form.get("notes").trim(),
-      status: "email_draft_created",
       review_email: REVIEW_EMAIL,
       created_at: new Date().toISOString()
     };
     request.mailto = buildReviewEmail(request);
-    state.add_chemical_requests ||= [];
-    state.add_chemical_requests.push(request);
-    saveState(state);
+    const requests = loadRequests();
+    requests.push(request);
+    saveRequests(requests);
     location.hash = `#/request/${request.id}`;
     window.setTimeout(() => {
       window.location.href = request.mailto;
@@ -596,35 +433,8 @@ function renderAddChemical(prefill = currentQuery) {
   });
 }
 
-function renderMissing(id) {
-  const request = state.missing_chemical_requests.find((item) => item.id === id);
-  layout(`
-    <div class="banner">
-      <strong>Request saved</strong>
-      The request was saved for follow-up.
-    </div>
-    <section class="panel">
-      <h1>Missing Chemical Request</h1>
-      ${exposureGuidancePanel()}
-    </section>
-    <section class="panel receipt">
-      <h2>Saved for Review</h2>
-      <dl class="summary-list">
-        <div><dt>Chemical</dt><dd>${escapeHtml(request?.chemical_name || "Unknown")}</dd></div>
-        <div><dt>CAS</dt><dd>${escapeHtml(request?.cas_number || "Not provided")}</dd></div>
-        <div><dt>Exposure</dt><dd>${escapeHtml(request?.exposure_type || "unknown")}</dd></div>
-        <div><dt>Status</dt><dd>${escapeHtml(request?.status || "needs_review")}</dd></div>
-      </dl>
-      <div class="form-actions">
-        <button class="button secondary" data-route="home">Back to search</button>
-        <button class="button primary" data-route="add-chemical">Add chemical details</button>
-      </div>
-    </section>
-  `);
-}
-
 function renderRequestReceipt(id) {
-  const request = state.add_chemical_requests?.find((item) => item.id === id);
+  const request = loadRequests().find((item) => item.id === id);
   if (!request) {
     renderAddChemical();
     return;
@@ -637,15 +447,15 @@ function renderRequestReceipt(id) {
         A prefilled email draft should open in your mail app. If it does not, use the button below.
       </div>
       <h1>Add Chemical Request</h1>
-      <dl class="summary-list">
-        <div><dt>Chemical</dt><dd>${escapeHtml(request.chemical_name || "Not provided")}</dd></div>
-        <div><dt>Formula</dt><dd>${escapeHtml(request.formula || "Not provided")}</dd></div>
-        <div><dt>CAS</dt><dd>${escapeHtml(request.cas_number || "Not provided")}</dd></div>
-        <div><dt>Manufacturer</dt><dd>${escapeHtml(request.manufacturer || "Not provided")}</dd></div>
-        <div><dt>SDS</dt><dd>${request.sds_url ? `<a href="${escapeHtml(request.sds_url)}" target="_blank" rel="noreferrer">${escapeHtml(request.sds_url)}</a>` : "Not provided"}</dd></div>
-        <div><dt>Reviewer email</dt><dd>${escapeHtml(request.review_email)}</dd></div>
-        <div><dt>Status</dt><dd>${escapeHtml(statusLabel(request.status))}</dd></div>
-      </dl>
+      ${summaryRows([
+        ["Chemical", request.chemical_name],
+        ["Formula", request.formula],
+        ["CAS", request.cas_number],
+        ["Manufacturer", request.manufacturer],
+        ["Reviewer email", request.review_email],
+        ["Created", formatDate(request.created_at)]
+      ])}
+      <p class="meta">SDS: ${request.sds_url ? `<a href="${escapeHtml(request.sds_url)}" target="_blank" rel="noreferrer">${escapeHtml(request.sds_url)}</a>` : "Not provided"}</p>
       <div class="form-actions">
         <a class="button primary" href="${escapeHtml(request.mailto)}">Open review email</a>
         <button class="button secondary" data-route="home">Back to search</button>
@@ -654,30 +464,10 @@ function renderRequestReceipt(id) {
   `);
 }
 
-function bindRouteButtons(scope = document) {
-  scope.querySelectorAll("[data-route]:not([data-bound])").forEach((button) => {
-    button.dataset.bound = "true";
-    button.addEventListener("click", () => {
-      const routeName = button.dataset.route;
-      if (routeName === "home") location.hash = "#/";
-      if (routeName === "add-chemical") location.hash = "#/add-chemical";
-      if (routeName === "not-found") location.hash = "#/not-found";
-    });
-  });
-  scope.querySelectorAll("[data-chemical-id]:not([data-bound])").forEach((button) => {
-    button.dataset.bound = "true";
-    button.addEventListener("click", () => {
-      location.hash = `#/chemical/${button.dataset.chemicalId}`;
-    });
-  });
-}
-
 function route() {
   const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
   if (!page) renderHome();
-  else if (page === "chemical") renderChemical(id);
-  else if (page === "temporary") renderChemical(id);
-  else if (page === "missing") renderMissing(id);
+  else if (page === "chemical") renderRecord(id);
   else if (page === "add-chemical") renderAddChemical();
   else if (page === "request") renderRequestReceipt(id);
   else if (page === "not-found") renderNotFound(currentQuery);
