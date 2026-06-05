@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChemicalSearch | Safety Data Lookup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="Primary navigation">
+        <a class="brand" href="#top" aria-label="ChemicalSearch home">
+          <span class="brand-mark">CS</span>
+          <span>
+            <strong>ChemicalSearch</strong>
+            <small>Safety Data Lookup</small>
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="#search">Search</a>
+          <a href="#emergency">Emergency</a>
+          <a href="#records">Records</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-content">
+          <p class="eyebrow">SDS-inspired chemical safety reference</p>
+          <h1>Find hazards, symptoms, PPE, and first-aid steps fast.</h1>
+          <p class="hero-copy">
+            Search sample chemical records in a professional Safety Data Sheet layout designed for quick triage, lab use, and incident response.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#search">Search chemicals</a>
+            <a class="button button-secondary" href="#emergency">View emergency steps</a>
+          </div>
+        </div>
+        <aside class="status-card" aria-label="Important safety notice">
+          <span class="status-label">Emergency notice</span>
+          <h2>Call poison control or emergency services for real exposures.</h2>
+          <p>This prototype is not a substitute for an official SDS, medical care, or trained hazmat response.</p>
+        </aside>
+      </section>
+
+      <section id="search" class="search-panel" aria-labelledby="search-title">
+        <div>
+          <p class="eyebrow">Chemical lookup</p>
+          <h2 id="search-title">Search the database</h2>
+        </div>
+        <div class="search-box">
+          <label for="chemicalSearch">Chemical name, CAS number, symptom, or hazard</label>
+          <input id="chemicalSearch" type="search" placeholder="Try acetone, 67-64-1, inhalation, corrosive..." autocomplete="off" />
+        </div>
+        <div class="filters" aria-label="Hazard filters">
+          <button class="filter-pill active" data-filter="all">All</button>
+          <button class="filter-pill" data-filter="flammable">Flammable</button>
+          <button class="filter-pill" data-filter="corrosive">Corrosive</button>
+          <button class="filter-pill" data-filter="toxic">Toxic</button>
+          <button class="filter-pill" data-filter="irritant">Irritant</button>
+        </div>
+      </section>
+
+      <section class="dashboard" aria-label="Chemical safety dashboard">
+        <aside class="side-panel" id="emergency">
+          <h2>Exposure response</h2>
+          <div class="response-step">
+            <span>1</span>
+            <p><strong>Move away from exposure.</strong> Get to fresh air, remove contaminated clothing, and avoid spreading contamination.</p>
+          </div>
+          <div class="response-step">
+            <span>2</span>
+            <p><strong>Check the route.</strong> Skin, eye, inhalation, and ingestion incidents require different first-aid steps.</p>
+          </div>
+          <div class="response-step">
+            <span>3</span>
+            <p><strong>Escalate quickly.</strong> Contact Poison Control, emergency services, or the facility safety officer.</p>
+          </div>
+          <div class="mini-card">
+            <strong>Missing chemical?</strong>
+            <p>Use the intake workflow to collect name, CAS, container label, photo, and exposure route before routing to a verified data source.</p>
+          </div>
+        </aside>
+
+        <section id="records" class="records-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Safety records</p>
+              <h2>Available chemicals</h2>
+            </div>
+            <p id="resultCount" class="result-count"></p>
+          </div>
+          <div id="chemicalGrid" class="chemical-grid"></div>
+          <div id="emptyState" class="empty-state" hidden>
+            <h3>No matching chemical found</h3>
+            <p>Collect the chemical name, CAS number, label photo, product manufacturer, and exposure details, then route the request to a verified SDS/API source before adding it to the database.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Prototype only. Always verify against the official Safety Data Sheet and local emergency protocols.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
