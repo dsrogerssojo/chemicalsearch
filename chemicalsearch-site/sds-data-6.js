@@ -153,3 +153,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "updated_at": "2026-06-05"
   }
 ]);
+
+window.addEventListener("load", () => {
+  const script = document.createElement("script");
+  script.src = "enhancements.js";
+  document.body.appendChild(script);
+});
