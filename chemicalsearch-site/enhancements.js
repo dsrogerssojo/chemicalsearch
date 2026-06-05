@@ -58,6 +58,7 @@
     .eyebrow { background: transparent !important; color: var(--sojo-purple) !important; padding: 0 !important; letter-spacing: .08em !important; }
     .panel h1,.panel h2,.panel h3,.chemical-name,.summary-list dt,.label,.detail-title,.incident-card h3 { color: var(--sojo-text) !important; }
 
+    .search-panel .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
     .search-panel .search-row { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 12px !important; width: 100% !important; max-width: 100% !important; }
     .search-panel .search-input { order: 1 !important; flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; max-width: none !important; height: 52px !important; }
     .search-panel .search-row .button,.search-panel .search-row button[type='submit'] { order: 2 !important; flex: 0 0 auto !important; width: auto !important; min-width: 128px !important; height: 52px !important; padding: 0 26px !important; }
