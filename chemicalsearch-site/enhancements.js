@@ -29,6 +29,28 @@
     }
 
     .topbar { display: none !important; }
+    .home-button-fixed {
+      position: fixed !important;
+      top: 14px !important;
+      left: 14px !important;
+      z-index: 9999 !important;
+      min-height: 40px !important;
+      padding: 0 16px !important;
+      border-radius: 999px !important;
+      border: 1px solid var(--sojo-line) !important;
+      background: #ffffff !important;
+      color: #05070b !important;
+      font-weight: 900 !important;
+      font-size: .95rem !important;
+      text-decoration: none !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35) !important;
+      cursor: pointer !important;
+    }
+    .home-button-fixed:hover { transform: translateY(-1px) !important; }
     .brand-mark { background: #ffffff !important; color: #05070b !important; border-radius: 10px !important; }
     .brand-title { color: var(--sojo-text) !important; letter-spacing: -.02em !important; }
 
@@ -39,7 +61,7 @@
     .button.secondary,.quick-chip,.filter-chip { background: #111721 !important; color: var(--sojo-text) !important; border-color: var(--sojo-line) !important; }
     .button.secondary:hover,.quick-chip:hover,.filter-chip:hover,.filter-chip.is-selected { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
 
-    .emergency-strip { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; }
+    .emergency-strip { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; padding-top: 58px !important; }
     .hotline { background: #111721 !important; color: var(--sojo-text) !important; border-color: var(--sojo-line) !important; border-radius: 10px !important; }
     .hotline.critical { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
 
@@ -129,14 +151,34 @@
     }
 
     @media (max-width: 820px) {
+      .home-button-fixed { top: 10px !important; left: 10px !important; min-height: 38px !important; padding: 0 14px !important; font-size: .9rem !important; }
+      .emergency-strip { padding-top: 54px !important; }
       .hero h1 { font-size: clamp(2rem, 12vw, 3.2rem) !important; }
       .results-panel,.search-panel,.incident-card,.sds-section-grid .panel,.hazard-overview .panel,.detail-header { border-radius: 14px !important; }
       .search-panel .search-row { flex-direction: column !important; align-items: stretch !important; }
       .search-panel .search-input,.search-panel .search-row .button,.search-panel .search-row button[type='submit'] { width: 100% !important; min-width: 0 !important; }
     }
+
+    @media print { .home-button-fixed { display: none !important; } }
   `;
 
   document.head.appendChild(style);
+
+  function addHomeButton() {
+    let button = document.querySelector(".home-button-fixed");
+    if (!button) {
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "home-button-fixed";
+      button.textContent = "← Home";
+      button.setAttribute("aria-label", "Go to home search page");
+      button.addEventListener("click", () => {
+        location.hash = "#/";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      document.body.appendChild(button);
+    }
+  }
 
   function addHeroLogo() {
     const heroInner = document.querySelector(".hero-inner");
@@ -155,6 +197,10 @@
     heroInner.appendChild(panel);
   }
 
+  addHomeButton();
   addHeroLogo();
-  new MutationObserver(addHeroLogo).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(() => {
+    addHomeButton();
+    addHeroLogo();
+  }).observe(document.body, { childList: true, subtree: true });
 })();
