@@ -6,7 +6,7 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260608-homehide" />
+    <link rel="stylesheet" href="styles.css?v=20260608-homehide2" />
     <style>
       #homeButton {
         position: fixed;
@@ -29,6 +29,7 @@
       body.is-home-page #homeButton { display: none !important; }
       body.is-home-page .emergency-strip { padding-top: 0 !important; }
       .topbar { display: none !important; }
+      .home-button-fixed { display: none !important; }
       .emergency-strip { padding-top: 58px !important; }
 
       .hero-inner {
@@ -84,6 +85,7 @@
       @media print {
         @page { margin: 0.55in; }
         #homeButton,
+        .home-button-fixed,
         .topbar,
         .emergency-strip,
         .hero,
@@ -121,6 +123,7 @@
         var route = location.hash.replace(/^#\/?/, "").split("/")[0];
         var isHome = !route;
         document.body.classList.toggle("is-home-page", isHome);
+        document.querySelectorAll(".home-button-fixed").forEach(function (node) { node.remove(); });
       }
 
       document.getElementById("homeButton").addEventListener("click", function () {
@@ -130,16 +133,17 @@
       });
       window.addEventListener("hashchange", syncHomeButtonVisibility);
       syncHomeButtonVisibility();
+      new MutationObserver(syncHomeButtonVisibility).observe(document.body, { childList: true, subtree: true });
     </script>
-    <script src="sds-data-1.js?v=20260608-homehide"></script>
-    <script src="sds-data-2.js?v=20260608-homehide"></script>
-    <script src="sds-data-3.js?v=20260608-homehide"></script>
-    <script src="sds-data-4.js?v=20260608-homehide"></script>
-    <script src="sds-data-5.js?v=20260608-homehide"></script>
-    <script src="sds-data-6.js?v=20260608-homehide"></script>
-    <script src="app.js?v=20260608-homehide"></script>
-    <script src="enhancements.js?v=20260608-homehide"></script>
-    <script src="autofill-client.js?v=20260608-homehide"></script>
+    <script src="sds-data-1.js?v=20260608-homehide2"></script>
+    <script src="sds-data-2.js?v=20260608-homehide2"></script>
+    <script src="sds-data-3.js?v=20260608-homehide2"></script>
+    <script src="sds-data-4.js?v=20260608-homehide2"></script>
+    <script src="sds-data-5.js?v=20260608-homehide2"></script>
+    <script src="sds-data-6.js?v=20260608-homehide2"></script>
+    <script src="app.js?v=20260608-homehide2"></script>
+    <script src="enhancements.js?v=20260608-homehide2"></script>
+    <script src="autofill-client.js?v=20260608-homehide2"></script>
     <script>
       (function () {
         var SOJO_LOGO_URL = "https://techcouncilventures.com/wp-content/uploads/2023/10/Sojo-Logo.png";
