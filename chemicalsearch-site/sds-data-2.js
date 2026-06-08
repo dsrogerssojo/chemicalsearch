@@ -14,7 +14,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/0/1/0",
     "sds_url": "https://amp.generalair.com/msdsdocs/jmzpbgubs.pdf",
     "sds_reference": "https://amp.generalair.com/msdsdocs/jmzpbgubs.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-liquid-ice-melt",
@@ -30,8 +30,8 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "composition": "Calcium Chloride",
     "hfrp_info": "1/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-25016pdf",
-    "sds_reference": "SS-25016pdf",
-    "updated_at": "2026-06-05"
+    "sds_reference": "https://img.uline.com/is/content/uline/SS-25016pdf",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "multi-purpose-lubricant-corrosion-inhibitor",
@@ -48,7 +48,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/4/0/0",
     "sds_url": "https://www.crcindustries.com/media/msdsen/msds_en-1003257.pdf",
     "sds_reference": "https://www.crcindustries.com/media/msdsen/msds_en-1003257.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-antibacterial-handsoap",
@@ -64,8 +64,8 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "composition": "Benzalkonium Chloride 0.13% w/w 68391-01-5 0 - 10 - - Water 7732-18-5 50 - 100 - - Lauramine Oxide 1643-20-5 0 - 10 - - Cocamidopropyl Betaine 61789-40-0 0 - 10 - - Lauramidopropylamine Oxide 61792-31-2 0 - 10 - - Sodium Chloride 7647-14-5 0 - 10 - - Myristamidopropylamine Oxide 67806-10-4 0 - 10 - - Glycerin 56-81-5 0 - 10 - - Fragrance Proprietary 0 - 10 - - Disteareth-75 IPDI 53533-75-8 0 - 10 - - PEG-150 Distearate 9005-08-7 0 - 10 - - Citric Acid 77-92-9 0 - 10 - - Tetrasodium EDTA 64-02-8 0 - 10 - - Benzophenone-4 4065-45-6 0 - 10 - - Sodium Benzoate 532-32-1 0 - 10 - - Red 33 3567-66-6 0 - 10 - - Red 40 25956-17-6 0 - 10 - - Yellow 5",
     "hfrp_info": "3/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-17080pdf",
-    "sds_reference": "SS-17080pdf",
-    "updated_at": "2026-06-05"
+    "sds_reference": "https://img.uline.com/is/content/uline/SS-17080pdf",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-antibacterial-handsoap-2",
@@ -82,7 +82,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "3/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-17080pdf",
     "sds_reference": "https://img.uline.com/is/content/uline/SS-17080pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "crystal-simple-green-industrial-cleaner-degreaser",
@@ -99,7 +99,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/0/0/0",
     "sds_url": "https://cdn.simplegreen.com/downloads/SDS_EN-US_SimpleGreenCrystalIndustrialCleanerDegreaser.pdf",
     "sds_reference": "https://cdn.simplegreen.com/downloads/SDS_EN-US_SimpleGreenCrystalIndustrialCleanerDegreaser.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "everprime",
@@ -114,9 +114,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "N/A",
     "hfrp_info": "1/0/0/0",
-    "sds_url": "https://static1.squarespace.com/static/55f0bb56e4b0292a721109c4/t/5a4d4cfc71c10b69178b0eb6/1515015422878/SDS+EverPrime%C2%81+1514_2018.pdf",
-    "sds_reference": "https://static1.squarespace.com/static/55f0bb56e4b0292a721109c4/t/5a4d4cfc71c10b69178b0eb6/1515015422878/SDS+EverPrime%C2%81+1514_2018.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous Squarespace link was unstable.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "fabuloso-all-purpose-cleaner-liquid-ocean-cool",
@@ -133,7 +133,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/1/0/0",
     "sds_url": "https://www.uline.com/PDF/SS-18398.pdf",
     "sds_reference": "https://www.uline.com/PDF/SS-18398.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-dish-soap",
@@ -149,7 +149,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "composition": "Sodium C14-16 Olefin Sulfonate",
     "hfrp_info": "3/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-25782pdf",
-    "sds_reference": "SS-25782pdf",
-    "updated_at": "2026-06-05"
+    "sds_reference": "https://img.uline.com/is/content/uline/SS-25782pdf",
+    "updated_at": "2026-06-08"
   }
 ]);
