@@ -12,9 +12,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "butanone / ethyl (S)-2-hydroxypropionate, ethyl L-lactate, ethyl-(S)-lactate",
     "hfrp_info": "1/3/0/0",
-    "sds_url": "https://drive.google.com/drive/folders/1UEq_4ifSSUOTW7ufJqijrt9dSyCHvpun",
-    "sds_reference": "https://drive.google.com/drive/folders/1UEq_4ifSSUOTW7ufJqijrt9dSyCHvpun",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous shared-folder link was not a direct SDS file.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "3m-silicone-spray",
@@ -31,7 +31,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/4/0/0",
     "sds_url": "https://www.uline.com/PDF/SS-18768.pdf",
     "sds_reference": "https://www.uline.com/PDF/SS-18768.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "rapid-tap-cutting-oil",
@@ -46,9 +46,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "Mineral oil (70-90%), C14-C16 chlorinated paraffin (<40%), Calcium sulfonate (2-3%)",
     "hfrp_info": "1/1/0/C",
-    "sds_url": "https://sojoindustries0.sharepoint.com/:b:/s/SojoSharedDocuments/EbfO-v_LeUVGh7iQZfYP8H0Bg0qFNk5YFUyjiuHDqEfHwA?e=Vuu1Vl",
-    "sds_reference": "https://sojoindustries0.sharepoint.com/:b:/s/SojoSharedDocuments/EbfO-v_LeUVGh7iQZfYP8H0Bg0qFNk5YFUyjiuHDqEfHwA?e=Vuu1Vl",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous private document link may require access.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "spray-on-food-grade-silicone-lubricant",
@@ -63,9 +63,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "Hexane (42%), 2-Methylpentane (19.4%), Propane (15%), 3-Methylpentane (7.2%)",
     "hfrp_info": "2/4/0/0",
-    "sds_url": "https://sojoindustries0.sharepoint.com/:b:/s/SojoSharedDocuments/EQXbYCMOjjZJuVk194M89-MBFerINpXAqnkF-XfnuA1jZQ?e=njAQch",
-    "sds_reference": "https://sojoindustries0.sharepoint.com/:b:/s/SojoSharedDocuments/EQXbYCMOjjZJuVk194M89-MBFerINpXAqnkF-XfnuA1jZQ?e=njAQch",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous private document link may require access.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "markem-imaje-320-cleaner",
@@ -80,9 +80,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "",
     "composition": "Isopropyl Alcohol (~60-70%), Ethyl Acetate (~30-40%)",
     "hfrp_info": "2/3/0/0",
-    "sds_url": "https://sojoindustries0.sharepoint.com/sites/SojoSharedDocuments/Shared%20Documents/SQF%20&%20QPI%20Folder/Archive/MSDS%20Information/Markem%20Imaje%20320%20Cleaner.pdf?CT=1778009111383&OR=ItemsView",
-    "sds_reference": "https://sojoindustries0.sharepoint.com/sites/SojoSharedDocuments/Shared%20Documents/SQF%20&%20QPI%20Folder/Archive/MSDS%20Information/Markem%20Imaje%20320%20Cleaner.pdf?CT=1778009111383&OR=ItemsView",
-    "updated_at": "2026-06-05"
+    "sds_url": "https://www.markem-imaje.com/services-support/safety-data-sheets",
+    "sds_reference": "https://www.markem-imaje.com/services-support/safety-data-sheets",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "sprayon-machine-oil-lu700-h1-10-oz-aerosol-can-iso-grade-32",
@@ -99,7 +99,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/4/0/0",
     "sds_url": "https://www.grainger.com/sds/pdf/220785.pdf",
     "sds_reference": "https://www.grainger.com/sds/pdf/220785.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "lps-detex-foodlube-sugar-dissolving-fluid",
@@ -116,7 +116,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/1/0/0",
     "sds_url": "https://www.itwprobrands.com/files/techdatasheets/LPSDETEXFOODLUBESugarDissolvingFluid-.pdf",
     "sds_reference": "https://www.itwprobrands.com/files/techdatasheets/LPSDETEXFOODLUBESugarDissolvingFluid-.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "klean-strip-denatured-alcohol",
@@ -133,7 +133,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/3/0/0",
     "sds_url": "https://kleanstrip.com/heating-fuels/denatured-alcohol/",
     "sds_reference": "https://kleanstrip.com/heating-fuels/denatured-alcohol/",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "wd-40-ez-reach",
@@ -150,6 +150,6 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "12/0/0",
     "sds_url": "https://www.wd40.com/products/ez-reach/",
     "sds_reference": "https://www.wd40.com/products/ez-reach/",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   }
 ]);
