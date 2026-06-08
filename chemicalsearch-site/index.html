@@ -6,8 +6,38 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260608-homehide2" />
+    <link rel="stylesheet" href="styles.css?v=20260608-canonical" />
     <style>
+      :root {
+        --sojo-bg: #05070b;
+        --sojo-panel: #090d14;
+        --sojo-panel-soft: #0d121b;
+        --sojo-line: #2f3948;
+        --sojo-line-soft: #1e2733;
+        --sojo-text: #f7f8fb;
+        --sojo-muted: #7e8da0;
+        --sojo-muted-2: #aeb9c8;
+        --sojo-purple: #d94eff;
+      }
+
+      html,
+      body {
+        background: var(--sojo-bg) !important;
+        color: var(--sojo-text) !important;
+      }
+
+      body {
+        font-family: Inter, Arial, Helvetica, sans-serif !important;
+      }
+
+      .shell {
+        background:
+          radial-gradient(circle at 90% 2%, rgba(217, 78, 255, .10), transparent 34%),
+          linear-gradient(180deg, #05070b 0%, #070a10 100%) !important;
+      }
+
+      .topbar { display: none !important; }
+
       #homeButton {
         position: fixed;
         top: 14px;
@@ -28,23 +58,18 @@
 
       body.is-home-page #homeButton { display: none !important; }
       body.is-home-page .emergency-strip { padding-top: 0 !important; }
-      .topbar { display: none !important; }
-      .home-button-fixed { display: none !important; }
-      .emergency-strip { padding-top: 58px !important; }
+      .emergency-strip { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; padding-top: 58px !important; }
+      .hotline { background: #111721 !important; color: var(--sojo-text) !important; border-color: var(--sojo-line) !important; border-radius: 10px !important; }
+      .hotline.critical { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
 
+      .hero { background: #05070b !important; border-bottom: 1px solid var(--sojo-line) !important; }
       .hero-inner {
         display: block !important;
         position: relative !important;
         min-height: 330px !important;
         padding: 42px 390px 38px 16px !important;
       }
-
-      .hero-inner::after {
-        display: none !important;
-        content: none !important;
-        background: none !important;
-      }
-
+      .hero-inner::after { display: none !important; content: none !important; background: none !important; }
       .hero-logo-panel {
         position: absolute !important;
         right: 16px !important;
@@ -58,7 +83,6 @@
         justify-content: center !important;
         pointer-events: none !important;
       }
-
       .hero-logo-panel img {
         width: 100% !important;
         max-width: 320px !important;
@@ -68,6 +92,111 @@
         background: transparent !important;
         border: 0 !important;
       }
+      .hero .eyebrow,
+      .eyebrow {
+        background: transparent !important;
+        color: var(--sojo-purple) !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        letter-spacing: .08em !important;
+      }
+      .hero h1 {
+        color: #ffffff !important;
+        text-transform: uppercase !important;
+        letter-spacing: -.045em !important;
+        font-size: clamp(2rem, 4vw, 4rem) !important;
+        line-height: .92 !important;
+        max-width: 790px !important;
+        margin: 10px 0 18px !important;
+      }
+      .hero .lead { color: #ffffff !important; max-width: 760px !important; font-size: 1rem !important; line-height: 1.5 !important; }
+      .trust-row { margin-top: 18px !important; gap: 8px !important; }
+      .trust-row span { background: #ffffff !important; color: #111827 !important; border: 0 !important; border-radius: 999px !important; padding: 7px 13px !important; font-weight: 700 !important; }
+
+      .brand-subtitle,
+      .meta,
+      .footer-inner,
+      .summary-list dd,
+      .panel p,
+      .lead,
+      .sort-control { color: var(--sojo-muted-2) !important; }
+
+      .button,
+      .quick-chip,
+      .filter-chip {
+        border-radius: 999px !important;
+        font-weight: 800 !important;
+      }
+      .button.primary { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; box-shadow: none !important; }
+      .button.secondary,
+      .quick-chip,
+      .filter-chip { background: #111721 !important; color: var(--sojo-text) !important; border-color: var(--sojo-line) !important; }
+      .button.secondary:hover,
+      .quick-chip:hover,
+      .filter-chip:hover,
+      .filter-chip.is-selected { background: #ffffff !important; color: #05070b !important; border-color: #ffffff !important; }
+
+      .main { padding-top: 18px !important; gap: 16px !important; }
+      .panel,
+      .search-panel,
+      .incident-card,
+      .chemical-card,
+      .detail-header { background: var(--sojo-panel) !important; border-color: var(--sojo-line) !important; box-shadow: none !important; color: var(--sojo-text) !important; }
+      .panel { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; padding: 22px 0 !important; }
+      .results-panel,
+      .search-panel { border-radius: 16px !important; border: 1px solid var(--sojo-line) !important; padding: 18px !important; background: rgba(9, 13, 20, .96) !important; }
+      .section-heading { border-bottom: 1px solid var(--sojo-line) !important; padding-bottom: 12px !important; margin-bottom: 14px !important; }
+      .panel h1,
+      .panel h2,
+      .panel h3,
+      .chemical-name,
+      .summary-list dt,
+      .label,
+      .detail-title,
+      .incident-card h3 { color: var(--sojo-text) !important; }
+
+      .search-panel .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+      .search-panel .search-row { display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px !important; width: 100% !important; }
+      .search-panel .search-input { flex: 1 1 auto !important; width: auto !important; min-width: 0 !important; max-width: none !important; height: 52px !important; }
+      .search-panel .search-row .button,
+      .search-panel .search-row button[type='submit'] { flex: 0 0 auto !important; min-width: 128px !important; height: 52px !important; padding: 0 26px !important; }
+      .search-input,
+      .field,
+      .textarea,
+      .sort-control select { background: #ffffff !important; color: #101419 !important; border: 1px solid #c8d0da !important; border-radius: 12px !important; }
+      .search-input::placeholder,
+      .field::placeholder,
+      .textarea::placeholder { color: #596577 !important; }
+      .quick-searches { justify-content: flex-start !important; }
+      .filter-toolbar { border-bottom: 1px solid var(--sojo-line-soft) !important; padding-bottom: 12px !important; }
+
+      .chemical-card { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; border-top: 1px solid var(--sojo-line) !important; border-bottom: 0 !important; background: transparent !important; }
+      .chemical-card:hover { background: rgba(255,255,255,.035) !important; border-color: var(--sojo-line) !important; }
+      .hazard-rail { width: 4px !important; background: var(--sojo-purple) !important; }
+      .hazard-high .hazard-rail,
+      .hazard-extreme .hazard-rail { background: #ff4d4d !important; }
+      .hazard-moderate .hazard-rail { background: #ffb020 !important; }
+      .card-content { padding: 18px 14px !important; }
+      .card-preview { color: var(--sojo-muted-2) !important; max-width: 760px !important; }
+      .card-footer { color: var(--sojo-muted) !important; }
+      .open-label { color: #ffffff !important; }
+
+      .incident-card,
+      .sds-section-grid .panel,
+      .hazard-overview .panel,
+      .detail-header { border-radius: 16px !important; border: 1px solid var(--sojo-line) !important; background: var(--sojo-panel-soft) !important; padding: 18px !important; }
+      .summary-list div { border-bottom-color: var(--sojo-line) !important; }
+      .footer { background: #05070b !important; border-top: 1px solid var(--sojo-line) !important; }
 
       .autofill-status.is-success { border-color: #a7e6cc !important; background: #e9fbf4 !important; color: #064e3b !important; }
       .autofill-status.is-loading { border-color: #b8d7f2 !important; background: #eaf4ff !important; color: #0d4d7d !important; }
@@ -80,12 +209,15 @@
         body.is-home-page .emergency-strip { padding-top: 0 !important; }
         .hero-inner { min-height: auto !important; padding: 28px 16px !important; }
         .hero-logo-panel { position: static !important; transform: none !important; width: 190px !important; max-width: 190px !important; min-width: 0 !important; justify-content: flex-start !important; margin-top: 22px !important; }
+        .search-panel .search-row { flex-direction: column !important; align-items: stretch !important; }
+        .search-panel .search-input,
+        .search-panel .search-row .button,
+        .search-panel .search-row button[type='submit'] { width: 100% !important; min-width: 0 !important; }
       }
 
       @media print {
         @page { margin: 0.55in; }
         #homeButton,
-        .home-button-fixed,
         .topbar,
         .emergency-strip,
         .hero,
@@ -123,7 +255,6 @@
         var route = location.hash.replace(/^#\/?/, "").split("/")[0];
         var isHome = !route;
         document.body.classList.toggle("is-home-page", isHome);
-        document.querySelectorAll(".home-button-fixed").forEach(function (node) { node.remove(); });
       }
 
       document.getElementById("homeButton").addEventListener("click", function () {
@@ -133,24 +264,21 @@
       });
       window.addEventListener("hashchange", syncHomeButtonVisibility);
       syncHomeButtonVisibility();
-      new MutationObserver(syncHomeButtonVisibility).observe(document.body, { childList: true, subtree: true });
     </script>
-    <script src="sds-data-1.js?v=20260608-homehide2"></script>
-    <script src="sds-data-2.js?v=20260608-homehide2"></script>
-    <script src="sds-data-3.js?v=20260608-homehide2"></script>
-    <script src="sds-data-4.js?v=20260608-homehide2"></script>
-    <script src="sds-data-5.js?v=20260608-homehide2"></script>
-    <script src="sds-data-6.js?v=20260608-homehide2"></script>
-    <script src="app.js?v=20260608-homehide2"></script>
-    <script src="enhancements.js?v=20260608-homehide2"></script>
-    <script src="autofill-client.js?v=20260608-homehide2"></script>
+    <script src="sds-data-1.js?v=20260608-canonical"></script>
+    <script src="sds-data-2.js?v=20260608-canonical"></script>
+    <script src="sds-data-3.js?v=20260608-canonical"></script>
+    <script src="sds-data-4.js?v=20260608-canonical"></script>
+    <script src="sds-data-5.js?v=20260608-canonical"></script>
+    <script src="sds-data-6.js?v=20260608-canonical"></script>
+    <script src="app.js?v=20260608-canonical"></script>
+    <script src="autofill-client.js?v=20260608-canonical"></script>
     <script>
       (function () {
         var SOJO_LOGO_URL = "https://techcouncilventures.com/wp-content/uploads/2023/10/Sojo-Logo.png";
         function fixHeroLogo() {
           var hero = document.querySelector(".hero-inner");
-          if (!hero) return;
-          hero.querySelectorAll(".hero-logo-panel").forEach(function (node) { node.remove(); });
+          if (!hero || hero.querySelector(".hero-logo-panel")) return;
           var panel = document.createElement("div");
           panel.className = "hero-logo-panel";
           var img = document.createElement("img");
