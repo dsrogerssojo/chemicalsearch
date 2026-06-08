@@ -14,7 +14,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/4/0/0",
     "sds_url": "https://www.crcindustries.com/qd-174-electronic-cleaner-11-wt-oz/",
     "sds_reference": "https://www.crcindustries.com/qd-174-electronic-cleaner-11-wt-oz/",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "chemtronics-electro-wash-px",
@@ -31,7 +31,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/4/0/0",
     "sds_url": "https://www.chemtronics.com/electro-wash-px",
     "sds_reference": "https://www.chemtronics.com/electro-wash-px",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "ags-sil-glyde-silicone-compound",
@@ -48,7 +48,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/1/0/0",
     "sds_url": "https://agscompany.com/product/sil-glyde-silicone-brake-lubricant/",
     "sds_reference": "https://agscompany.com/product/sil-glyde-silicone-brake-lubricant/",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "crc-3-36-multi-purpose-lubricant",
@@ -65,7 +65,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/2/0/0",
     "sds_url": "https://www.crcindustries.com/3-36-multi-purpose-lubricant-and-corrosion-inhibitor-11-wt-oz/",
     "sds_reference": "https://www.crcindustries.com/3-36-multi-purpose-lubricant-and-corrosion-inhibitor-11-wt-oz/",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "bernzomatic-butane-fuel",
@@ -82,7 +82,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/4/0/0",
     "sds_url": "https://www.bernzomatic.com/Products/Fuel-Cylinders/Butane/BF56",
     "sds_reference": "https://www.bernzomatic.com/Products/Fuel-Cylinders/Butane/BF56",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "gojo-natural-orange-pumice-hand-cleaner",
@@ -99,7 +99,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/0/0/0",
     "sds_url": "https://www.gojo.com/en/Product/0955-04",
     "sds_reference": "https://www.gojo.com/en/Product/0955-04",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "great-stuff-fireblock-insulating-foam-sealant",
@@ -116,7 +116,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/4/1/0",
     "sds_url": "https://www.greatstuff.dupont.com/products/greatstuff-fireblock.html",
     "sds_reference": "https://www.greatstuff.dupont.com/products/greatstuff-fireblock.html",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "loctite-threadlocker-thread-smart",
@@ -133,7 +133,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/1/0/0",
     "sds_url": "https://www.henkel-adhesives.com/us/en/product/threadlockers/loctite_2420.html",
     "sds_reference": "https://www.henkel-adhesives.com/us/en/product/threadlockers/loctite_2420.html",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "lubriplate-grease",
@@ -150,12 +150,6 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/1/0/0",
     "sds_url": "https://www.lubriplate.com/Products/Greases/Multi-Purpose-Greases/630-Series/630-AA",
     "sds_reference": "https://www.lubriplate.com/Products/Greases/Multi-Purpose-Greases/630-Series/630-AA",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   }
 ]);
-
-window.addEventListener("load", () => {
-  const script = document.createElement("script");
-  script.src = "enhancements.js";
-  document.body.appendChild(script);
-});
