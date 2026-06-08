@@ -12,9 +12,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "10/03/2016",
     "composition": "21% of the mixture consists of ingredient(s) of unknown acute toxicity",
     "hfrp_info": "2/2/0/0",
-    "sds_url": "https://dkstatic.blob.core.windows.net/resources/1126702/242258.pdf",
-    "sds_reference": "https://dkstatic.blob.core.windows.net/resources/1126702/242258.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous third-party PDF link was unstable.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "henry-easyrelease-adhesive-remover",
@@ -31,7 +31,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "3/0/0/0",
     "sds_url": "https://images.homedepot-static.com/catalog/pdfImages/57/57ffc0ed-765c-4dd3-993d-0212e5b26bba.pdf",
     "sds_reference": "https://images.homedepot-static.com/catalog/pdfImages/57/57ffc0ed-765c-4dd3-993d-0212e5b26bba.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "klean-strip-green-adhesive-remover",
@@ -48,7 +48,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/1/0/0",
     "sds_url": "https://images.thdstatic.com/catalog/pdfImages/00/0002fd0b-96f8-40a7-ae9a-c2cca37951bc.pdf",
     "sds_reference": "https://images.thdstatic.com/catalog/pdfImages/00/0002fd0b-96f8-40a7-ae9a-c2cca37951bc.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "lu-910-food-grade-silicone-lubricant-aerosol",
@@ -65,7 +65,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "2/3/0/0",
     "sds_url": "https://www.paintdocs.com/docs/webPDF.jsp?SITEID=SO&doctype=SDS&lang=en&prodno=075577759316&cntry=US",
     "sds_reference": "https://www.paintdocs.com/docs/webPDF.jsp?SITEID=SO&doctype=SDS&lang=en&prodno=075577759316&cntry=US",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "lysol-brand-ii-kills-99-9-of-viruses-bacteria-all-purpose-purpose-cleaner-complete-clean-lemon-breeze-scent",
@@ -82,7 +82,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/0/0/B",
     "sds_url": "https://resources.cleanitsupply.com/MSDS/RAC75352EA_SDS.PDF",
     "sds_reference": "https://resources.cleanitsupply.com/MSDS/RAC75352EA_SDS.PDF",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "mr-clean-professional-glass-and-multi-surface-cleaner-ready-to-use",
@@ -99,7 +99,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "0/1/0/0",
     "sds_url": "https://resources.cleanitsupply.com/MSDS/PGC81308_SDS.PDF",
     "sds_reference": "https://resources.cleanitsupply.com/MSDS/PGC81308_SDS.PDF",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "nviroclean",
@@ -114,9 +114,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "Dipropylene glycol monomethyl ether",
     "hfrp_info": "0/0/0/0",
-    "sds_url": "https://static1.squarespace.com/static/55f0bb56e4b0292a721109c4/t/5a4d4d7e4192020626615fa2/1515015553407/SDS+Nviroclean+1614_2018.pdf",
-    "sds_reference": "https://static1.squarespace.com/static/55f0bb56e4b0292a721109c4/t/5a4d4d7e4192020626615fa2/1515015553407/SDS+Nviroclean+1614_2018.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous Squarespace link was unstable.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "professional-lysol-brand-kills-99-9-of-viruses-bacteria-power-toilet-bowl-cleaner-liquid",
@@ -131,9 +131,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "Hydrochloric acid / Amines, tallow alkyl, ethoxylated / Alcohols, C12-16, ethoxylated",
     "hfrp_info": "3/0/1/D",
-    "sds_url": "http://www.rbnainfo.com/MSDS/US/Professional%20Lysol%20Brand%20TBC%20EN%20GHS.pdf",
-    "sds_reference": "http://www.rbnainfo.com/MSDS/US/Professional%20Lysol%20Brand%20TBC%20EN%20GHS.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "https://www.rbnainfo.com/MSDS/US/Professional%20Lysol%20Brand%20TBC%20EN%20GHS.pdf",
+    "sds_reference": "https://www.rbnainfo.com/MSDS/US/Professional%20Lysol%20Brand%20TBC%20EN%20GHS.pdf",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "simple-green-all-purpose-cleaner",
@@ -150,6 +150,6 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "0/0/0/B",
     "sds_url": "https://cdn.simplegreen.com/downloads/SDS_EN-US_SimpleGreenAllPurposeCleaner.pdf",
     "sds_reference": "https://cdn.simplegreen.com/downloads/SDS_EN-US_SimpleGreenAllPurposeCleaner.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   }
 ]);
