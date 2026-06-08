@@ -14,7 +14,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "0/0/0/B",
     "sds_url": "https://cdn.simplegreen.com/downloads/SDS_EN-US_SimpleGreenIndustrialCleanerDegreaser.pdf",
     "sds_reference": "https://cdn.simplegreen.com/downloads/SDS_EN-US_SimpleGreenIndustrialCleanerDegreaser.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "softsoap-antibacterial-liquid-soap-hand-crisp-clean",
@@ -29,9 +29,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "CETRIMONIUM CHLORIDE",
     "hfrp_info": "3/1/0/0",
-    "sds_url": "http://sds.staples.com/msds/789230.pdf",
-    "sds_reference": "http://sds.staples.com/msds/789230.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous Staples SDS link was unstable.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "ultra-palmolive-antibacterial-dish-liquid",
@@ -48,7 +48,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "3/1/0/0",
     "sds_url": "https://content.oppictures.com/Master_Images/Master_PDF_Files/CPC45038_SDS.PDF",
     "sds_reference": "https://content.oppictures.com/Master_Images/Master_PDF_Files/CPC45038_SDS.PDF",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "ultra-shine-dishwashing-liquid-lemon",
@@ -63,9 +63,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "05/09/2015",
     "composition": "Sodium Laureth Sulfate",
     "hfrp_info": "3/1/0/0",
-    "sds_url": "http://ultrasoap.com/assets/ultra-sds-ultra-shine-lemon-dish.pdf",
-    "sds_reference": "http://ultrasoap.com/assets/ultra-sds-ultra-shine-lemon-dish.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous Ultra Soap link was unstable.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "windex-original-glass-cleaner",
@@ -80,9 +80,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "N/A",
     "hfrp_info": "1/0/0/0",
-    "sds_url": "https://beta.lakeland.edu/AboutUs/MSDS/PDFs/3258/Windex%20Original%20Glass%20Cleaner%20(SC%20Johnson)%201-23-18.pdf",
-    "sds_reference": "https://beta.lakeland.edu/AboutUs/MSDS/PDFs/3258/Windex%20Original%20Glass%20Cleaner%20(SC%20Johnson)%201-23-18.pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous hosted PDF copy was unstable.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "a118-4-additive-for-markem-9450-coders",
@@ -99,7 +99,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/3/0/0",
     "sds_url": "https://www.markem-imaje.com/services-support/safety-data-sheets",
     "sds_reference": "https://www.markem-imaje.com/services-support/safety-data-sheets",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "mb175-4-ink-for-markem-9450-coders",
@@ -116,7 +116,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "1/3/0/0",
     "sds_url": "https://www.markem-imaje.com/services-support/safety-data-sheets",
     "sds_reference": "https://www.markem-imaje.com/services-support/safety-data-sheets",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "si-cij9020-black-ink",
@@ -131,9 +131,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "butanone / 1-methoxy-2-propanol",
     "hfrp_info": "1/3/0/0",
-    "sds_url": "https://drive.google.com/drive/folders/1UEq_4ifSSUOTW7ufJqijrt9dSyCHvpun",
-    "sds_reference": "https://drive.google.com/drive/folders/1UEq_4ifSSUOTW7ufJqijrt9dSyCHvpun",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous shared-folder link was not a direct SDS file.",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "si-cij9030-black-ink",
@@ -148,8 +148,8 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "butanone / ethyl methyl ketone",
     "hfrp_info": "2/3/0/0",
-    "sds_url": "https://drive.google.com/drive/folders/1UEq_4ifSSUOTW7ufJqijrt9dSyCHvpun",
-    "sds_reference": "https://drive.google.com/drive/folders/1UEq_4ifSSUOTW7ufJqijrt9dSyCHvpun",
-    "updated_at": "2026-06-05"
+    "sds_url": "",
+    "sds_reference": "No verified public SDS link found; previous shared-folder link was not a direct SDS file.",
+    "updated_at": "2026-06-08"
   }
 ]);
