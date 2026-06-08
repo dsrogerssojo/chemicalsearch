@@ -6,20 +6,49 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260608-restore-prehome" />
+    <link rel="stylesheet" href="styles.css?v=20260608-home-sdsparse" />
   </head>
   <body>
+    <button id="homeButton" type="button" hidden>← Home</button>
     <div id="app"></div>
-    <script src="sds-data-1.js?v=20260608-restore-prehome"></script>
-    <script src="sds-data-2.js?v=20260608-restore-prehome"></script>
-    <script src="sds-data-3.js?v=20260608-restore-prehome"></script>
-    <script src="sds-data-4.js?v=20260608-restore-prehome"></script>
-    <script src="sds-data-5.js?v=20260608-restore-prehome"></script>
-    <script src="sds-data-6.js?v=20260608-restore-prehome"></script>
-    <script src="app.js?v=20260608-restore-prehome"></script>
-    <script src="enhancements.js?v=20260608-restore-prehome"></script>
-    <script src="autofill-client.js?v=20260608-restore-prehome"></script>
+    <script src="sds-data-1.js?v=20260608-home-sdsparse"></script>
+    <script src="sds-data-2.js?v=20260608-home-sdsparse"></script>
+    <script src="sds-data-3.js?v=20260608-home-sdsparse"></script>
+    <script src="sds-data-4.js?v=20260608-home-sdsparse"></script>
+    <script src="sds-data-5.js?v=20260608-home-sdsparse"></script>
+    <script src="sds-data-6.js?v=20260608-home-sdsparse"></script>
+    <script src="app.js?v=20260608-home-sdsparse"></script>
+    <script src="enhancements.js?v=20260608-home-sdsparse"></script>
+    <script src="autofill-client.js?v=20260608-home-sdsparse"></script>
     <style id="final-hero-logo-layout">
+      #homeButton {
+        position: fixed !important;
+        top: 14px !important;
+        left: 14px !important;
+        z-index: 9999 !important;
+        min-height: 42px !important;
+        padding: 0 18px !important;
+        border: 1px solid #ffffff !important;
+        border-radius: 999px !important;
+        background: #ffffff !important;
+        color: #05070b !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 900 !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,.35) !important;
+        cursor: pointer !important;
+      }
+
+      #homeButton[hidden],
+      body.is-home-page #homeButton,
+      .home-button-fixed {
+        display: none !important;
+      }
+
+      body:not(.is-home-page) .emergency-strip {
+        padding-top: 58px !important;
+      }
+
       .hero-inner {
         display: block !important;
         position: relative !important;
@@ -94,6 +123,18 @@
       }
 
       @media (max-width: 900px) {
+        #homeButton {
+          top: 10px !important;
+          left: 10px !important;
+          min-height: 38px !important;
+          padding: 0 14px !important;
+          font-size: 14px !important;
+        }
+
+        body:not(.is-home-page) .emergency-strip {
+          padding-top: 54px !important;
+        }
+
         .hero-inner {
           min-height: auto !important;
           padding: 28px 16px !important;
@@ -142,6 +183,8 @@
           line-height: 1.35 !important;
         }
 
+        #homeButton,
+        .home-button-fixed,
         .topbar,
         .emergency-strip,
         .hero,
@@ -298,11 +341,32 @@
       (function () {
         var SOJO_LOGO_URL = 'https://techcouncilventures.com/wp-content/uploads/2023/10/Sojo-Logo.png';
         var fixing = false;
+        var homeButton = document.getElementById('homeButton');
+
+        function routeName() {
+          return location.hash.replace(/^#\/?/, '').split('/')[0];
+        }
+
+        function syncHomeButton() {
+          var isHome = !routeName();
+          document.body.classList.toggle('is-home-page', isHome);
+          document.querySelectorAll('.home-button-fixed').forEach(function (node) { node.remove(); });
+          if (homeButton) homeButton.hidden = isHome;
+        }
+
+        if (homeButton) {
+          homeButton.addEventListener('click', function () {
+            location.hash = '#/';
+            syncHomeButton();
+            setTimeout(function () { window.scrollTo(0, 0); }, 0);
+          });
+        }
 
         function fixHeroLogo() {
           if (fixing) return;
           fixing = true;
           try {
+            syncHomeButton();
             var hero = document.querySelector('.hero-inner');
             if (!hero) return;
 
@@ -325,7 +389,9 @@
           }
         }
 
+        syncHomeButton();
         fixHeroLogo();
+        window.addEventListener('hashchange', syncHomeButton);
         new MutationObserver(function () {
           window.requestAnimationFrame(fixHeroLogo);
         }).observe(document.getElementById('app') || document.body, { childList: true, subtree: true });
