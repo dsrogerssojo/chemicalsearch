@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "Internal chemical safety lookup website with SDS references and add-chemical review requests.",
+  "type": "module",
   "scripts": {
     "start": "node tools/server.mjs",
     "dev": "node tools/server.mjs",
-    "check": "node --check app.js && node --check tools/server.mjs"
+    "check": "node --check app.js && node --check tools/server.mjs && node --check netlify/functions/autofill.mjs"
+  },
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
   },
   "keywords": [
     "chemical-safety",
