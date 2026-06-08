@@ -6,20 +6,24 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260608-home-sdsparse" />
+    <link rel="stylesheet" href="styles.css?v=20260608-workflow-start" />
   </head>
   <body>
     <button id="homeButton" type="button" hidden>← Home</button>
     <div id="app"></div>
-    <script src="sds-data-1.js?v=20260608-home-sdsparse"></script>
-    <script src="sds-data-2.js?v=20260608-home-sdsparse"></script>
-    <script src="sds-data-3.js?v=20260608-home-sdsparse"></script>
-    <script src="sds-data-4.js?v=20260608-home-sdsparse"></script>
-    <script src="sds-data-5.js?v=20260608-home-sdsparse"></script>
-    <script src="sds-data-6.js?v=20260608-home-sdsparse"></script>
-    <script src="app.js?v=20260608-home-sdsparse"></script>
-    <script src="enhancements.js?v=20260608-home-sdsparse"></script>
-    <script src="autofill-client.js?v=20260608-home-sdsparse"></script>
+    <script>
+      window.CHEMICALSEARCH_API_URL = localStorage.getItem("chemicalsearch.apiBaseUrl") || "";
+    </script>
+    <script src="sds-data-1.js?v=20260608-workflow-start"></script>
+    <script src="sds-data-2.js?v=20260608-workflow-start"></script>
+    <script src="sds-data-3.js?v=20260608-workflow-start"></script>
+    <script src="sds-data-4.js?v=20260608-workflow-start"></script>
+    <script src="sds-data-5.js?v=20260608-workflow-start"></script>
+    <script src="sds-data-6.js?v=20260608-workflow-start"></script>
+    <script src="sds-approved.js?v=20260608-workflow-start"></script>
+    <script src="app.js?v=20260608-workflow-start"></script>
+    <script src="enhancements.js?v=20260608-workflow-start"></script>
+    <script src="autofill-client.js?v=20260608-workflow-start"></script>
     <style id="final-hero-logo-layout">
       #homeButton {
         position: fixed !important;
