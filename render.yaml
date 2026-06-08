@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: chemicalsearch-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+
+  - type: static
+    name: chemicalsearch-site
+    rootDir: chemicalsearch-site
+    buildCommand: ""
+    staticPublishPath: .
+    envVars:
+      - key: NODE_VERSION
+        value: 20
