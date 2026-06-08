@@ -28,7 +28,7 @@
         linear-gradient(180deg, #05070b 0%, #070a10 100%) !important;
     }
 
-    .topbar { background: rgba(5, 7, 11, .94) !important; border-bottom: 1px solid var(--sojo-line) !important; backdrop-filter: blur(14px) !important; }
+    .topbar { display: none !important; }
     .brand-mark { background: #ffffff !important; color: #05070b !important; border-radius: 10px !important; }
     .brand-title { color: var(--sojo-text) !important; letter-spacing: -.02em !important; }
 
