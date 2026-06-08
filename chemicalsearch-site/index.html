@@ -6,18 +6,19 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260605-final-logo-fix" />
+    <link rel="stylesheet" href="styles.css?v=20260608-prod-autofill" />
   </head>
   <body>
     <div id="app"></div>
-    <script src="sds-data-1.js?v=20260605-final-logo-fix"></script>
-    <script src="sds-data-2.js?v=20260605-final-logo-fix"></script>
-    <script src="sds-data-3.js?v=20260605-final-logo-fix"></script>
-    <script src="sds-data-4.js?v=20260605-final-logo-fix"></script>
-    <script src="sds-data-5.js?v=20260605-final-logo-fix"></script>
-    <script src="sds-data-6.js?v=20260605-final-logo-fix"></script>
-    <script src="app.js?v=20260605-final-logo-fix"></script>
-    <script src="enhancements.js?v=20260605-final-logo-fix"></script>
+    <script src="sds-data-1.js?v=20260608-prod-autofill"></script>
+    <script src="sds-data-2.js?v=20260608-prod-autofill"></script>
+    <script src="sds-data-3.js?v=20260608-prod-autofill"></script>
+    <script src="sds-data-4.js?v=20260608-prod-autofill"></script>
+    <script src="sds-data-5.js?v=20260608-prod-autofill"></script>
+    <script src="sds-data-6.js?v=20260608-prod-autofill"></script>
+    <script src="app.js?v=20260608-prod-autofill"></script>
+    <script src="enhancements.js?v=20260608-prod-autofill"></script>
+    <script src="autofill-client.js?v=20260608-prod-autofill"></script>
     <style id="final-hero-logo-layout">
       .hero-inner {
         display: block !important;
@@ -67,6 +68,29 @@
 
       .hero .lead {
         max-width: 760px !important;
+      }
+
+      .autofill-status.is-success {
+        border-color: #a7e6cc !important;
+        background: #e9fbf4 !important;
+        color: #064e3b !important;
+      }
+
+      .autofill-status.is-loading {
+        border-color: #b8d7f2 !important;
+        background: #eaf4ff !important;
+        color: #0d4d7d !important;
+      }
+
+      .autofill-status.is-error {
+        border-color: #f2b8b0 !important;
+        background: #fff0ed !important;
+        color: #991b1b !important;
+      }
+
+      .autofill-status a {
+        color: inherit !important;
+        font-weight: 900 !important;
       }
 
       @media (max-width: 900px) {
