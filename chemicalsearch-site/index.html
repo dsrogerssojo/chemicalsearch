@@ -6,19 +6,19 @@
     <meta name="description" content="Internal SDS lookup library for searching chemical products, basic details, composition notes, and SDS references." />
     <meta name="theme-color" content="#05070b" />
     <title>Chemical Safety Lookup</title>
-    <link rel="stylesheet" href="styles.css?v=20260608-prod-autofill" />
+    <link rel="stylesheet" href="styles.css?v=20260608-printfix" />
   </head>
   <body>
     <div id="app"></div>
-    <script src="sds-data-1.js?v=20260608-prod-autofill"></script>
-    <script src="sds-data-2.js?v=20260608-prod-autofill"></script>
-    <script src="sds-data-3.js?v=20260608-prod-autofill"></script>
-    <script src="sds-data-4.js?v=20260608-prod-autofill"></script>
-    <script src="sds-data-5.js?v=20260608-prod-autofill"></script>
-    <script src="sds-data-6.js?v=20260608-prod-autofill"></script>
-    <script src="app.js?v=20260608-prod-autofill"></script>
-    <script src="enhancements.js?v=20260608-prod-autofill"></script>
-    <script src="autofill-client.js?v=20260608-prod-autofill"></script>
+    <script src="sds-data-1.js?v=20260608-printfix"></script>
+    <script src="sds-data-2.js?v=20260608-printfix"></script>
+    <script src="sds-data-3.js?v=20260608-printfix"></script>
+    <script src="sds-data-4.js?v=20260608-printfix"></script>
+    <script src="sds-data-5.js?v=20260608-printfix"></script>
+    <script src="sds-data-6.js?v=20260608-printfix"></script>
+    <script src="app.js?v=20260608-printfix"></script>
+    <script src="enhancements.js?v=20260608-printfix"></script>
+    <script src="autofill-client.js?v=20260608-printfix"></script>
     <style id="final-hero-logo-layout">
       .hero-inner {
         display: block !important;
@@ -107,6 +107,190 @@
           min-width: 0 !important;
           justify-content: flex-start !important;
           margin-top: 22px !important;
+        }
+      }
+
+      @media print {
+        @page {
+          margin: 0.55in;
+          size: auto;
+        }
+
+        * {
+          box-shadow: none !important;
+          text-shadow: none !important;
+          animation: none !important;
+          transition: none !important;
+        }
+
+        html,
+        body,
+        .shell,
+        .main,
+        .panel,
+        .detail-header,
+        .incident-card,
+        .sds-section-grid .panel,
+        .hazard-overview .panel {
+          background: #ffffff !important;
+          color: #000000 !important;
+        }
+
+        body {
+          font-family: Arial, Helvetica, sans-serif !important;
+          font-size: 10.5pt !important;
+          line-height: 1.35 !important;
+        }
+
+        .topbar,
+        .emergency-strip,
+        .hero,
+        .footer,
+        .search-panel,
+        .filter-toolbar,
+        .results-panel > .section-heading,
+        .cards,
+        .incident-grid,
+        .detail-actions,
+        .button,
+        .nav-actions,
+        .hero-logo-panel,
+        .autofill-status,
+        .form-actions {
+          display: none !important;
+        }
+
+        .main {
+          display: block !important;
+          width: 100% !important;
+          max-width: none !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        .panel,
+        .detail-header,
+        .incident-card,
+        .sds-section-grid .panel,
+        .hazard-overview .panel {
+          border: 1px solid #bdbdbd !important;
+          border-radius: 0 !important;
+          padding: 10px !important;
+          margin: 0 0 10px !important;
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
+        }
+
+        .detail-header {
+          border: 0 !important;
+          border-bottom: 2px solid #000000 !important;
+          padding: 0 0 10px !important;
+          margin-bottom: 12px !important;
+        }
+
+        .eyebrow {
+          background: transparent !important;
+          color: #000000 !important;
+          padding: 0 !important;
+          letter-spacing: 0.04em !important;
+          font-size: 8pt !important;
+        }
+
+        .detail-title,
+        h1 {
+          color: #000000 !important;
+          font-size: 20pt !important;
+          line-height: 1.1 !important;
+          margin: 4px 0 6px !important;
+        }
+
+        h2 {
+          color: #000000 !important;
+          font-size: 12pt !important;
+          margin: 0 0 6px !important;
+        }
+
+        p,
+        .meta,
+        .detail-meta,
+        .summary-list dd,
+        .panel p {
+          color: #000000 !important;
+          font-size: 10pt !important;
+        }
+
+        .hazard-overview {
+          display: grid !important;
+          grid-template-columns: 150px 1fr !important;
+          gap: 10px !important;
+          margin-bottom: 10px !important;
+        }
+
+        .nfpa-card {
+          padding: 8px !important;
+        }
+
+        .nfpa-diamond {
+          width: 92px !important;
+          height: 92px !important;
+          margin: 8px auto !important;
+        }
+
+        .nfpa-cell {
+          width: 45px !important;
+          height: 45px !important;
+          font-size: 10pt !important;
+          border: 1px solid #000000 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        .nfpa-health { left: 0 !important; top: 23px !important; }
+        .nfpa-fire { left: 23px !important; top: 0 !important; }
+        .nfpa-reactivity { right: 0 !important; top: 23px !important; }
+        .nfpa-special { left: 23px !important; bottom: 0 !important; }
+
+        .card-badges {
+          margin-top: 6px !important;
+        }
+
+        .risk-pill,
+        .ghs-pill {
+          border: 1px solid #777777 !important;
+          background: #ffffff !important;
+          color: #000000 !important;
+          padding: 2px 6px !important;
+          font-size: 8pt !important;
+        }
+
+        .sds-section-grid {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 10px !important;
+        }
+
+        .sds-section-grid .panel:nth-child(6),
+        .sds-section-grid .panel:has(a[href]) {
+          display: none !important;
+        }
+
+        .summary-list div {
+          display: grid !important;
+          grid-template-columns: 110px 1fr !important;
+          gap: 8px !important;
+          padding: 4px 0 !important;
+          border-bottom: 1px solid #dddddd !important;
+        }
+
+        .summary-list dt,
+        .summary-list dd {
+          color: #000000 !important;
+          margin: 0 !important;
+          font-size: 9.5pt !important;
+        }
+
+        a[href]::after {
+          content: "" !important;
         }
       }
     </style>
