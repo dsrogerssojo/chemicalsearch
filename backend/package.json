@@ -14,4 +14,6 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "pdf-parse": "^1.1.1",
-    "playwright": "^
+    "playwright": "^1.49.1"
+  }
+}
