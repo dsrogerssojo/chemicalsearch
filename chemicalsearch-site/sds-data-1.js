@@ -14,7 +14,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "0/0/0/B",
     "sds_url": "https://www.uline.com/PDF/SS-19455.pdf",
     "sds_reference": "https://www.uline.com/PDF/SS-19455.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-all-purpose-cleaner-refill",
@@ -30,8 +30,8 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "composition": "2-(2-butoxyethoxy)ethanol",
     "hfrp_info": "0/0/0/B",
     "sds_url": "https://img.uline.com/is/content/uline/SS-19456pdf",
-    "sds_reference": "SS-19456pdf",
-    "updated_at": "2026-06-05"
+    "sds_reference": "https://img.uline.com/is/content/uline/SS-19456pdf",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-air-freshener-cool-linen",
@@ -46,9 +46,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "N/A",
     "hfrp_info": "0/1/0/0",
-    "sds_url": "https://img.uline.com/is/content/uline/SS-17147pdf",
-    "sds_reference": "https://img.uline.com/is/content/uline/SS-17147pdf",
-    "updated_at": "2026-06-05"
+    "sds_url": "https://www.uline.com/PDF/SS-17147.pdf",
+    "sds_reference": "https://www.uline.com/PDF/SS-17147.pdf",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "clorox-germicidal-bleach-concentrated",
@@ -65,7 +65,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "3/0/0/X",
     "sds_url": "https://www.thecloroxcompany.com/wp-content/uploads/2020/06/CloroxPro%C2%AE-Clorox%C2%AE-Germicidal-Bleach_Multilingual2.pdf",
     "sds_reference": "https://www.thecloroxcompany.com/wp-content/uploads/2020/06/CloroxPro%C2%AE-Clorox%C2%AE-Germicidal-Bleach_Multilingual2.pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-toilet-bowl-cleaner",
@@ -82,7 +82,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "3/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-24321pdf",
     "sds_reference": "https://img.uline.com/is/content/uline/SS-24321pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-glass-cleaner",
@@ -99,7 +99,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "0/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-19452pdf",
     "sds_reference": "https://img.uline.com/is/content/uline/SS-19452pdf",
-    "updated_at": "2026-06-05"
+    "updated_at": "2026-06-08"
   },
   {
     "id": "uline-multi-purpose-cleaner-lavender",
@@ -115,8 +115,8 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "composition": "Surfactant Blend",
     "hfrp_info": "2/0/0/0",
     "sds_url": "https://img.uline.com/is/content/uline/SS-19454pdf",
-    "sds_reference": "SS-19454pdf",
-    "updated_at": "2026-06-05"
+    "sds_reference": "https://img.uline.com/is/content/uline/SS-19454pdf",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "30-secondsmold-mildew-remover",
@@ -131,9 +131,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "Sodium hypochlorite",
     "hfrp_info": "3/0/0/0",
-    "sds_url": "https://30secondscleaners.com/mwdownloads/download/link/id/2308?srsltid=AfmBOopMqNLp6v6WuhaT0C1VLW281Lznlv2oNFuV4zXYCPq4oPifptqW",
-    "sds_reference": "https://30secondscleaners.com/mwdownloads/download/link/id/2308?srsltid=AfmBOopMqNLp6v6WuhaT0C1VLW281Lznlv2oNFuV4zXYCPq4oPifptqW",
-    "updated_at": "2026-06-05"
+    "sds_url": "https://30secondscleaners.com/mwdownloads/download/link/id/2308",
+    "sds_reference": "https://30secondscleaners.com/mwdownloads/download/link/id/2308",
+    "updated_at": "2026-06-08"
   },
   {
     "id": "orange-sol-multi-use-citrus-solvent",
@@ -149,7 +149,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "composition": "N/A",
     "hfrp_info": "0/2/0/0",
     "sds_url": "",
-    "sds_reference": "MS-CC-DMU.pdf",
-    "updated_at": "2026-06-05"
+    "sds_reference": "No verified public SDS link found; original reference was MS-CC-DMU.pdf",
+    "updated_at": "2026-06-08"
   }
 ]);
