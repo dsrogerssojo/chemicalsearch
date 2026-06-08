@@ -63,21 +63,12 @@ async function lookupSubmittedSds(url) {
   const extractedCount = fieldCount(fields);
   notes.push(extractedCount ? `Extracted ${extractedCount} field(s) from SDS text/metadata.` : 'Read the SDS link, but could not extract structured fields from its text, metadata, or embedded links. It may be scanned, blocked, or rendered by JavaScript only.');
   notes.push('Verify all extracted values against the visible SDS before submitting.');
-
-  return {
-    confidence: isTrustedSdsUrl(url) ? Math.min(0.97, 0.72 + extractedCount * 0.05) : Math.min(0.86, 0.55 + extractedCount * 0.06),
-    source: 'Submitted SDS document',
-    source_type: 'sds_document_parse',
-    fields,
-    notes,
-    links
-  };
+  return { confidence: isTrustedSdsUrl(url) ? Math.min(0.97, 0.72 + extractedCount * 0.05) : Math.min(0.86, 0.55 + extractedCount * 0.06), source: 'Submitted SDS document', source_type: 'sds_document_parse', fields, notes, links };
 }
 
 function findCas(synonyms = []) { return synonyms.map(clean).find((item) => CAS_SINGLE_PATTERN.test(item)) || ''; }
-
 async function lookupPubChem(term) {
-  if (/^https?:\/\//i.test(term)) return null;
+  if (!term || /^https?:\/\//i.test(term)) return null;
   const encoded = encodeURIComponent(term);
   const cidData = await fetchJson(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encoded}/cids/JSON`);
   const cid = cidData?.IdentifierList?.CID?.[0];
@@ -87,14 +78,7 @@ async function lookupPubChem(term) {
     fetchJson(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/synonyms/JSON`).catch(() => null)
   ]);
   const properties = propertiesData?.PropertyTable?.Properties?.[0] || {};
-  return {
-    confidence: CAS_SINGLE_PATTERN.test(term) ? 0.82 : 0.7,
-    source: 'PubChem',
-    source_type: 'chemical_identity',
-    fields: { chemical_name: firstUseful(properties.Title, term), cas_number: findCas(synonymsData?.InformationList?.Information?.[0]?.Synonym || []), composition: properties.MolecularFormula || '' },
-    notes: [`PubChem CID ${cid}`, `PubChem URL: https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`, properties.IUPACName ? `IUPAC name: ${properties.IUPACName}` : '', properties.MolecularWeight ? `Molecular weight: ${properties.MolecularWeight}` : '', 'Chemical identity only. Product-specific SDS, supplier, and product code require official SDS verification.'].filter(Boolean),
-    links: [{ label: 'PubChem', url: `https://pubchem.ncbi.nlm.nih.gov/compound/${cid}` }]
-  };
+  return { confidence: CAS_SINGLE_PATTERN.test(term) ? 0.82 : 0.7, source: 'PubChem', source_type: 'chemical_identity', fields: { chemical_name: firstUseful(properties.Title, term), cas_number: findCas(synonymsData?.InformationList?.Information?.[0]?.Synonym || []), composition: properties.MolecularFormula || '' }, notes: [`PubChem CID ${cid}`, `PubChem URL: https://pubchem.ncbi.nlm.nih.gov/compound/${cid}`, properties.IUPACName ? `IUPAC name: ${properties.IUPACName}` : '', properties.MolecularWeight ? `Molecular weight: ${properties.MolecularWeight}` : '', 'Chemical identity only. Product-specific SDS, supplier, and product code require official SDS verification.'].filter(Boolean), links: [{ label: 'PubChem', url: `https://pubchem.ncbi.nlm.nih.gov/compound/${cid}` }] };
 }
 
 function buildSearchQuery(term, fields = {}) { return [firstUseful(fields.chemical_name, fields.product_name, term), fields.product_code, fields.manufacturer, 'SDS PDF safety data sheet'].filter(Boolean).join(' '); }
@@ -139,7 +123,7 @@ async function commitApprovedToGithub(record) { const token = process.env.GITHUB
 
 app.get('/health', (req, res) => res.json({ ok: true, service: 'chemicalsearch-backend' }));
 app.post('/api/autofill', async (req, res) => { try { const fields = req.body.fields || req.body; const term = buildLookupTerm(fields); if (term.length < 2) return res.status(400).json({ error: 'Enter at least one product, CAS, supplier, composition, or SDS field.' }); const candidates = []; const tasks = []; if (clean(fields.sds_url)) tasks.push(lookupSubmittedSds(fields.sds_url).then((r) => r && candidates.push(r)).catch((e) => candidates.push({ confidence: 0.1, source: 'Submitted SDS document', source_type: 'sds_document_parse_error', fields: { sds_url: fields.sds_url }, notes: [`Could not read SDS link: ${e.message}`], links: [{ label: 'Submitted SDS', url: fields.sds_url }] }))); if (!/^https?:\/\//i.test(term)) tasks.push(lookupPubChem(term).then((r) => r && candidates.push(r)).catch(() => null)); if (!clean(fields.sds_url)) tasks.push(lookupSdsSearch(term, fields).then((r) => r && candidates.push(r)).catch(() => null)); await Promise.allSettled(tasks); res.json({ query: term, ...mergeCandidates(candidates), warning: 'Autofill is a review aid only. Always verify against the current official SDS before adding or using safety data.' }); } catch (error) { res.status(500).json({ error: error.message || 'Autofill failed' }); } });
-app.post('/api/submit-request', async (req, res) => { try { const request = normalizeRequest(req.body); if (!request.chemical_name && !request.sds_url) return res.status(400).json({ error: 'Chemical/product name or SDS link is required.' }); const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL; if (!webhookUrl) return res.status(202).json({ ok: true, queued: false, request, message: 'Request received locally, but POWER_AUTOMATE_WEBHOOK_URL is not configured yet.' }); const flowRes = await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...request, secret: process.env.POWER_AUTOMATE_SHARED_SECRET || '' }) }); if (!flowRes.ok) throw new Error(`Power Automate webhook failed: ${flowRes.status} ${await flowRes.text()}`); res.json({ ok: true, queued: true, request_id: request.request_id, message: 'Request sent to Teams for supervisor review.' }); } catch (error) { res.status(500).json({ error: error.message || 'Submit request failed' }); } });
+app.post('/api/submit-request', async (req, res) => { try { const request = normalizeRequest(req.body); const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL; if (!webhookUrl) return res.status(202).json({ ok: true, queued: false, request, message: 'Request received locally, but POWER_AUTOMATE_WEBHOOK_URL is not configured yet.' }); const flowRes = await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...request, secret: process.env.POWER_AUTOMATE_SHARED_SECRET || '' }) }); if (!flowRes.ok) throw new Error(`Power Automate webhook failed: ${flowRes.status} ${await flowRes.text()}`); res.json({ ok: true, queued: true, request_id: request.request_id, message: 'Request sent to Teams for supervisor review.' }); } catch (error) { res.status(500).json({ error: error.message || 'Submit request failed' }); } });
 app.post('/api/review-callback', async (req, res) => { try { const expectedSecret = process.env.REVIEW_CALLBACK_SECRET || ''; const providedSecret = req.get('x-review-secret') || req.body.secret || ''; if (expectedSecret && providedSecret !== expectedSecret) return res.status(401).json({ error: 'Unauthorized review callback.' }); const decision = clean(req.body.decision).toLowerCase(); if (!['approved','approve','denied','deny','rejected','reject'].includes(decision)) return res.status(400).json({ error: 'Decision must be approved or denied.' }); if (['denied','deny','rejected','reject'].includes(decision)) return res.json({ ok: true, decision: 'denied', request_id: req.body.request_id, message: 'Denial received. No chemical record was added.' }); const record = normalizeApprovedChemical(req.body); if (!record.name || !record.sds_url) return res.status(400).json({ error: 'Approved chemical requires at least name and SDS URL.' }); await appendLocalApproved(record); const github = await commitApprovedToGithub(record); res.json({ ok: true, decision: 'approved', record, github }); } catch (error) { res.status(500).json({ error: error.message || 'Review callback failed' }); } });
 app.get('/api/approved-chemicals', async (req, res) => { try { res.json(await readLocalApproved()); } catch (error) { res.status(500).json({ error: error.message || 'Could not read approved chemicals' }); } });
 app.listen(PORT, () => console.log(`ChemicalSearch backend running at http://localhost:${PORT}`));
