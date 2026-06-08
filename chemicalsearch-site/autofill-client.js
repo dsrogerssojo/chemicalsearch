@@ -1,9 +1,13 @@
 (() => {
-  const AUTOFILL_ENDPOINT = "/api/autofill";
+  const API_BASE_URL = (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || "").replace(/\/$/, "");
   const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
   let timer;
   let lastPayload = "";
   let latestController;
+
+  function apiUrl(path) {
+    return `${API_BASE_URL}${path}`;
+  }
 
   function clean(value) {
     return String(value || "").trim();
@@ -44,6 +48,7 @@
 
   function formFields(form) {
     return {
+      request_id: form.dataset.requestId || makeId(),
       chemical_name: clean(form.elements.chemical_name?.value),
       product_code: clean(form.elements.product_code?.value),
       cas_number: clean(form.elements.cas_number?.value),
@@ -57,12 +62,11 @@
   }
 
   function lookupPayload(form) {
-    const fields = formFields(form);
     return {
-      fields,
+      fields: formFields(form),
       context: {
         source: "missing-chemical-request-form",
-        version: "production-autofill-v1"
+        version: "platform-neutral-autofill-v1"
       }
     };
   }
@@ -138,7 +142,7 @@
     statusMessage(status, "Looking up external chemical and SDS sources...", "is-loading");
 
     try {
-      const response = await fetch(AUTOFILL_ENDPOINT, {
+      const response = await fetch(apiUrl("/api/autofill"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -151,10 +155,28 @@
       if (error.name === "AbortError") return;
       statusMessage(
         status,
-        `<strong>External autofill is not available from this deployment.</strong><br><span>Deploy this repo on Netlify so /api/autofill can run, then add a search API key for product-specific SDS lookup. Chemical identity lookup uses PubChem through the backend.</span>`,
+        `<strong>External autofill is not available.</strong><br><span>Run the platform-neutral backend locally at <code>http://localhost:3001</code>, or set <code>window.CHEMICALSEARCH_API_URL</code> / <code>localStorage.chemicalsearch.apiBaseUrl</code> to your backend URL.</span>`,
         "is-error"
       );
     }
+  }
+
+  async function submitForReview(form, status) {
+    const request = formFields(form);
+    request.created_at = new Date().toISOString();
+    request.source = "platform-neutral-review-request";
+    request.status = "pending_review";
+    saveRequest(request);
+
+    statusMessage(status, "Sending request to supervisor review workflow...", "is-loading");
+    const response = await fetch(apiUrl("/api/submit-request"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request)
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Could not submit request for review");
+    return { request, result };
   }
 
   function renderProductionRequestForm(prefill = "") {
@@ -165,7 +187,7 @@
           <div>
             <span class="eyebrow">Request review</span>
             <h1>Add or Update Chemical</h1>
-            <p class="lead">Start with any field you know. The system checks external chemical identity and SDS sources, fills what it can, and keeps the request marked for review.</p>
+            <p class="lead">Start with any field you know. The system checks external chemical identity and SDS sources, fills what it can, and sends the final request to supervisor review.</p>
           </div>
         </div>
         <div id="autofillStatus" class="banner autofill-status">Start with any product name, code, CAS number, supplier, composition, or SDS link.</div>
@@ -179,7 +201,7 @@
           <label class="label">Exposure route <select class="field" name="exposure_route"><option value="">Not incident-related / unknown</option><option>Skin</option><option>Eyes</option><option>Inhalation</option><option>Ingestion</option></select></label>
           <label class="label">Your email <input class="field" name="requested_by" type="email"></label>
           <label class="label label-full">Notes <textarea class="textarea" name="notes"></textarea></label>
-          <div class="form-actions label-full"><button class="button primary" type="submit">Create review email</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
+          <div class="form-actions label-full"><button class="button primary" type="submit">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
         </form>
       </section>
     `);
@@ -188,6 +210,7 @@
 
     const form = document.getElementById("addChemicalForm");
     const status = document.getElementById("autofillStatus");
+    form.dataset.requestId = makeId();
 
     form.querySelectorAll("input, textarea, select").forEach((field) => {
       field.addEventListener("input", () => {
@@ -199,19 +222,26 @@
 
     if (prefill) setTimeout(() => runAutofill(form, status), 350);
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const request = formFields(form);
-      request.id = makeId();
-      request.created_at = new Date().toISOString();
-      request.source = "production-autofill-review-request";
-      request.status = "pending_review";
-      saveRequest(request);
-      location.hash = `#/request/${request.id}`;
+      try {
+        const { request, result } = await submitForReview(form, status);
+        statusMessage(
+          status,
+          `<strong>Request sent for supervisor review.</strong><br><span>${escapeHtml(result.message || "It will appear in ChemicalSearch after approval.")}</span>`,
+          "is-success"
+        );
+        setTimeout(() => {
+          location.hash = `#/request/${request.request_id}`;
+        }, 700);
+      } catch (error) {
+        statusMessage(status, `<strong>Could not send request.</strong><br><span>${escapeHtml(error.message)}</span>`, "is-error");
+      }
     });
   }
 
   window.renderAddChemical = renderProductionRequestForm;
+  window.CHEMICALSEARCH_API_BASE_URL = API_BASE_URL;
 
   window.addEventListener("hashchange", () => {
     const [page] = location.hash.replace(/^#\/?/, "").split("/");
