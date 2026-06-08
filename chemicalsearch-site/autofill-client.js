@@ -87,14 +87,14 @@
     if (changed.length) {
       setStatus(status, `<strong>Autofill updated ${escapeHtml(changed.join(", "))}.</strong> ${escapeHtml(confidence)}<br><span>Review everything against the SDS before submitting.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "is-success");
     } else {
-      setStatus(status, `<strong>Autofill checked, but did not find fillable fields.</strong><br><span>The SDS may be scanned, blocked, or formatted in a way the parser cannot read yet. Add the product name/manufacturer manually and submit for review.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "");
+      setStatus(status, `<strong>Autofill checked, but did not find fillable fields.</strong><br><span>The SDS may be scanned, blocked, or formatted in a way the parser cannot read yet. You can still submit the request for supervisor review.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "");
     }
   }
 
   async function runAutofill(form, status, options = {}) {
     const fields = formFields(form);
     if (!enoughForLookup(fields) && !options.force) {
-      setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now.");
+      setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now. You can still submit without autofill.");
       return;
     }
     const key = lookupKey(fields);
@@ -110,7 +110,7 @@
       applyAutofill(form, status, result);
     } catch (error) {
       if (error.name === "AbortError") return;
-      setStatus(status, `<strong>Autofill could not complete.</strong><br><span>${escapeHtml(error.message)} Try a more specific product name or paste a direct SDS PDF link.</span>`, "is-error");
+      setStatus(status, `<strong>Autofill could not complete.</strong><br><span>${escapeHtml(error.message)} You can still submit the request for supervisor review.</span>`, "is-error");
     }
   }
 
@@ -128,10 +128,10 @@
     if (typeof layout !== "function") return;
     layout(`
       <section class="panel">
-        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter what you know. SDS links check immediately; typed names check after you pause.</p></div></div>
-        <div id="autofillStatus" class="banner autofill-status">Type a product name, CAS number, manufacturer, or paste a direct SDS link.</div>
-        <form id="addChemicalForm" class="form-grid">
-          <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" required autocomplete="off"></label>
+        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter whatever you know. No fields are required to send a supervisor request.</p></div></div>
+        <div id="autofillStatus" class="banner autofill-status">Type a product name, CAS number, manufacturer, or paste a direct SDS link. You can also submit with limited information.</div>
+        <form id="addChemicalForm" class="form-grid" novalidate>
+          <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" autocomplete="off"></label>
           <label class="label">Product code <input class="field" name="product_code" autocomplete="off"></label>
           <label class="label">CAS number <input class="field" name="cas_number" autocomplete="off"></label>
           <label class="label">Manufacturer / supplier <input class="field" name="manufacturer" autocomplete="off"></label>
@@ -158,7 +158,7 @@
           timer = setTimeout(() => runAutofill(form, status), 100);
           return;
         }
-        if (!enoughForLookup(fields)) { setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now."); return; }
+        if (!enoughForLookup(fields)) { setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now. You can still submit without autofill."); return; }
         setStatus(status, "Waiting for you to finish typing before checking autofill...");
         timer = setTimeout(() => runAutofill(form, status), TYPE_DELAY);
       });
