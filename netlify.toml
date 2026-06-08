@@ -1,7 +1,6 @@
 [build]
-  base = "chemicalsearch-site"
-  publish = "."
-  functions = "netlify/functions"
+  publish = "chemicalsearch-site"
+  functions = "chemicalsearch-site/netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
