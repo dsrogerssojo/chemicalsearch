@@ -2,8 +2,8 @@
   const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
   const API_BASE_URL = (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || DEFAULT_API_BASE_URL).replace(/\/$/, "");
   const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
-  const MIN_TEXT = 4;
-  const TYPE_DELAY = 1400;
+  const MIN_TEXT = 3;
+  const TYPE_DELAY = 900;
   let timer;
   let lastLookupKey = "";
   let controller;
@@ -43,21 +43,14 @@
 
   function enoughForLookup(fields) {
     if (isUrl(fields.sds_url) || isCas(fields.cas_number)) return true;
-    if (usefulText(fields.chemical_name) && (usefulText(fields.manufacturer) || usefulText(fields.product_code))) return true;
-    if (clean(fields.chemical_name).length >= 6) return true;
-    if (clean(fields.composition).length >= 6) return true;
+    if (usefulText(fields.chemical_name)) return true;
+    if (usefulText(fields.composition)) return true;
+    if (usefulText(fields.product_code) && usefulText(fields.manufacturer)) return true;
     return false;
   }
 
   function lookupKey(fields) {
-    return JSON.stringify({
-      chemical_name: fields.chemical_name,
-      product_code: fields.product_code,
-      cas_number: fields.cas_number,
-      manufacturer: fields.manufacturer,
-      sds_url: fields.sds_url,
-      composition: fields.composition
-    });
+    return JSON.stringify({ chemical_name: fields.chemical_name, product_code: fields.product_code, cas_number: fields.cas_number, manufacturer: fields.manufacturer, sds_url: fields.sds_url, composition: fields.composition });
   }
 
   function setIfEmpty(field, value) {
@@ -88,43 +81,36 @@
 
     const changed = Array.from(form.elements).filter((el) => el.name && clean(el.value) && filledBefore[el.name] !== clean(el.value)).map((el) => el.name.replace(/_/g, " "));
     const links = (result.links || []).slice(0, 3).map((link) => link?.url ? `<a href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer">${escapeHtml(link.label || "source")}</a>` : "").filter(Boolean).join(" · ");
+    const notes = (result.notes || []).slice(0, 3).map((note) => `<li>${escapeHtml(note)}</li>`).join("");
     const confidence = result.confidence ? `${Math.round(result.confidence * 100)}% confidence` : "review needed";
 
     if (changed.length) {
-      setStatus(status, `<strong>Autofill updated ${escapeHtml(changed.join(", "))}.</strong> ${escapeHtml(confidence)}<br><span>Review everything against the SDS before submitting.</span>${links ? `<br>${links}` : ""}`, "is-success");
+      setStatus(status, `<strong>Autofill updated ${escapeHtml(changed.join(", "))}.</strong> ${escapeHtml(confidence)}<br><span>Review everything against the SDS before submitting.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "is-success");
     } else {
-      setStatus(status, `<strong>Autofill checked external sources.</strong><br><span>No empty fields could be confidently filled from the available data. You can keep typing or paste a direct SDS link.</span>${links ? `<br>${links}` : ""}`, "");
+      setStatus(status, `<strong>Autofill checked, but did not find fillable fields.</strong><br><span>The SDS may be scanned, blocked, or formatted in a way the parser cannot read yet. Add the product name/manufacturer manually and submit for review.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "");
     }
   }
 
   async function runAutofill(form, status, options = {}) {
     const fields = formFields(form);
     if (!enoughForLookup(fields) && !options.force) {
-      setStatus(status, "Keep typing, or paste a direct SDS link. Autofill will check once there is enough information.");
+      setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now.");
       return;
     }
-
     const key = lookupKey(fields);
     if (key === lastLookupKey && !options.force) return;
     lastLookupKey = key;
-
     controller?.abort();
     controller = new AbortController();
     setStatus(status, "Checking SDS and chemical sources...", "is-loading");
-
     try {
-      const response = await fetch(apiUrl("/api/autofill"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields, context: { source: "missing-chemical-request-form" } }),
-        signal: controller.signal
-      });
+      const response = await fetch(apiUrl("/api/autofill"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields, context: { source: "missing-chemical-request-form" } }), signal: controller.signal });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Autofill failed");
       applyAutofill(form, status, result);
     } catch (error) {
       if (error.name === "AbortError") return;
-      setStatus(status, `<strong>Autofill could not complete.</strong><br><span>${escapeHtml(error.message)} Try a more specific product name or paste a direct SDS link.</span>`, "is-error");
+      setStatus(status, `<strong>Autofill could not complete.</strong><br><span>${escapeHtml(error.message)} Try a more specific product name or paste a direct SDS PDF link.</span>`, "is-error");
     }
   }
 
@@ -132,11 +118,7 @@
     const request = { ...formFields(form), created_at: new Date().toISOString(), source: "review-request", status: "pending_review" };
     saveRequest(request);
     setStatus(status, "Sending request to supervisor review workflow...", "is-loading");
-    const response = await fetch(apiUrl("/api/submit-request"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request)
-    });
+    const response = await fetch(apiUrl("/api/submit-request"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Could not submit request");
     return { request, result };
@@ -146,7 +128,7 @@
     if (typeof layout !== "function") return;
     layout(`
       <section class="panel">
-        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter what you know. Autofill waits until there is enough information, then checks SDS and chemical sources.</p></div></div>
+        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter what you know. SDS links check immediately; typed names check after you pause.</p></div></div>
         <div id="autofillStatus" class="banner autofill-status">Type a product name, CAS number, manufacturer, or paste a direct SDS link.</div>
         <form id="addChemicalForm" class="form-grid">
           <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" required autocomplete="off"></label>
@@ -161,60 +143,48 @@
           <div class="form-actions label-full"><button class="button secondary" type="button" id="manualAutofillButton">Check Autofill Now</button><button class="button primary" type="submit">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
         </form>
       </section>`);
-
     if (typeof bindButtons === "function") bindButtons();
     const form = document.getElementById("addChemicalForm");
     const status = document.getElementById("autofillStatus");
     const manual = document.getElementById("manualAutofillButton");
     if (!form) return;
     form.dataset.requestId = makeId();
-
     form.querySelectorAll("input, textarea, select").forEach((field) => {
       field.addEventListener("input", () => {
         clearTimeout(timer);
         const fields = formFields(form);
-        if (!enoughForLookup(fields)) {
-          setStatus(status, "Keep typing, or paste a direct SDS link. Autofill will check once there is enough information.");
+        if (isUrl(fields.sds_url) || isCas(fields.cas_number)) {
+          setStatus(status, "SDS link/CAS detected. Checking now...", "is-loading");
+          timer = setTimeout(() => runAutofill(form, status), 100);
           return;
         }
+        if (!enoughForLookup(fields)) { setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now."); return; }
         setStatus(status, "Waiting for you to finish typing before checking autofill...");
         timer = setTimeout(() => runAutofill(form, status), TYPE_DELAY);
       });
+      field.addEventListener("paste", () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => runAutofill(form, status), 150);
+      });
       field.addEventListener("blur", () => {
         clearTimeout(timer);
-        timer = setTimeout(() => runAutofill(form, status), 500);
+        timer = setTimeout(() => runAutofill(form, status), 250);
       });
     });
-
-    manual?.addEventListener("click", () => {
-      clearTimeout(timer);
-      runAutofill(form, status, { force: true });
-    });
-
+    manual?.addEventListener("click", () => { clearTimeout(timer); runAutofill(form, status, { force: true }); });
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       try {
         const { request, result } = await submitForReview(form, status);
         setStatus(status, `<strong>Request sent for supervisor review.</strong><br><span>${escapeHtml(result.message || "It will appear in ChemicalSearch after approval.")}</span>`, "is-success");
         setTimeout(() => { location.hash = `#/request/${request.request_id}`; }, 700);
-      } catch (error) {
-        setStatus(status, `<strong>Could not send request.</strong><br><span>${escapeHtml(error.message)}</span>`, "is-error");
-      }
+      } catch (error) { setStatus(status, `<strong>Could not send request.</strong><br><span>${escapeHtml(error.message)}</span>`, "is-error"); }
     });
-
-    if (prefill && clean(prefill).length >= 6) timer = setTimeout(() => runAutofill(form, status), 700);
+    if (prefill && clean(prefill).length >= 3) timer = setTimeout(() => runAutofill(form, status), 700);
   }
 
   window.renderAddChemical = renderProductionRequestForm;
   window.CHEMICALSEARCH_API_BASE_URL = API_BASE_URL;
-
-  window.addEventListener("hashchange", () => {
-    if (location.hash.replace(/^#\/?/, "").split("/")[0] === "add-chemical") {
-      setTimeout(() => renderProductionRequestForm(window.currentQuery || ""), 0);
-    }
-  });
-
-  if (location.hash.replace(/^#\/?/, "").split("/")[0] === "add-chemical") {
-    setTimeout(() => renderProductionRequestForm(window.currentQuery || ""), 0);
-  }
+  window.addEventListener("hashchange", () => { if (location.hash.replace(/^#\/?/, "").split("/")[0] === "add-chemical") setTimeout(() => renderProductionRequestForm(window.currentQuery || ""), 0); });
+  if (location.hash.replace(/^#\/?/, "").split("/")[0] === "add-chemical") setTimeout(() => renderProductionRequestForm(window.currentQuery || ""), 0);
 })();
