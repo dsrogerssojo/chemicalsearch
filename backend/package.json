@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node --check server.js"
+    "check": "node --check server.js && node --check sds-parser.js && node --check config.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
