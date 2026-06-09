@@ -11,6 +11,10 @@ const requiredForGithubWriteback = [
   'GITHUB_BRANCH'
 ];
 
+const recommendedForFrontendRefresh = [
+  'FRONTEND_DEPLOY_HOOK_URL'
+];
+
 const optionalSearchProviders = [
   'BRAVE_SEARCH_API_KEY',
   'GOOGLE_CSE_API_KEY',
@@ -31,6 +35,7 @@ function printGroup(title, names) {
 console.log('ChemicalSearch backend environment check');
 printGroup('Teams review workflow', requiredForTeamsWorkflow);
 printGroup('GitHub approved-record writeback', requiredForGithubWriteback);
+printGroup('Frontend refresh after approval', recommendedForFrontendRefresh);
 printGroup('Optional SDS search providers', optionalSearchProviders);
 
 const missingTeamsWorkflow = requiredForTeamsWorkflow.filter((name) => !isSet(name));
@@ -42,6 +47,10 @@ if (missingTeamsWorkflow.length) {
 
 if (missingGithubWriteback.length) {
   console.log('\nGitHub writeback is not fully configured. Approved chemicals may only be saved locally on the backend instance.');
+}
+
+if (!isSet('FRONTEND_DEPLOY_HOOK_URL')) {
+  console.log('\nFRONTEND_DEPLOY_HOOK_URL is not set. Approved records can still be written to GitHub, but the static frontend will not redeploy automatically.');
 }
 
 if (!isSet('ALLOWED_ORIGINS')) {
