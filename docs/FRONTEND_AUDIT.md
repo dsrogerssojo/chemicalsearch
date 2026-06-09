@@ -9,26 +9,26 @@ The frontend is a static site in `chemicalsearch-site/`. It does not use React, 
 Main files:
 
 ```text
-index.html          Static shell, script loading, inline final layout/print styles, home-button/logo script
+index.html          Static shell and script loading
 app.js              Main app rendering, routing, search, detail views, injected base CSS
 autofill-client.js  Add/update chemical request form behavior and backend API calls
 enhancements.js     Additional behavior layered onto the app
-styles.css          Small CSS override file, not the main stylesheet
+layout-fixes.js     Home-button behavior and SOJO logo placement helper
+styles.css          Stylesheet for overrides, final layout rules, and print rules
 sds-data-*.js       Built-in chemical/SDS data loaded as global records
 sds-approved.js     Approved records appended at runtime as global records
 ```
 
 ## Biggest frontend issue
 
-The biggest issue is that styling is split across three places:
+The biggest remaining issue is that styling is split across two places:
 
 ```text
 1. styles.css
-2. index.html inline <style>
-3. app.js injected <style>
+2. app.js injected <style>
 ```
 
-This makes the visual system fragile. The file named `styles.css` is not actually the full stylesheet; most base styles are generated dynamically by JavaScript in `app.js`.
+Earlier cleanup moved the former `index.html` inline `<style>` block into `styles.css`. The file named `styles.css` now contains more of the visible layout and print styling, but most base styles are still generated dynamically by JavaScript in `app.js`.
 
 This can cause the site to look different between Render, GitHub Pages, local Live Server, or browser cache states.
 
@@ -42,6 +42,7 @@ Render expected paths:
 /styles.css
 /app.js
 /autofill-client.js
+/layout-fixes.js
 /sds-data-1.js
 ```
 
@@ -54,26 +55,34 @@ GitHub Pages may need paths like:
 
 If CSS or JavaScript fails to load, the page can look very different.
 
-## Cleanup recommendation
+## Cleanup completed
+
+Completed frontend cleanup:
+
+```text
+1. Moved index.html inline final layout/print styles into styles.css.
+2. Moved index.html home-button/SOJO-logo script into layout-fixes.js.
+3. Kept app behavior unchanged and verified manually after each step.
+```
+
+## Next cleanup recommendation
 
 Do not redesign the UI yet. First make styling predictable.
 
-Recommended order:
+Recommended remaining order:
 
 ```text
-1. Leave all current styling in place.
-2. Copy injected base CSS from app.js into styles.css.
-3. Verify Render visually matches before and after.
-4. Remove the injected app.js style block only after verification.
-5. Move index.html inline style into styles.css.
-6. Move index.html home-button/logo script into a separate file only after CSS is stable.
+1. Copy injected base CSS from app.js into styles.css.
+2. Verify Render visually matches before and after.
+3. Remove the injected app.js style block only after verification.
+4. Review enhancements.js and autofill-client.js for duplicated DOM helpers.
 ```
 
 ## Risk level
 
-Moving CSS is medium risk because selector order and `!important` rules currently matter.
+Moving the remaining injected CSS is medium risk because selector order and `!important` rules currently matter.
 
-Do not move all CSS in one commit. Use several small commits and manually test after each one.
+Do not move all remaining CSS and app logic in one untested change. Use small commits and manually test after each one.
 
 ## Manual visual test checklist
 
@@ -99,8 +108,7 @@ Do not delete these without manual browser testing:
 ```text
 enhancements.js
 autofill-client.js
-inline style block in index.html
-inline script block in index.html
+layout-fixes.js
 injected style block in app.js
 ```
 
