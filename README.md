@@ -27,11 +27,12 @@ README.md                 Project documentation
 Important frontend files:
 
 ```text
-chemicalsearch-site/index.html          Main frontend entry point
-chemicalsearch-site/styles.css          Main stylesheet
+chemicalsearch-site/index.html          Main frontend entry point and script loading
+chemicalsearch-site/styles.css          Main stylesheet and layout overrides
 chemicalsearch-site/app.js              Main app/routing/search logic
 chemicalsearch-site/autofill-client.js  Add/update chemical request form and autofill behavior
 chemicalsearch-site/enhancements.js     Additional frontend behavior
+chemicalsearch-site/layout-fixes.js     Home button and SOJO logo layout helper
 chemicalsearch-site/sds-data-*.js       Built-in SDS record data
 chemicalsearch-site/sds-approved.js     Approved records generated from review workflow
 ```
@@ -56,7 +57,7 @@ backend/.env.example           Example backend environment variables
 5. Backend sends the request to Power Automate.
 6. Reviewer approves or denies in Teams.
 7. If approved, backend writes the approved record into GitHub.
-8. Frontend must redeploy or reload updated approved data before the new chemical appears.
+8. Frontend redeploys or reloads updated approved data before the new chemical appears.
 
 ## Local backend setup
 
@@ -144,6 +145,7 @@ GITHUB_TOKEN
 GITHUB_REPO
 GITHUB_APPROVED_FILE
 GITHUB_BRANCH
+FRONTEND_DEPLOY_HOOK_URL
 BRAVE_SEARCH_API_KEY        optional
 GOOGLE_CSE_API_KEY          optional
 GOOGLE_CSE_CX               optional
@@ -182,7 +184,7 @@ https://chemicalsearch-site.onrender.com,http://127.0.0.1:5500
 - SDS autofill is best-effort only.
 - JavaScript-rendered SDS viewer pages may not expose full SDS text to the backend.
 - Scanned/image-only PDFs require OCR and may not parse correctly.
-- Approved records are currently written to a static frontend JS file, so the frontend may need redeployment before newly approved chemicals appear.
+- Approved records are currently written to a static frontend JS file, so the frontend must redeploy or reload updated approved data before newly approved chemicals appear.
 - There is not yet a formal automated test suite.
 
 ## Manual test checklist
