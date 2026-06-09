@@ -19,6 +19,7 @@ This repository was built quickly and is still being stabilized. Treat autofill 
 chemicalsearch-site/      Static frontend files
 backend/                  Node/Express backend API
 backend/data/             Local approved-record fallback data, ignored by git
+docs/                     Cleanup notes and maintenance documentation
 render.yaml               Render deployment blueprint
 README.md                 Project documentation
 ```
@@ -38,10 +39,12 @@ chemicalsearch-site/sds-approved.js     Approved records generated from review w
 Important backend files:
 
 ```text
-backend/server.js        Express API routes and integration logic
-backend/sds-parser.js    SDS parsing helper functions
-backend/package.json     Backend npm scripts and dependencies
-backend/.env.example     Example backend environment variables
+backend/server.js              Express API routes and integration logic
+backend/sds-parser.js          SDS parsing helper functions
+backend/config.js              Shared backend configuration constants
+backend/scripts/check-env.js   Environment configuration checker
+backend/package.json           Backend npm scripts and dependencies
+backend/.env.example           Example backend environment variables
 ```
 
 ## Main user flows
@@ -75,6 +78,26 @@ Expected response:
 
 ```json
 {"ok":true,"service":"chemicalsearch-backend"}
+```
+
+## Backend scripts
+
+Run these from the `backend/` folder:
+
+```bash
+npm run dev
+npm start
+npm run check
+npm run check:env
+```
+
+Script purpose:
+
+```text
+npm run dev        Start the backend locally
+npm start          Start the backend for deployment
+npm run check      Syntax-check backend JavaScript files
+npm run check:env  Print which important environment variables are configured
 ```
 
 ## Local frontend setup
