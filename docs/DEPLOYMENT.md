@@ -55,6 +55,14 @@ Recommended `ALLOWED_ORIGINS` value for production plus local testing:
 https://chemicalsearch-site.onrender.com,http://127.0.0.1:5500
 ```
 
+Recommended variable for automatic frontend redeploys after approved chemicals:
+
+```text
+FRONTEND_DEPLOY_HOOK_URL
+```
+
+This should be the deploy hook URL from the Render `chemicalsearch-site` static site.
+
 Optional search provider variables:
 
 ```text
@@ -85,16 +93,31 @@ chemicalsearch-site/sds-approved.js
 
 Because the frontend is static, a newly approved chemical may not appear until the frontend static site redeploys.
 
-Short-term options:
+Automatic redeploy support now exists. If `FRONTEND_DEPLOY_HOOK_URL` is set, the backend calls that Render deploy hook after a successful GitHub approved-record writeback.
 
-```text
-1. Manually redeploy the Render static frontend after approvals.
-2. Add a Render deploy hook and have the backend call it after successful GitHub writeback.
-```
+If the deploy hook is not configured or the hook call fails, the approval still succeeds. The backend response includes a `frontend_deploy` object explaining whether the frontend redeploy was triggered.
 
 Long-term recommendation:
 
 Serve approved records from a backend API or database so frontend redeployment is not required for every approval.
+
+## Creating the Render frontend deploy hook
+
+In Render:
+
+```text
+1. Open chemicalsearch-site.
+2. Go to Settings.
+3. Find Deploy Hooks.
+4. Create a deploy hook if one does not exist.
+5. Copy the hook URL.
+6. Open chemicalsearch-backend.
+7. Add FRONTEND_DEPLOY_HOOK_URL as an environment variable.
+8. Paste the hook URL as the value.
+9. Save changes and redeploy the backend.
+```
+
+Do not commit the deploy hook URL to GitHub.
 
 ## Power Automate callback
 
@@ -164,6 +187,19 @@ Clear override if needed:
 ```js
 localStorage.removeItem("chemicalsearch.apiBaseUrl")
 ```
+
+### Approved chemical does not appear after approval
+
+Likely causes:
+
+```text
+1. FRONTEND_DEPLOY_HOOK_URL is not set.
+2. Render frontend deploy hook failed.
+3. Static frontend redeploy is still running.
+4. Browser cache still has the old approved data file.
+```
+
+Check the backend approval response for the `frontend_deploy` field.
 
 ### GitHub Pages looks different from Render
 
