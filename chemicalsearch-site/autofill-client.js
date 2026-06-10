@@ -66,7 +66,9 @@
   function saveRequest(request) {
     let requests = [];
     try { requests = JSON.parse(localStorage.getItem(REQUEST_KEY)) || []; } catch { requests = []; }
-    requests.push(request);
+    const index = requests.findIndex((item) => item.id === request.id || item.request_id === request.request_id);
+    if (index >= 0) requests[index] = { ...requests[index], ...request };
+    else requests.push(request);
     localStorage.setItem(REQUEST_KEY, JSON.stringify(requests));
   }
 
@@ -118,31 +120,46 @@
 
   async function submitForReview(form, status) {
     const request = { ...formFields(form), created_at: new Date().toISOString(), source: "review-request", status: "pending_review" };
-    saveRequest(request);
     setStatus(status, "Sending request to supervisor review workflow...", "is-loading");
-    const response = await fetch(apiUrl("/api/submit-request"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request) });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "Could not submit request");
-    return { request, result };
+    try {
+      const response = await fetch(apiUrl("/api/submit-request"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(request) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not submit request");
+      request.delivery_status = result.queued === false ? "saved_without_teams" : "sent_to_teams";
+      request.submit_message = result.message || "Request sent for supervisor review.";
+      saveRequest(request);
+      return { request, result };
+    } catch (error) {
+      request.delivery_status = "local_only";
+      request.submit_message = `${error.message || "Could not submit request"} The request was saved in this browser, but it may not have reached Teams.`;
+      saveRequest(request);
+      throw error;
+    }
   }
 
   function renderProductionRequestForm(prefill = "") {
     if (typeof layout !== "function") return;
     layout(`
       <section class="panel">
-        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter whatever you know. No fields are required to send a supervisor request.</p></div></div>
-        <div id="autofillStatus" class="banner autofill-status">Type a product name, CAS number, manufacturer, or paste a direct SDS link. You can also submit with limited information.</div>
+        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter whatever you know. The request can still be sent if autofill cannot find a match.</p></div></div>
+        <div id="autofillStatus" class="banner autofill-status">Type a product name, CAS number, manufacturer, or paste a direct SDS link. Autofill is optional and review-only.</div>
         <form id="addChemicalForm" class="form-grid" novalidate>
-          <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" autocomplete="off"></label>
-          <label class="label">Product code <input class="field" name="product_code" autocomplete="off"></label>
-          <label class="label">CAS number <input class="field" name="cas_number" autocomplete="off"></label>
-          <label class="label">Manufacturer / supplier <input class="field" name="manufacturer" autocomplete="off"></label>
-          <label class="label">SDS link <input class="field" name="sds_url" type="url" autocomplete="off"></label>
-          <label class="label">Composition / active ingredient <input class="field" name="composition" autocomplete="off"></label>
-          <label class="label">Exposure route <select class="field" name="exposure_route"><option value="">Not incident-related / unknown</option><option>Skin</option><option>Eyes</option><option>Inhalation</option><option>Ingestion</option></select></label>
-          <label class="label">Your email <input class="field" name="requested_by" type="email" autocomplete="email"></label>
-          <label class="label label-full">Notes <textarea class="textarea" name="notes"></textarea></label>
-          <div class="form-actions label-full"><button class="button secondary" type="button" id="manualAutofillButton">Check Autofill Now</button><button class="button primary" type="submit">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
+          <fieldset class="form-section label-full"><legend>What do you know?</legend><div class="form-section-grid">
+            <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" autocomplete="off"></label>
+            <label class="label">Product code <input class="field" name="product_code" autocomplete="off"></label>
+            <label class="label">CAS number <input class="field" name="cas_number" autocomplete="off"></label>
+            <label class="label">Manufacturer / supplier <input class="field" name="manufacturer" autocomplete="off"></label>
+          </div></fieldset>
+          <fieldset class="form-section label-full"><legend>SDS or safety details</legend><div class="form-section-grid">
+            <label class="label">SDS link <input class="field" name="sds_url" type="url" autocomplete="off"></label>
+            <label class="label">Composition / active ingredient <input class="field" name="composition" autocomplete="off"></label>
+            <label class="label">Exposure route <select class="field" name="exposure_route"><option value="">Not incident-related / unknown</option><option>Skin</option><option>Eyes</option><option>Inhalation</option><option>Ingestion</option></select></label>
+          </div></fieldset>
+          <fieldset class="form-section label-full"><legend>Requester info</legend><div class="form-section-grid">
+            <label class="label">Your email <input class="field" name="requested_by" type="email" autocomplete="email"></label>
+            <label class="label label-full">Notes <textarea class="textarea" name="notes" placeholder="Location, label details, why it is needed, or anything the reviewer should verify"></textarea></label>
+          </div></fieldset>
+          <div class="form-actions label-full"><button class="button secondary" type="button" id="manualAutofillButton">Check Autofill Now</button><button class="button primary" type="submit" id="submitReviewButton">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
         </form>
       </section>`);
     if (typeof bindButtons === "function") bindButtons();
@@ -176,11 +193,23 @@
     manual?.addEventListener("click", () => { clearTimeout(timer); runAutofill(form, status, { force: true }); });
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      const submitButton = document.getElementById("submitReviewButton");
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending...";
+      }
       try {
         const { request, result } = await submitForReview(form, status);
-        setStatus(status, `<strong>Request sent for supervisor review.</strong><br><span>${escapeHtml(result.message || "It will appear in ChemicalSearch after approval.")}</span>`, "is-success");
+        setStatus(status, `<strong>${request.delivery_status === "sent_to_teams" ? "Request sent to Teams review." : "Request saved."}</strong><br><span>${escapeHtml(result.message || "It will appear in ChemicalSearch after approval.")}</span>`, "is-success");
         setTimeout(() => { location.hash = `#/request/${request.request_id}`; }, 700);
-      } catch (error) { setStatus(status, `<strong>Could not send request.</strong><br><span>${escapeHtml(error.message)}</span>`, "is-error"); }
+      } catch (error) {
+        setStatus(status, `<strong>Request saved locally, but was not sent.</strong><br><span>${escapeHtml(error.message)} Check the backend connection and try again.</span>`, "is-error");
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = "Send for supervisor review";
+        }
+      }
     });
     if (prefill && clean(prefill).length >= 3) timer = setTimeout(() => runAutofill(form, status), 700);
   }

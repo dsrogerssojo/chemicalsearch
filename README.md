@@ -33,6 +33,7 @@ chemicalsearch-site/sojo-theme.css      SOJO visual theme
 chemicalsearch-site/app.js              Main rendering, routing, search, details, request receipts
 chemicalsearch-site/autofill-client.js  Add/update form, autofill calls, request submission
 chemicalsearch-site/layout-fixes.js     SOJO logo placement and Home button behavior
+chemicalsearch-site/sojologo.webp       Local SOJO logo asset
 chemicalsearch-site/sds-data-*.js       Built-in SDS records
 chemicalsearch-site/sds-approved.js     Approved records written by the backend workflow
 ```
@@ -46,6 +47,7 @@ backend/.env.example
 backend/config.js
 backend/sds-parser.js
 backend/server.js
+tools/validate-deploy.mjs
 ```
 
 ## Backend Setup
@@ -67,6 +69,16 @@ Expected response:
 ```json
 {"ok":true,"service":"chemicalsearch-backend"}
 ```
+
+## Validation
+
+Run this from the repository root before deploying:
+
+```bash
+node tools/validate-deploy.mjs
+```
+
+The script checks required frontend/backend files, verifies `index.html` asset references, and syntax-checks backend JavaScript.
 
 ## Environment Variables
 

@@ -1,5 +1,5 @@
 (function () {
-  var SOJO_LOGO_URL = 'https://techcouncilventures.com/wp-content/uploads/2023/10/Sojo-Logo.png';
+  var SOJO_LOGO_URL = 'sojologo.webp';
   var fixing = false;
   var homeButton = document.getElementById('homeButton');
 
@@ -65,7 +65,7 @@
         return;
       }
 
-      if (img.src !== SOJO_LOGO_URL) img.src = SOJO_LOGO_URL;
+      if (img.getAttribute('src') !== SOJO_LOGO_URL) img.src = SOJO_LOGO_URL;
       if (img.alt !== 'SOJO') img.alt = 'SOJO';
       if (img.loading !== 'eager') img.loading = 'eager';
     } finally {

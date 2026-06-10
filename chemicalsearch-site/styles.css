@@ -157,6 +157,69 @@ body:not(.is-home-page) .emergency-strip {
   font-weight: 900 !important;
 }
 
+.record-status-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 10px !important;
+}
+
+.source-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  background: rgba(255,255,255,.08) !important;
+  color: inherit !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.source-approved,
+.sds-linked {
+  border-color: #a7e6cc !important;
+  background: rgba(167,230,204,.18) !important;
+}
+
+.source-built-in {
+  border-color: #b8d7f2 !important;
+  background: rgba(184,215,242,.16) !important;
+}
+
+.sds-missing {
+  border-color: #f2b8b0 !important;
+  background: rgba(242,184,176,.18) !important;
+}
+
+.detail-search-panel {
+  padding: 18px 26px !important;
+}
+
+.form-section {
+  border: 1px solid rgba(255,255,255,.16) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  margin: 0 !important;
+}
+
+.form-section legend {
+  padding: 0 8px !important;
+  font-weight: 900 !important;
+}
+
+.form-section-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.button:disabled {
+  cursor: wait !important;
+  opacity: .68 !important;
+}
+
 @media (max-width: 900px) {
   #homeButton {
     top: 10px !important;
@@ -197,6 +260,10 @@ body:not(.is-home-page) .emergency-strip {
   .search-row button[type='submit'] {
     width: 100% !important;
     min-width: 0 !important;
+  }
+
+  .form-section-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
