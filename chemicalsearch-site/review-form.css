@@ -1,0 +1,14 @@
+#addChemicalForm [name="composition"],
+#addChemicalForm [name="exposure_route"] {
+  display: none !important;
+}
+
+#addChemicalForm [name="composition"]:is(input, textarea, select),
+#addChemicalForm [name="exposure_route"]:is(input, textarea, select) {
+  display: none !important;
+}
+
+#addChemicalForm label:has([name="composition"]),
+#addChemicalForm label:has([name="exposure_route"]) {
+  display: none !important;
+}
