@@ -10,27 +10,29 @@ Main files:
 
 ```text
 index.html          Static shell and script loading
-app.js              Main app rendering, routing, search, detail views, injected base CSS
+runtime-config.js   Runtime API URL override setup
+app-base.css        Base app styles extracted from app.js
+styles.css          Overrides, final layout rules, and print rules
+app.js              Main app rendering, routing, search, and detail views
 autofill-client.js  Add/update chemical request form behavior and backend API calls
 enhancements.js     Additional behavior layered onto the app
 layout-fixes.js     Home-button behavior and SOJO logo placement helper
-styles.css          Stylesheet for overrides, final layout rules, and print rules
 sds-data-*.js       Built-in chemical/SDS data loaded as global records
 sds-approved.js     Approved records appended at runtime as global records
 ```
 
-## Biggest frontend issue
+## Frontend cleanup status
 
-The biggest remaining issue is that styling is split across two places:
+The largest frontend cleanup issue has been addressed: styling is no longer embedded inside `index.html` or injected by `app.js`.
+
+Current styling structure:
 
 ```text
-1. styles.css
-2. app.js injected <style>
+1. app-base.css  Base app styling extracted from app.js
+2. styles.css    Overrides, final layout rules, and print rules
 ```
 
-Earlier cleanup moved the former `index.html` inline `<style>` block into `styles.css`. The file named `styles.css` now contains more of the visible layout and print styling, but most base styles are still generated dynamically by JavaScript in `app.js`.
-
-This can cause the site to look different between Render, GitHub Pages, local Live Server, or browser cache states.
+This is more predictable than the earlier structure, where styling was split across `styles.css`, an inline `index.html` style block, and a dynamically injected `app.js` style block.
 
 ## Why Render and GitHub static pages may look different
 
@@ -39,7 +41,9 @@ Render serves `chemicalsearch-site/` as the site root. GitHub Pages may serve th
 Render expected paths:
 
 ```text
+/app-base.css
 /styles.css
+/runtime-config.js
 /app.js
 /autofill-client.js
 /layout-fixes.js
@@ -49,6 +53,7 @@ Render expected paths:
 GitHub Pages may need paths like:
 
 ```text
+/chemicalsearch/chemicalsearch-site/app-base.css
 /chemicalsearch/chemicalsearch-site/styles.css
 /chemicalsearch/chemicalsearch-site/app.js
 ```
@@ -62,27 +67,30 @@ Completed frontend cleanup:
 ```text
 1. Moved index.html inline final layout/print styles into styles.css.
 2. Moved index.html home-button/SOJO-logo script into layout-fixes.js.
-3. Kept app behavior unchanged and verified manually after each step.
+3. Moved index.html runtime API setup into runtime-config.js.
+4. Copied app.js injected base CSS into app-base.css.
+5. Loaded app-base.css before styles.css.
+6. Removed the injected app.js style payload after manual verification.
+7. Kept app behavior unchanged and verified manually after each step.
 ```
 
 ## Next cleanup recommendation
 
-Do not redesign the UI yet. First make styling predictable.
+Do not redesign the UI yet. The best next frontend cleanup is to review JavaScript responsibilities.
 
 Recommended remaining order:
 
 ```text
-1. Copy injected base CSS from app.js into styles.css.
-2. Verify Render visually matches before and after.
-3. Remove the injected app.js style block only after verification.
-4. Review enhancements.js and autofill-client.js for duplicated DOM helpers.
+1. Review enhancements.js and autofill-client.js for duplicated DOM helpers.
+2. Check whether layout-fixes.js can be simplified after app rendering is stable.
+3. Add a lightweight browser smoke test only after the manual checklist stays stable.
 ```
 
 ## Risk level
 
-Moving the remaining injected CSS is medium risk because selector order and `!important` rules currently matter.
+The largest frontend styling risk has been reduced. Remaining frontend cleanup is medium risk because these files still affect routing, form behavior, and post-render DOM updates.
 
-Do not move all remaining CSS and app logic in one untested change. Use small commits and manually test after each one.
+Use small commits and manually test after each one.
 
 ## Manual visual test checklist
 
@@ -109,7 +117,8 @@ Do not delete these without manual browser testing:
 enhancements.js
 autofill-client.js
 layout-fixes.js
-injected style block in app.js
+app-base.css
+styles.css
 ```
 
-They are messy, but they likely affect visible behavior.
+They affect visible behavior and workflow behavior.
