@@ -8,7 +8,6 @@ const requiredFiles = [
   "backend/package.json",
   "backend/package-lock.json",
   "backend/config.js",
-  "backend/sds-parser.js",
   "backend/server.js",
   "chemicalsearch-site/index.html",
   "chemicalsearch-site/app-base.css",
@@ -16,7 +15,7 @@ const requiredFiles = [
   "chemicalsearch-site/sojo-theme.css",
   "chemicalsearch-site/runtime-config.js",
   "chemicalsearch-site/app.js",
-  "chemicalsearch-site/autofill-client.js",
+  "chemicalsearch-site/request-client.js",
   "chemicalsearch-site/layout-fixes.js",
   "chemicalsearch-site/sojologo.webp",
   "chemicalsearch-site/sds-approved.js"
@@ -44,7 +43,7 @@ if (missingRefs.length) {
   process.exit(1);
 }
 
-for (const file of ["backend/server.js", "backend/sds-parser.js", "backend/config.js"]) {
+for (const file of ["backend/server.js", "backend/config.js"]) {
   const result = spawnSync(process.execPath, ["--check", file], { cwd: root, stdio: "inherit" });
   if (result.status !== 0) process.exit(result.status || 1);
 }

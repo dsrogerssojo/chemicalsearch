@@ -134,25 +134,25 @@ body:not(.is-home-page) .emergency-strip {
   max-width: 760px !important;
 }
 
-.autofill-status.is-success {
+.request-status.is-success {
   border-color: #a7e6cc !important;
   background: #e9fbf4 !important;
   color: #064e3b !important;
 }
 
-.autofill-status.is-loading {
+.request-status.is-loading {
   border-color: #b8d7f2 !important;
   background: #eaf4ff !important;
   color: #0d4d7d !important;
 }
 
-.autofill-status.is-error {
+.request-status.is-error {
   border-color: #f2b8b0 !important;
   background: #fff0ed !important;
   color: #991b1b !important;
 }
 
-.autofill-status a {
+.request-status a {
   color: inherit !important;
   font-weight: 900 !important;
 }
@@ -220,6 +220,99 @@ body:not(.is-home-page) .emergency-strip {
   opacity: .68 !important;
 }
 
+.submission-dialog-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 20px !important;
+  background: rgba(5, 7, 11, .72) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.submission-dialog {
+  position: relative !important;
+  width: min(520px, 100%) !important;
+  border: 1px solid rgba(255,255,255,.2) !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+  color: #05070b !important;
+  padding: 28px !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.4) !important;
+}
+
+.submission-dialog-close {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid #d8d8d8 !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: #05070b !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+}
+
+.submission-dialog-icon {
+  display: grid !important;
+  place-items: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  margin-bottom: 14px !important;
+  border-radius: 999px !important;
+  background: #e9fbf4 !important;
+  color: #047857 !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+}
+
+.submission-dialog h2 {
+  margin: 8px 0 8px !important;
+  color: #05070b !important;
+  font-size: 1.55rem !important;
+  line-height: 1.15 !important;
+}
+
+.submission-dialog p {
+  margin: 0 0 18px !important;
+  color: #333333 !important;
+  line-height: 1.45 !important;
+}
+
+.submission-dialog-details {
+  display: grid !important;
+  gap: 8px !important;
+  margin: 0 0 20px !important;
+}
+
+.submission-dialog-details div {
+  display: grid !important;
+  grid-template-columns: 110px 1fr !important;
+  gap: 10px !important;
+  padding: 10px 0 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.submission-dialog-details dt {
+  color: #5f6368 !important;
+  font-weight: 900 !important;
+}
+
+.submission-dialog-details dd {
+  margin: 0 !important;
+  color: #05070b !important;
+  overflow-wrap: anywhere !important;
+}
+
+.submission-dialog-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
 @media (max-width: 900px) {
   #homeButton {
     top: 10px !important;
@@ -264,6 +357,19 @@ body:not(.is-home-page) .emergency-strip {
 
   .form-section-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .submission-dialog {
+    padding: 24px 18px !important;
+  }
+
+  .submission-dialog-details div {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+
+  .submission-dialog-actions .button {
+    width: 100% !important;
   }
 }
 
@@ -314,7 +420,7 @@ body:not(.is-home-page) .emergency-strip {
   .button,
   .nav-actions,
   .hero-logo-panel,
-  .autofill-status,
+  .request-status,
   .form-actions {
     display: none !important;
   }

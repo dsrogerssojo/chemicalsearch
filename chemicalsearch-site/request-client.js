@@ -2,11 +2,6 @@
   const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
   const API_BASE_URL = (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || DEFAULT_API_BASE_URL).replace(/\/$/, "");
   const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
-  const MIN_TEXT = 3;
-  const TYPE_DELAY = 900;
-  let timer;
-  let lastLookupKey = "";
-  let controller;
 
   function apiUrl(path) { return `${API_BASE_URL}${path}`; }
   function clean(value) { return String(value || "").trim(); }
@@ -16,14 +11,62 @@
       .replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
   }
   function makeId() { return crypto?.randomUUID ? crypto.randomUUID() : `request-${Date.now()}`; }
-  function isUrl(value) { return /^https?:\/\/.{8,}/i.test(clean(value)); }
-  function isCas(value) { return /^\d{2,7}-\d{2}-\d$/.test(clean(value)); }
-  function usefulText(value) { return clean(value).length >= MIN_TEXT; }
 
   function setStatus(status, html, className = "") {
     if (!status) return;
-    status.className = `banner autofill-status ${className}`.trim();
+    status.className = `banner request-status ${className}`.trim();
     status.innerHTML = html;
+  }
+
+  function closeSubmissionDialog() {
+    document.getElementById("submissionDialog")?.remove();
+  }
+
+  function showSubmissionDialog(request, message) {
+    closeSubmissionDialog();
+    const requestId = request.request_id || request.id;
+    const sentToTeams = request.delivery_status === "sent_to_teams";
+    const dialog = document.createElement("div");
+    dialog.id = "submissionDialog";
+    dialog.className = "submission-dialog-backdrop";
+    dialog.innerHTML = `
+      <section class="submission-dialog" role="dialog" aria-modal="true" aria-labelledby="submissionDialogTitle">
+        <button class="submission-dialog-close" type="button" aria-label="Close confirmation">&times;</button>
+        <span class="submission-dialog-icon" aria-hidden="true">&#10003;</span>
+        <span class="eyebrow">Request submitted</span>
+        <h2 id="submissionDialogTitle">${sentToTeams ? "Sent for supervisor review" : "Request saved"}</h2>
+        <p>${escapeHtml(message || request.submit_message || "Your request was received.")}</p>
+        <dl class="submission-dialog-details">
+          <div><dt>Request ID</dt><dd>${escapeHtml(requestId)}</dd></div>
+          <div><dt>Chemical</dt><dd>${escapeHtml(request.chemical_name || "Not listed")}</dd></div>
+        </dl>
+        <div class="submission-dialog-actions">
+          <button class="button primary" type="button" data-dialog-action="receipt">View receipt</button>
+          <button class="button secondary" type="button" data-dialog-action="home">Back to search</button>
+        </div>
+      </section>`;
+    document.body.appendChild(dialog);
+    const receiptButton = dialog.querySelector('[data-dialog-action="receipt"]');
+    const homeButton = dialog.querySelector('[data-dialog-action="home"]');
+    const closeButton = dialog.querySelector(".submission-dialog-close");
+    const closeAndRoute = (hash) => {
+      closeSubmissionDialog();
+      location.hash = hash;
+    };
+    receiptButton?.addEventListener("click", () => closeAndRoute(`#/request/${requestId}`));
+    homeButton?.addEventListener("click", () => closeAndRoute("#/"));
+    closeButton?.addEventListener("click", closeSubmissionDialog);
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) closeSubmissionDialog();
+    });
+    const escapeHandler = (event) => {
+      if (event.key === "Escape") {
+        closeSubmissionDialog();
+        document.removeEventListener("keydown", escapeHandler);
+      }
+    };
+    document.addEventListener("keydown", escapeHandler);
+    receiptButton?.focus();
   }
 
   function formFields(form) {
@@ -43,26 +86,6 @@
     };
   }
 
-  function enoughForLookup(fields) {
-    if (isUrl(fields.sds_url) || isCas(fields.cas_number)) return true;
-    if (usefulText(fields.chemical_name)) return true;
-    if (usefulText(fields.composition)) return true;
-    if (usefulText(fields.product_code) && usefulText(fields.manufacturer)) return true;
-    return false;
-  }
-
-  function lookupKey(fields) {
-    return JSON.stringify({ chemical_name: fields.chemical_name, product_code: fields.product_code, cas_number: fields.cas_number, manufacturer: fields.manufacturer, sds_url: fields.sds_url, composition: fields.composition });
-  }
-
-  function setIfEmpty(field, value) {
-    const text = clean(value);
-    if (field && !clean(field.value) && text) {
-      field.value = text;
-      field.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-  }
-
   function saveRequest(request) {
     let requests = [];
     try { requests = JSON.parse(localStorage.getItem(REQUEST_KEY)) || []; } catch { requests = []; }
@@ -70,52 +93,6 @@
     if (index >= 0) requests[index] = { ...requests[index], ...request };
     else requests.push(request);
     localStorage.setItem(REQUEST_KEY, JSON.stringify(requests));
-  }
-
-  function applyAutofill(form, status, result) {
-    const fields = result.fields || {};
-    const filledBefore = Object.fromEntries(Array.from(form.elements).filter((el) => el.name).map((el) => [el.name, clean(el.value)]));
-
-    setIfEmpty(form.elements.chemical_name, fields.chemical_name);
-    setIfEmpty(form.elements.product_code, fields.product_code);
-    setIfEmpty(form.elements.cas_number, fields.cas_number);
-    setIfEmpty(form.elements.manufacturer, fields.manufacturer);
-    setIfEmpty(form.elements.sds_url, fields.sds_url);
-    setIfEmpty(form.elements.composition, fields.composition);
-
-    const changed = Array.from(form.elements).filter((el) => el.name && clean(el.value) && filledBefore[el.name] !== clean(el.value)).map((el) => el.name.replace(/_/g, " "));
-    const links = (result.links || []).slice(0, 3).map((link) => link?.url ? `<a href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer">${escapeHtml(link.label || "source")}</a>` : "").filter(Boolean).join(" · ");
-    const notes = (result.notes || []).slice(0, 3).map((note) => `<li>${escapeHtml(note)}</li>`).join("");
-    const confidence = result.confidence ? `${Math.round(result.confidence * 100)}% confidence` : "review needed";
-
-    if (changed.length) {
-      setStatus(status, `<strong>Autofill updated ${escapeHtml(changed.join(", "))}.</strong> ${escapeHtml(confidence)}<br><span>Review everything against the SDS before submitting.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "is-success");
-    } else {
-      setStatus(status, `<strong>Autofill checked, but did not find fillable fields.</strong><br><span>The SDS may be scanned, blocked, or formatted in a way the parser cannot read yet. You can still submit the request for supervisor review.</span>${links ? `<br>${links}` : ""}${notes ? `<ul>${notes}</ul>` : ""}`, "");
-    }
-  }
-
-  async function runAutofill(form, status, options = {}) {
-    const fields = formFields(form);
-    if (!enoughForLookup(fields) && !options.force) {
-      setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now. You can still submit without autofill.");
-      return;
-    }
-    const key = lookupKey(fields);
-    if (key === lastLookupKey && !options.force) return;
-    lastLookupKey = key;
-    controller?.abort();
-    controller = new AbortController();
-    setStatus(status, "Checking SDS and chemical sources...", "is-loading");
-    try {
-      const response = await fetch(apiUrl("/api/autofill"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ fields, context: { source: "missing-chemical-request-form" } }), signal: controller.signal });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Autofill failed");
-      applyAutofill(form, status, result);
-    } catch (error) {
-      if (error.name === "AbortError") return;
-      setStatus(status, `<strong>Autofill could not complete.</strong><br><span>${escapeHtml(error.message)} You can still submit the request for supervisor review.</span>`, "is-error");
-    }
   }
 
   async function submitForReview(form, status) {
@@ -141,8 +118,8 @@
     if (typeof layout !== "function") return;
     layout(`
       <section class="panel">
-        <div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Enter whatever you know. The request can still be sent if autofill cannot find a match.</p></div></div>
-        <div id="autofillStatus" class="banner autofill-status">Type a product name, CAS number, manufacturer, or paste a direct SDS link. Autofill is optional and review-only.</div>
+        <div class="section-heading"><div><span class="eyebrow">Supervisor review</span><h1>Add or Update Chemical</h1><p class="lead">Enter the information you know from the label, SDS, supplier page, or product container. The request is sent to a supervisor for review and approval before it appears in ChemicalSearch.</p></div></div>
+        <div id="requestStatus" class="banner request-status"><strong>Put in whatever you know.</strong><br><span>Partial details are okay. A supervisor will verify the SDS information and approve the record before it is added to the searchable library.</span></div>
         <form id="addChemicalForm" class="form-grid" novalidate>
           <fieldset class="form-section label-full"><legend>What do you know?</legend><div class="form-section-grid">
             <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" autocomplete="off"></label>
@@ -159,38 +136,14 @@
             <label class="label">Your email <input class="field" name="requested_by" type="email" autocomplete="email"></label>
             <label class="label label-full">Notes <textarea class="textarea" name="notes" placeholder="Location, label details, why it is needed, or anything the reviewer should verify"></textarea></label>
           </div></fieldset>
-          <div class="form-actions label-full"><button class="button secondary" type="button" id="manualAutofillButton">Check Autofill Now</button><button class="button primary" type="submit" id="submitReviewButton">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
+          <div class="form-actions label-full"><button class="button primary" type="submit" id="submitReviewButton">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
         </form>
       </section>`);
     if (typeof bindButtons === "function") bindButtons();
     const form = document.getElementById("addChemicalForm");
-    const status = document.getElementById("autofillStatus");
-    const manual = document.getElementById("manualAutofillButton");
+    const status = document.getElementById("requestStatus");
     if (!form) return;
     form.dataset.requestId = makeId();
-    form.querySelectorAll("input, textarea, select").forEach((field) => {
-      field.addEventListener("input", () => {
-        clearTimeout(timer);
-        const fields = formFields(form);
-        if (isUrl(fields.sds_url) || isCas(fields.cas_number)) {
-          setStatus(status, "SDS link/CAS detected. Checking now...", "is-loading");
-          timer = setTimeout(() => runAutofill(form, status), 100);
-          return;
-        }
-        if (!enoughForLookup(fields)) { setStatus(status, "Keep typing, paste a direct SDS link, or click Check Autofill Now. You can still submit without autofill."); return; }
-        setStatus(status, "Waiting for you to finish typing before checking autofill...");
-        timer = setTimeout(() => runAutofill(form, status), TYPE_DELAY);
-      });
-      field.addEventListener("paste", () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => runAutofill(form, status), 150);
-      });
-      field.addEventListener("blur", () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => runAutofill(form, status), 250);
-      });
-    });
-    manual?.addEventListener("click", () => { clearTimeout(timer); runAutofill(form, status, { force: true }); });
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const submitButton = document.getElementById("submitReviewButton");
@@ -201,7 +154,7 @@
       try {
         const { request, result } = await submitForReview(form, status);
         setStatus(status, `<strong>${request.delivery_status === "sent_to_teams" ? "Request sent to Teams review." : "Request saved."}</strong><br><span>${escapeHtml(result.message || "It will appear in ChemicalSearch after approval.")}</span>`, "is-success");
-        setTimeout(() => { location.hash = `#/request/${request.request_id}`; }, 700);
+        showSubmissionDialog(request, result.message || "It will appear in ChemicalSearch after approval.");
       } catch (error) {
         setStatus(status, `<strong>Request saved locally, but was not sent.</strong><br><span>${escapeHtml(error.message)} Check the backend connection and try again.</span>`, "is-error");
       } finally {
@@ -211,7 +164,6 @@
         }
       }
     });
-    if (prefill && clean(prefill).length >= 3) timer = setTimeout(() => runAutofill(form, status), 700);
   }
 
   window.renderAddChemical = renderProductionRequestForm;

@@ -31,7 +31,7 @@ chemicalsearch-site/app-base.css        Base app styles
 chemicalsearch-site/styles.css          Layout, print, and fix styles
 chemicalsearch-site/sojo-theme.css      SOJO visual theme
 chemicalsearch-site/app.js              Main rendering, routing, search, details, request receipts
-chemicalsearch-site/autofill-client.js  Add/update form, autofill calls, request submission
+chemicalsearch-site/request-client.js   Add/update request form and supervisor review submission
 chemicalsearch-site/layout-fixes.js     SOJO logo placement and Home button behavior
 chemicalsearch-site/sojologo.webp       Local SOJO logo asset
 chemicalsearch-site/sds-data-*.js       Built-in SDS records
@@ -45,7 +45,6 @@ backend/package.json
 backend/package-lock.json
 backend/.env.example
 backend/config.js
-backend/sds-parser.js
 backend/server.js
 tools/validate-deploy.mjs
 ```
@@ -96,14 +95,6 @@ GITHUB_APPROVED_FILE
 GITHUB_BRANCH
 ALLOWED_ORIGINS
 FRONTEND_DEPLOY_HOOK_URL
-```
-
-Optional SDS search providers:
-
-```text
-BRAVE_SEARCH_API_KEY
-GOOGLE_CSE_API_KEY
-GOOGLE_CSE_CX
 ```
 
 ## Render

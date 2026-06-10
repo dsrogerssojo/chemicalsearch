@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "API for ChemicalSearch autofill, Power Automate submission, and approval callbacks.",
+  "description": "API for ChemicalSearch Power Automate submission and approval callbacks.",
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node --check server.js && node --check sds-parser.js && node --check config.js"
+    "check": "node --check server.js && node --check config.js"
   },
   "engines": {
     "node": ">=20"
@@ -15,7 +15,6 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "pdf-parse": "^1.1.1"
+    "express": "^4.21.2"
   }
 }

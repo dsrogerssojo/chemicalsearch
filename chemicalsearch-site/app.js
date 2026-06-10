@@ -350,53 +350,9 @@ function renderRecord(id) {
   });
 }
 
-function findAutofillMatch(form) {
-  const values = [form.chemical_name?.value, form.product_code?.value, form.cas_number?.value, form.manufacturer?.value, form.sds_url?.value, form.composition?.value].map(normalize).filter((value) => value.length >= 3);
-  if (!values.length) return null;
-  let best = null;
-  let bestScore = 0;
-  for (const record of records) {
-    const haystack = searchableValues(record).map(normalize).join(" ");
-    let score = 0;
-    values.forEach((value) => {
-      if (normalize(record.name) === value) score += 8;
-      if (normalize(record.product_code) === value) score += 7;
-      if (normalize(record.company) === value) score += 5;
-      if (haystack.includes(value)) score += 3;
-    });
-    if (score > bestScore) {
-      best = record;
-      bestScore = score;
-    }
-  }
-  return bestScore >= 3 ? best : null;
-}
-
-function setIfEmpty(field, value) {
-  if (field && !cleanValue(field.value) && cleanValue(value)) field.value = value;
-}
-
-function applyAutofill(form, status) {
-  const match = findAutofillMatch(form.elements);
-  if (!match) {
-    status.textContent = "Start with any product name, code, supplier, composition, or SDS link. Matching fields auto-fill from the current library.";
-    return;
-  }
-  setIfEmpty(form.elements.chemical_name, match.name);
-  setIfEmpty(form.elements.product_code, match.product_code);
-  setIfEmpty(form.elements.manufacturer, match.company);
-  setIfEmpty(form.elements.sds_url, match.sds_url);
-  setIfEmpty(form.elements.composition, match.composition);
-  setIfEmpty(form.elements.notes, [cleanValue(match.use) ? `Use: ${match.use}` : "", cleanValue(match.hfrp_info) ? `HFRP: ${match.hfrp_info}` : "", cleanValue(match.sds_number) ? `SDS number: ${match.sds_number}` : ""].filter(Boolean).join("\n"));
-  status.innerHTML = `<strong>Auto-filled:</strong> ${escapeHtml(match.name)}`;
-}
-
 function renderAddChemical(prefill = currentQuery) {
-  layout(`<section class="panel"><div class="section-heading"><div><span class="eyebrow">Request review</span><h1>Add or Update Chemical</h1><p class="lead">Start with any field you know. Matching fields fill in automatically from existing SDS records.</p></div></div><div id="autofillStatus" class="banner">Start with any product name, code, supplier, composition, or SDS link.</div><form id="addChemicalForm" class="form-grid"><label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill || "")}" required></label><label class="label">Product code <input class="field" name="product_code"></label><label class="label">CAS number <input class="field" name="cas_number"></label><label class="label">Manufacturer / supplier <input class="field" name="manufacturer"></label><label class="label">SDS link <input class="field" name="sds_url"></label><label class="label">Composition / active ingredient <input class="field" name="composition"></label><label class="label">Exposure route <select class="field" name="exposure_route"><option value="">Not incident-related / unknown</option><option>Skin</option><option>Eyes</option><option>Inhalation</option><option>Ingestion</option></select></label><label class="label">Your email <input class="field" name="requested_by" type="email"></label><label class="label label-full">Notes <textarea class="textarea" name="notes"></textarea></label><div class="form-actions label-full"><button class="button primary" type="submit">Create review email</button><button class="button secondary" type="button" data-route="home">Cancel</button></div></form></section>`);
+  layout(`<section class="panel"><div class="section-heading"><div><span class="eyebrow">Supervisor review</span><h1>Add or Update Chemical</h1><p class="lead">Enter the information you know from the label, SDS, supplier page, or product container. The request is sent to a supervisor for review and approval before it appears in ChemicalSearch.</p></div></div><div id="requestStatus" class="banner request-status"><strong>Put in whatever you know.</strong><br><span>Partial details are okay. A supervisor will verify the SDS information and approve the record before it is added to the searchable library.</span></div><form id="addChemicalForm" class="form-grid"><label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill || "")}"></label><label class="label">Product code <input class="field" name="product_code"></label><label class="label">CAS number <input class="field" name="cas_number"></label><label class="label">Manufacturer / supplier <input class="field" name="manufacturer"></label><label class="label">SDS link <input class="field" name="sds_url"></label><label class="label">Composition / active ingredient <input class="field" name="composition"></label><label class="label">Exposure route <select class="field" name="exposure_route"><option value="">Not incident-related / unknown</option><option>Skin</option><option>Eyes</option><option>Inhalation</option><option>Ingestion</option></select></label><label class="label">Your email <input class="field" name="requested_by" type="email"></label><label class="label label-full">Notes <textarea class="textarea" name="notes" placeholder="Location, label details, why it is needed, or anything the reviewer should verify"></textarea></label><div class="form-actions label-full"><button class="button primary" type="submit">Save request receipt</button><button class="button secondary" type="button" data-route="home">Cancel</button></div></form></section>`);
   const form = document.getElementById("addChemicalForm");
-  const status = document.getElementById("autofillStatus");
-  form.querySelectorAll("input, textarea, select").forEach((field) => field.addEventListener("input", () => applyAutofill(form, status)));
-  if (prefill) applyAutofill(form, status);
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(form);
@@ -415,7 +371,7 @@ function renderRequestReceipt(id) {
   if (!request) return renderAddChemical();
   const delivery = cleanValue(request.delivery_status || request.status);
   const statusLabel = delivery === "sent_to_teams" ? "Sent to Teams review" : delivery === "local_only" ? "Saved locally, not sent" : delivery === "saved_without_teams" ? "Saved without Teams queue" : "Saved";
-  layout(`<section class="panel receipt"><span class="eyebrow">Request receipt</span><h1>Add Chemical Request</h1><div class="banner ${delivery === "local_only" ? "autofill-status is-error" : "autofill-status is-success"}"><strong>${escapeHtml(statusLabel)}</strong><br><span>${escapeHtml(request.submit_message || "Keep this page as a local receipt for the request.")}</span></div>${summaryRows([["Request ID", request.request_id || request.id], ["Chemical", request.chemical_name], ["Product code", request.product_code], ["CAS", request.cas_number], ["Manufacturer", request.manufacturer], ["SDS link", request.sds_url], ["Created", formatDate(request.created_at)]])}<button class="button secondary" data-route="home">Back to search</button></section>`);
+  layout(`<section class="panel receipt"><span class="eyebrow">Request receipt</span><h1>Add Chemical Request</h1><div class="banner ${delivery === "local_only" ? "request-status is-error" : "request-status is-success"}"><strong>${escapeHtml(statusLabel)}</strong><br><span>${escapeHtml(request.submit_message || "Keep this page as a local receipt for the request.")}</span></div>${summaryRows([["Request ID", request.request_id || request.id], ["Chemical", request.chemical_name], ["Product code", request.product_code], ["CAS", request.cas_number], ["Manufacturer", request.manufacturer], ["SDS link", request.sds_url], ["Created", formatDate(request.created_at)]])}<button class="button secondary" data-route="home">Back to search</button></section>`);
 }
 
 function bindButtons(scope = document) {
