@@ -28,6 +28,7 @@ Important frontend files:
 
 ```text
 chemicalsearch-site/index.html          Main frontend entry point and script loading
+chemicalsearch-site/runtime-config.js   Runtime API URL override setup
 chemicalsearch-site/styles.css          Main stylesheet and layout overrides
 chemicalsearch-site/app.js              Main app/routing/search logic
 chemicalsearch-site/autofill-client.js  Add/update chemical request form and autofill behavior
