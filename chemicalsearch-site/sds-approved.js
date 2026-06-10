@@ -38,5 +38,25 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-09T14:45:29.083Z",
     "review_notes": "",
     "updated_at": "2026-06-09"
+  },
+  {
+    "id": "test-chemical-1781115776136",
+    "name": "Test Chemical",
+    "company": "",
+    "product_code": "N/A",
+    "use": "Pending classification",
+    "sds_number": "N/A",
+    "sds_version": "N/A",
+    "issue_date": "N/A",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "",
+    "hfrp_info": "N/A",
+    "sds_url": "https://example.com/test-sds.pdf",
+    "sds_reference": "https://example.com/test-sds.pdf",
+    "approved_by": "Testing Reviewer",
+    "approved_at": "2026-06-10T18:22:56.136Z",
+    "review_notes": "",
+    "updated_at": "2026-06-10"
   }
 ]);
