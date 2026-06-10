@@ -26,6 +26,19 @@
     });
   }
 
+  function createHeroLogoPanel() {
+    var panel = document.createElement('div');
+    panel.className = 'hero-logo-panel';
+
+    var img = document.createElement('img');
+    img.src = SOJO_LOGO_URL;
+    img.alt = 'SOJO';
+    img.loading = 'eager';
+
+    panel.appendChild(img);
+    return panel;
+  }
+
   function fixHeroLogo() {
     if (fixing) return;
     fixing = true;
@@ -34,20 +47,27 @@
       var hero = document.querySelector('.hero-inner');
       if (!hero) return;
 
-      hero.querySelectorAll('.hero-logo-panel').forEach(function (node) {
+      var panels = Array.from(hero.querySelectorAll('.hero-logo-panel'));
+      var primaryPanel = panels[0];
+
+      panels.slice(1).forEach(function (node) {
         node.remove();
       });
 
-      var panel = document.createElement('div');
-      panel.className = 'hero-logo-panel';
+      if (!primaryPanel) {
+        hero.appendChild(createHeroLogoPanel());
+        return;
+      }
 
-      var img = document.createElement('img');
-      img.src = SOJO_LOGO_URL;
-      img.alt = 'SOJO';
-      img.loading = 'eager';
+      var img = primaryPanel.querySelector('img');
+      if (!img) {
+        primaryPanel.replaceWith(createHeroLogoPanel());
+        return;
+      }
 
-      panel.appendChild(img);
-      hero.appendChild(panel);
+      if (img.src !== SOJO_LOGO_URL) img.src = SOJO_LOGO_URL;
+      if (img.alt !== 'SOJO') img.alt = 'SOJO';
+      if (img.loading !== 'eager') img.loading = 'eager';
     } finally {
       fixing = false;
     }
