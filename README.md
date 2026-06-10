@@ -48,6 +48,15 @@ backend/package.json           Backend npm scripts and dependencies
 backend/.env.example           Example backend environment variables
 ```
 
+Useful maintenance docs:
+
+```text
+docs/CLEANUP_AUDIT.md      Repository cleanup findings
+docs/DEPLOYMENT.md         Render, Power Automate, and deploy-hook notes
+docs/FRONTEND_AUDIT.md     Frontend architecture and styling cleanup notes
+docs/SMOKE_TEST.md         Manual smoke-test checklist after changes
+```
+
 ## Main user flows
 
 1. User searches existing chemicals in the frontend.
@@ -189,7 +198,9 @@ https://chemicalsearch-site.onrender.com,http://127.0.0.1:5500
 
 ## Manual test checklist
 
-Before considering a deployment healthy, manually test:
+Before considering a deployment healthy, manually test the workflow in `docs/SMOKE_TEST.md`.
+
+Quick checklist:
 
 ```text
 1. Backend health endpoint returns ok.
