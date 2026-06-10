@@ -16,13 +16,17 @@ Expected:
 {"ok":true,"service":"chemicalsearch-backend"}
 ```
 
+A `Cannot GET /` response at the backend root is normal. Use `/health` for health checks.
+
 ## Frontend load
 
 ```text
 1. Open https://chemicalsearch-site.onrender.com
 2. Hard refresh the page.
 3. Confirm the home page loads without a blank screen.
-4. Confirm the SOJO logo appears.
+4. Confirm the SOJO theme/colors are applied.
+5. Confirm the SOJO logo appears.
+6. Confirm the Home button is hidden on the home page.
 ```
 
 Hard refresh:
@@ -37,20 +41,24 @@ Mac: Cmd + Shift + R
 ```text
 1. Search for a known chemical.
 2. Confirm results appear.
-3. Open a result card.
-4. Confirm the detail page renders.
-5. Confirm the Home button appears on the detail page.
-6. Click Home and confirm it returns to the home/search page.
+3. Confirm quick search chips still populate results.
+4. Confirm chemical cards look correct and are clickable.
+5. Open a result card.
+6. Confirm the detail page renders.
+7. Confirm the Home button appears on the detail page.
+8. Click Home and confirm it returns to the home/search page.
 ```
 
 ## Add/update chemical flow
 
 ```text
 1. Open https://chemicalsearch-site.onrender.com/#/add-chemical
-2. Confirm the form loads.
+2. Confirm the add/update form loads.
 3. Enter a test product name and SDS URL.
-4. Submit the request.
-5. Confirm the request is accepted.
+4. Confirm autofill either fills useful fields or fails with a clear graceful message.
+5. Submit the request.
+6. Confirm the request is accepted.
+7. Confirm the receipt page loads for the submitted request.
 ```
 
 ## Teams approval flow
@@ -64,6 +72,8 @@ Mac: Cmd + Shift + R
 6. Confirm Render triggers a frontend redeploy.
 7. After deploy finishes, hard refresh the frontend.
 8. Search for the newly approved chemical.
+9. Confirm the approved chemical appears in search results.
+10. Open the approved chemical detail page.
 ```
 
 ## Frontend visual checks
@@ -73,10 +83,13 @@ Mac: Cmd + Shift + R
 2. Search bar and Search button align correctly.
 3. Quick search chips still wrap correctly.
 4. SOJO logo is in the expected place.
-5. Home button is hidden on the home page.
-6. Home button appears on non-home pages.
-7. Add/update form still looks usable.
-8. Approved chemical records appear after redeploy.
+5. SOJO theme/colors still apply.
+6. Home button is hidden on the home page.
+7. Home button appears on non-home pages.
+8. Add/update form still looks usable.
+9. Autofill status banners are readable.
+10. Receipt page is readable.
+11. Approved chemical records appear after redeploy.
 ```
 
 ## Browser console checks
@@ -84,13 +97,30 @@ Mac: Cmd + Shift + R
 Open DevTools and confirm there are no new errors for:
 
 ```text
+app-base.css
 styles.css
+sojo-theme.css
+runtime-config.js
 app.js
-enhancements.js
 autofill-client.js
 layout-fixes.js
 sds-data files
 sds-approved.js
+```
+
+## Backend API checks after backend changes
+
+Run these manually after backend code changes:
+
+```text
+1. GET /health returns ok true.
+2. POST /api/autofill succeeds or returns a useful validation/error response.
+3. POST /api/submit-request sends a request to the Teams workflow.
+4. Teams Adaptive Card appears.
+5. POST /api/review-callback accepts a valid approved/denied callback.
+6. Approved callback writes to chemicalsearch-site/sds-approved.js through GitHub.
+7. Frontend deploy hook runs after GitHub writeback.
+8. Approved chemical appears in frontend search after redeploy.
 ```
 
 ## When a test fails
