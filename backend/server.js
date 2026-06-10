@@ -49,13 +49,11 @@ function normalizeRequest(body = {}) {
 
   return {
     request_id: fields.request_id || body.request_id || crypto.randomUUID(),
-    chemical_name: firstUseful(fields.chemical_name, fields.product_name),
+    chemical_name: firstUseful(fields.chemical_name, fields.product_name, fields.name),
     product_code: clean(fields.product_code),
     cas_number: clean(fields.cas_number),
-    manufacturer: clean(fields.manufacturer),
+    manufacturer: firstUseful(fields.manufacturer, fields.company, fields.supplier),
     sds_url: clean(fields.sds_url),
-    composition: clean(fields.composition),
-    exposure_route: clean(fields.exposure_route),
     requested_by: clean(fields.requested_by),
     notes: clean(fields.notes),
     submitted_at: new Date().toISOString()
@@ -73,6 +71,7 @@ function normalizeApprovedChemical(input = {}) {
     name,
     company,
     product_code: clean(chemical.product_code) || 'N/A',
+    cas_number: clean(chemical.cas_number),
     use: clean(chemical.use) || 'Pending classification',
     sds_number: clean(chemical.sds_number) || 'N/A',
     sds_version: clean(chemical.sds_version) || 'N/A',
@@ -87,6 +86,120 @@ function normalizeApprovedChemical(input = {}) {
     approved_at: clean(input.approved_at) || now,
     review_notes: clean(input.review_notes),
     updated_at: now.slice(0, 10)
+  };
+}
+
+function buildReviewRecord(request) {
+  return {
+    request_id: request.request_id,
+    chemical_name: request.chemical_name,
+    name: request.chemical_name,
+    company: request.manufacturer,
+    manufacturer: request.manufacturer,
+    product_code: request.product_code,
+    cas_number: request.cas_number,
+    use: '',
+    sds_number: '',
+    sds_version: '',
+    issue_date: '',
+    revision_date: '',
+    supersedes_date: '',
+    hfrp_info: '',
+    sds_url: request.sds_url,
+    composition: '',
+    approved_by: '',
+    review_notes: request.notes,
+    requested_by: request.requested_by,
+    requester_notes: request.notes,
+    submitted_at: request.submitted_at
+  };
+}
+
+function reviewInput(id, label, value = '', options = {}) {
+  return {
+    type: 'Input.Text',
+    id,
+    label,
+    value: clean(value),
+    isMultiline: Boolean(options.isMultiline)
+  };
+}
+
+function buildReviewAdaptiveCard(reviewRecord) {
+  return {
+    type: 'AdaptiveCard',
+    version: '1.2',
+    body: [
+      {
+        type: 'TextBlock',
+        text: 'ChemicalSearch Review Request',
+        weight: 'Bolder',
+        size: 'Large',
+        wrap: true
+      },
+      {
+        type: 'TextBlock',
+        text: 'Edit any fields before approving. Blank fields can stay blank, but name and SDS link are required for approval.',
+        wrap: true
+      },
+      {
+        type: 'FactSet',
+        facts: [
+          { title: 'Request ID', value: reviewRecord.request_id || '' },
+          { title: 'Requested by', value: reviewRecord.requested_by || 'Not listed' },
+          { title: 'Submitted', value: reviewRecord.submitted_at || 'Not listed' }
+        ]
+      },
+      reviewInput('chemical_name', 'Chemical/product name', reviewRecord.chemical_name),
+      reviewInput('company', 'Company/manufacturer', reviewRecord.company),
+      reviewInput('product_code', 'Product code', reviewRecord.product_code),
+      reviewInput('cas_number', 'CAS number', reviewRecord.cas_number),
+      reviewInput('use', 'Use / classification', reviewRecord.use),
+      reviewInput('sds_number', 'SDS number', reviewRecord.sds_number),
+      reviewInput('sds_version', 'SDS version', reviewRecord.sds_version),
+      reviewInput('issue_date', 'Issue date', reviewRecord.issue_date),
+      reviewInput('revision_date', 'Revision date', reviewRecord.revision_date),
+      reviewInput('supersedes_date', 'Supersedes date', reviewRecord.supersedes_date),
+      reviewInput('hfrp_info', 'HFRP / NFPA info', reviewRecord.hfrp_info),
+      reviewInput('sds_url', 'SDS link', reviewRecord.sds_url),
+      reviewInput('composition', 'Composition / active ingredient', reviewRecord.composition, { isMultiline: true }),
+      reviewInput('approved_by', 'Approved by', reviewRecord.approved_by),
+      reviewInput('review_notes', 'Reviewer notes', reviewRecord.review_notes, { isMultiline: true }),
+      reviewInput('requester_notes', 'Requester notes', reviewRecord.requester_notes, { isMultiline: true })
+    ],
+    actions: [
+      {
+        type: 'Action.Submit',
+        title: 'Approve and Add Chemical',
+        data: {
+          decision: 'approved',
+          request_id: reviewRecord.request_id
+        }
+      },
+      {
+        type: 'Action.Submit',
+        title: 'Deny',
+        data: {
+          decision: 'denied',
+          request_id: reviewRecord.request_id
+        }
+      }
+    ]
+  };
+}
+
+function buildPowerAutomateReviewPayload(request) {
+  const reviewRecord = buildReviewRecord(request);
+  const adaptiveCard = buildReviewAdaptiveCard(reviewRecord);
+
+  return {
+    ...request,
+    ...reviewRecord,
+    secret: process.env.POWER_AUTOMATE_SHARED_SECRET || '',
+    review_fields: adaptiveCard.body.filter((item) => item.type === 'Input.Text'),
+    adaptive_card: adaptiveCard,
+    card_version: adaptiveCard.version,
+    instructions: 'Reviewer should edit fields in Teams before approving. Forward all submitted input fields to /api/review-callback.'
   };
 }
 
@@ -246,10 +359,7 @@ app.post('/api/submit-request', async (req, res) => {
     const flowRes = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...request,
-        secret: process.env.POWER_AUTOMATE_SHARED_SECRET || ''
-      })
+      body: JSON.stringify(buildPowerAutomateReviewPayload(request))
     });
 
     if (!flowRes.ok) {
