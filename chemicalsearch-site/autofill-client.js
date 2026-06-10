@@ -27,8 +27,10 @@
   }
 
   function formFields(form) {
+    const requestId = form.dataset.requestId || makeId();
     return {
-      request_id: form.dataset.requestId || makeId(),
+      id: requestId,
+      request_id: requestId,
       chemical_name: clean(form.elements.chemical_name?.value),
       product_code: clean(form.elements.product_code?.value),
       cas_number: clean(form.elements.cas_number?.value),
