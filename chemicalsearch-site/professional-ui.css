@@ -1,0 +1,158 @@
+/* Professional UI polish for action controls and contact information. */
+
+.button,
+.quick-chip,
+.filter-chip,
+.hotline,
+.source-pill,
+.ghs-pill,
+.risk-pill {
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.button {
+  min-height: 44px !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+.button.primary {
+  background: #f7f8fb !important;
+  color: #080b10 !important;
+  border: 1px solid #f7f8fb !important;
+}
+
+.button.secondary {
+  background: transparent !important;
+  color: #f7f8fb !important;
+  border: 1px solid #445066 !important;
+}
+
+.button.primary:hover,
+.button.secondary:hover,
+.quick-chip:hover,
+.filter-chip:hover {
+  transform: none !important;
+  filter: none !important;
+}
+
+.button.primary:hover {
+  background: #e8edf5 !important;
+  border-color: #e8edf5 !important;
+}
+
+.button.secondary:hover {
+  background: rgba(255,255,255,.08) !important;
+  border-color: #68768f !important;
+}
+
+.button:focus-visible,
+.quick-chip:focus-visible,
+.filter-chip:focus-visible,
+.hotline:focus-visible,
+.chemical-card:focus-visible {
+  outline: 2px solid rgba(255,255,255,.78) !important;
+  outline-offset: 3px !important;
+}
+
+.quick-chip,
+.filter-chip {
+  border-radius: 8px !important;
+  font-size: .92rem !important;
+  font-weight: 700 !important;
+  padding: 9px 13px !important;
+}
+
+.filter-chip.is-selected {
+  background: #f7f8fb !important;
+  color: #080b10 !important;
+  border-color: #f7f8fb !important;
+}
+
+.emergency-strip {
+  background: #060a10 !important;
+}
+
+.emergency-strip-inner {
+  align-items: stretch !important;
+}
+
+.hotline {
+  border-radius: 10px !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 16px !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+.hotline-label {
+  display: block !important;
+  color: #f7f8fb !important;
+  font-size: .92rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+}
+
+.hotline-copy {
+  display: block !important;
+  color: #aeb9c8 !important;
+  font-size: .82rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  margin-top: 2px !important;
+}
+
+.hotline strong {
+  color: inherit !important;
+  font-size: .98rem !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.hotline.critical {
+  background: #f7f8fb !important;
+  color: #080b10 !important;
+}
+
+.hotline.critical .hotline-label,
+.hotline.critical .hotline-copy {
+  color: #080b10 !important;
+}
+
+.hotline.poison,
+.hotline.neutral {
+  background: #101722 !important;
+  border-color: #344055 !important;
+  color: #f7f8fb !important;
+}
+
+.hotline.poison:hover,
+.hotline.neutral:hover {
+  background: #151e2b !important;
+  border-color: #4b5a73 !important;
+}
+
+.card-badges,
+.record-status-row {
+  gap: 8px !important;
+}
+
+.risk-pill,
+.ghs-pill,
+.source-pill {
+  border-radius: 999px !important;
+  font-size: .82rem !important;
+  font-weight: 800 !important;
+  padding: 5px 10px !important;
+}
+
+.form-actions {
+  align-items: center !important;
+}
+
+.submission-dialog-actions .button {
+  min-width: 140px !important;
+}
