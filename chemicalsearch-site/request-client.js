@@ -79,8 +79,6 @@
       cas_number: clean(form.elements.cas_number?.value),
       manufacturer: clean(form.elements.manufacturer?.value),
       sds_url: clean(form.elements.sds_url?.value),
-      composition: clean(form.elements.composition?.value),
-      exposure_route: clean(form.elements.exposure_route?.value),
       requested_by: clean(form.elements.requested_by?.value),
       notes: clean(form.elements.notes?.value)
     };
@@ -129,12 +127,10 @@
           </div></fieldset>
           <fieldset class="form-section label-full"><legend>SDS or safety details</legend><div class="form-section-grid">
             <label class="label">SDS link <input class="field" name="sds_url" type="url" autocomplete="off"></label>
-            <label class="label">Composition / active ingredient <input class="field" name="composition" autocomplete="off"></label>
-            <label class="label">Exposure route <select class="field" name="exposure_route"><option value="">Not incident-related / unknown</option><option>Skin</option><option>Eyes</option><option>Inhalation</option><option>Ingestion</option></select></label>
           </div></fieldset>
           <fieldset class="form-section label-full"><legend>Requester info</legend><div class="form-section-grid">
             <label class="label">Your email <input class="field" name="requested_by" type="email" autocomplete="email"></label>
-            <label class="label label-full">Notes <textarea class="textarea" name="notes" placeholder="Location, label details, why it is needed, or anything the reviewer should verify"></textarea></label>
+            <label class="label label-full">Notes <textarea class="textarea" name="notes" placeholder="Any other additional information for the reviewer"></textarea></label>
           </div></fieldset>
           <div class="form-actions label-full"><button class="button primary" type="submit" id="submitReviewButton">Send for supervisor review</button><button class="button secondary" type="button" data-route="home">Cancel</button></div>
         </form>
