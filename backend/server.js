@@ -192,7 +192,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
       },
       {
         type: 'TextBlock',
-        text: 'Edit any fields before approving. Use Delete Product to remove an existing product card.',
+        text: 'Edit any fields before approving. Product name is required for adding or updating; SDS link is optional. Use Delete Product to remove an existing product card.',
         wrap: true
       },
       {
@@ -503,8 +503,8 @@ app.post('/api/review-callback', async (req, res) => {
 
     const record = normalizeApprovedChemical(req.body);
 
-    if (!record.name || !record.sds_url) {
-      return res.status(400).json({ error: 'Approved chemical requires at least name and SDS URL.' });
+    if (!record.name) {
+      return res.status(400).json({ error: 'Approved chemical requires at least a product name.' });
     }
 
     await upsertLocalApproved(record);

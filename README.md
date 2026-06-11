@@ -139,4 +139,6 @@ Product update requests use the same flow. When the user clicks `Suggest update`
 
 To delete a product from Teams, click `Delete Product` on an existing product update card. Power Automate must forward the card response `decision` and `record_id` to `/api/review-callback`. The backend writes a deletion marker with that same `record_id`, and the frontend hides that product after redeploy. Blank approved update cards with `record_id` are still treated as deletes for backwards compatibility.
 
+Approved add/update callbacks require a product name. SDS links are optional; records without one appear as `SDS missing`.
+
 Keep this workflow conservative. Do not rename environment variables or rewrite the approval/writeback/deploy-hook path without testing it end to end.
