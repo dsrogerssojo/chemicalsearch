@@ -135,4 +135,6 @@ Frontend redeploys
 Approved chemical appears in search
 ```
 
+Product update requests use the same flow. When the user clicks `Suggest update`, the site sends `record_id` plus the current product fields to Power Automate. Include `record_id` in the `/api/review-callback` body. If `record_id` matches an existing approved record, the backend replaces that approved record; if it matches a built-in record, the approved update keeps the same ID and the frontend displays the approved version because the last loaded record wins.
+
 Keep this workflow conservative. Do not rename environment variables or rewrite the approval/writeback/deploy-hook path without testing it end to end.

@@ -49,11 +49,20 @@ function normalizeRequest(body = {}) {
 
   return {
     request_id: fields.request_id || body.request_id || crypto.randomUUID(),
+    record_id: clean(fields.record_id),
     chemical_name: firstUseful(fields.chemical_name, fields.product_name, fields.name),
     product_code: clean(fields.product_code),
     cas_number: clean(fields.cas_number),
     manufacturer: firstUseful(fields.manufacturer, fields.company, fields.supplier),
     sds_url: clean(fields.sds_url),
+    use: clean(fields.use),
+    sds_number: clean(fields.sds_number),
+    sds_version: clean(fields.sds_version),
+    issue_date: clean(fields.issue_date),
+    revision_date: clean(fields.revision_date),
+    supersedes_date: clean(fields.supersedes_date),
+    composition: clean(fields.composition),
+    hfrp_info: clean(fields.hfrp_info),
     requested_by: clean(fields.requested_by),
     notes: clean(fields.notes),
     submitted_at: new Date().toISOString()
@@ -64,10 +73,11 @@ function normalizeApprovedChemical(input = {}) {
   const chemical = input.chemical || input;
   const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
+  const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
   const now = new Date().toISOString();
 
   return {
-    id: slugify(`${name}-${company}-${Date.now()}`),
+    id: recordId || slugify(`${name}-${company}-${Date.now()}`),
     name,
     company,
     product_code: clean(chemical.product_code) || 'N/A',
@@ -92,21 +102,22 @@ function normalizeApprovedChemical(input = {}) {
 function buildReviewRecord(request) {
   return {
     request_id: request.request_id,
+    record_id: request.record_id,
     chemical_name: request.chemical_name,
     name: request.chemical_name,
     company: request.manufacturer,
     manufacturer: request.manufacturer,
     product_code: request.product_code,
     cas_number: request.cas_number,
-    use: '',
-    sds_number: '',
-    sds_version: '',
-    issue_date: '',
-    revision_date: '',
-    supersedes_date: '',
-    hfrp_info: '',
+    use: request.use,
+    sds_number: request.sds_number,
+    sds_version: request.sds_version,
+    issue_date: request.issue_date,
+    revision_date: request.revision_date,
+    supersedes_date: request.supersedes_date,
+    hfrp_info: request.hfrp_info,
     sds_url: request.sds_url,
-    composition: '',
+    composition: request.composition,
     approved_by: '',
     review_notes: request.notes,
     requested_by: request.requested_by,
@@ -146,6 +157,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
         type: 'FactSet',
         facts: [
           { title: 'Request ID', value: reviewRecord.request_id || '' },
+          { title: 'Product record ID', value: reviewRecord.record_id || 'New product' },
           { title: 'Requested by', value: reviewRecord.requested_by || 'Not listed' },
           { title: 'Submitted', value: reviewRecord.submitted_at || 'Not listed' }
         ]
@@ -173,7 +185,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         title: 'Approve and Add Chemical',
         data: {
           decision: 'approved',
-          request_id: reviewRecord.request_id
+          request_id: reviewRecord.request_id,
+          record_id: reviewRecord.record_id
         }
       },
       {
@@ -181,7 +194,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         title: 'Deny',
         data: {
           decision: 'denied',
-          request_id: reviewRecord.request_id
+          request_id: reviewRecord.request_id,
+          record_id: reviewRecord.record_id
         }
       }
     ]
@@ -224,10 +238,17 @@ async function readLocalApproved() {
   }
 }
 
-async function appendLocalApproved(record) {
+function upsertRecord(records, record) {
+  const id = clean(record.id);
+  records = records.filter((item) => clean(item.id) !== id);
+  records.push(record);
+  return records;
+}
+
+async function upsertLocalApproved(record) {
   const current = await readLocalApproved();
-  current.push(record);
-  await fs.writeFile(LOCAL_APPROVED_PATH, `${JSON.stringify(current, null, 2)}\n`);
+  const records = upsertRecord(current, record);
+  await fs.writeFile(LOCAL_APPROVED_PATH, `${JSON.stringify(records, null, 2)}\n`);
 }
 
 function approvedJs(records) {
@@ -272,7 +293,7 @@ async function commitApprovedToGithub(record) {
     }
   }
 
-  records.push(record);
+  records = upsertRecord(records, record);
 
   const putRes = await fetch(apiBase, {
     method: 'PUT',
@@ -407,7 +428,7 @@ app.post('/api/review-callback', async (req, res) => {
       return res.status(400).json({ error: 'Approved chemical requires at least name and SDS URL.' });
     }
 
-    await appendLocalApproved(record);
+    await upsertLocalApproved(record);
     const github = await commitApprovedToGithub(record);
     const frontend_deploy = await triggerFrontendDeploy(github);
 

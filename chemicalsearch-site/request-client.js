@@ -5,6 +5,15 @@
 
   function apiUrl(path) { return `${API_BASE_URL}${path}`; }
   function clean(value) { return String(value || "").trim(); }
+  function getUpdateRecord(recordId) {
+    if (!recordId) return null;
+    return (globalThis.CHEMICALSEARCH_RECORDS || []).find((record) => record.id === recordId) || null;
+  }
+
+  function fieldValue(record, key, fallback = "") {
+    return escapeHtml(record?.[key] ?? fallback ?? "");
+  }
+
   function escapeHtml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -74,11 +83,20 @@
     return {
       id: requestId,
       request_id: requestId,
+      record_id: clean(form.elements.record_id?.value),
       chemical_name: clean(form.elements.chemical_name?.value),
       product_code: clean(form.elements.product_code?.value),
       cas_number: clean(form.elements.cas_number?.value),
       manufacturer: clean(form.elements.manufacturer?.value),
       sds_url: clean(form.elements.sds_url?.value),
+      use: clean(form.elements.use?.value),
+      sds_number: clean(form.elements.sds_number?.value),
+      sds_version: clean(form.elements.sds_version?.value),
+      issue_date: clean(form.elements.issue_date?.value),
+      revision_date: clean(form.elements.revision_date?.value),
+      supersedes_date: clean(form.elements.supersedes_date?.value),
+      hfrp_info: clean(form.elements.hfrp_info?.value),
+      composition: clean(form.elements.composition?.value),
       requested_by: clean(form.elements.requested_by?.value),
       notes: clean(form.elements.notes?.value)
     };
@@ -114,19 +132,35 @@
 
   function renderProductionRequestForm(prefill = "") {
     if (typeof layout !== "function") return;
+    const updateRecord = getUpdateRecord(prefill);
+    const formTitle = updateRecord ? "Suggest Product Update" : "Add or Update Chemical";
+    const formIntro = updateRecord
+      ? "Review the current product information below, change only what should be corrected, and send it to a supervisor for approval."
+      : "Enter the information you know from the label, SDS, supplier page, or product container. The request is sent to a supervisor for review and approval before it appears in ChemicalSearch.";
+    const productName = updateRecord ? updateRecord.name : prefill;
+    const manufacturer = updateRecord ? updateRecord.company || updateRecord.manufacturer : "";
     layout(`
       <section class="panel">
-        <div class="section-heading"><div><span class="eyebrow">Supervisor review</span><h1>Add or Update Chemical</h1><p class="lead">Enter the information you know from the label, SDS, supplier page, or product container. The request is sent to a supervisor for review and approval before it appears in ChemicalSearch.</p></div></div>
-        <div id="requestStatus" class="banner request-status"><strong>Put in whatever you know.</strong><br><span>Partial details are okay. A supervisor will verify the SDS information and approve the record before it is added to the searchable library.</span></div>
+        <div class="section-heading"><div><span class="eyebrow">Supervisor review</span><h1>${escapeHtml(formTitle)}</h1><p class="lead">${escapeHtml(formIntro)}</p></div></div>
+        <div id="requestStatus" class="banner request-status"><strong>Put in whatever you know.</strong><br><span>${updateRecord ? "Blanking a field asks the supervisor to remove that detail from the approved product card." : "Partial details are okay. A supervisor will verify the SDS information and approve the record before it is added to the searchable library."}</span></div>
         <form id="addChemicalForm" class="form-grid" novalidate>
+          <input type="hidden" name="record_id" value="${fieldValue(updateRecord, "id")}">
           <fieldset class="form-section label-full"><legend>What do you know?</legend><div class="form-section-grid">
-            <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(prefill)}" autocomplete="off"></label>
-            <label class="label">Product code <input class="field" name="product_code" autocomplete="off"></label>
-            <label class="label">CAS number <input class="field" name="cas_number" autocomplete="off"></label>
-            <label class="label">Manufacturer / supplier <input class="field" name="manufacturer" autocomplete="off"></label>
+            <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(productName)}" autocomplete="off"></label>
+            <label class="label">Product code <input class="field" name="product_code" value="${fieldValue(updateRecord, "product_code")}" autocomplete="off"></label>
+            <label class="label">CAS number <input class="field" name="cas_number" value="${fieldValue(updateRecord, "cas_number")}" autocomplete="off"></label>
+            <label class="label">Manufacturer / supplier <input class="field" name="manufacturer" value="${escapeHtml(manufacturer)}" autocomplete="off"></label>
           </div></fieldset>
           <fieldset class="form-section label-full"><legend>SDS or safety details</legend><div class="form-section-grid">
-            <label class="label">SDS link <input class="field" name="sds_url" type="url" autocomplete="off"></label>
+            <label class="label">SDS link <input class="field" name="sds_url" type="url" value="${fieldValue(updateRecord, "sds_url")}" autocomplete="off"></label>
+            <label class="label">Use / classification <input class="field" name="use" value="${fieldValue(updateRecord, "use")}" autocomplete="off"></label>
+            <label class="label">SDS number <input class="field" name="sds_number" value="${fieldValue(updateRecord, "sds_number")}" autocomplete="off"></label>
+            <label class="label">SDS version <input class="field" name="sds_version" value="${fieldValue(updateRecord, "sds_version")}" autocomplete="off"></label>
+            <label class="label">Issue date <input class="field" name="issue_date" value="${fieldValue(updateRecord, "issue_date")}" autocomplete="off"></label>
+            <label class="label">Revision date <input class="field" name="revision_date" value="${fieldValue(updateRecord, "revision_date")}" autocomplete="off"></label>
+            <label class="label">Supersedes date <input class="field" name="supersedes_date" value="${fieldValue(updateRecord, "supersedes_date")}" autocomplete="off"></label>
+            <label class="label">HFRP / NFPA info <input class="field" name="hfrp_info" value="${fieldValue(updateRecord, "hfrp_info")}" autocomplete="off"></label>
+            <label class="label label-full">Composition / active ingredient <textarea class="textarea" name="composition" autocomplete="off">${fieldValue(updateRecord, "composition")}</textarea></label>
           </div></fieldset>
           <fieldset class="form-section label-full"><legend>Requester info</legend><div class="form-section-grid">
             <label class="label">Your email <input class="field" name="requested_by" type="email" autocomplete="email"></label>
@@ -164,6 +198,10 @@
 
   window.renderAddChemical = renderProductionRequestForm;
   window.CHEMICALSEARCH_API_BASE_URL = API_BASE_URL;
-  window.addEventListener("hashchange", () => { if (location.hash.replace(/^#\/?/, "").split("/")[0] === "add-chemical") setTimeout(() => renderProductionRequestForm(window.currentQuery || ""), 0); });
-  if (location.hash.replace(/^#\/?/, "").split("/")[0] === "add-chemical") setTimeout(() => renderProductionRequestForm(window.currentQuery || ""), 0);
+  function syncRequestRoute() {
+    const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
+    if (page === "add-chemical") setTimeout(() => renderProductionRequestForm(id || window.currentQuery || ""), 0);
+  }
+  window.addEventListener("hashchange", syncRequestRoute);
+  syncRequestRoute();
 })();
