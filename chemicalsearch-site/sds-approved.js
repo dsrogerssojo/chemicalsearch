@@ -23,5 +23,30 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-11T18:19:07.736Z",
     "review_notes": "",
     "updated_at": "2026-06-11"
+  },
+  {
+    "id": "test3",
+    "name": "test3",
+    "company": "",
+    "product_code": "N/A",
+    "cas_number": "",
+    "use": "Pending classification",
+    "sds_number": "N/A",
+    "sds_version": "N/A",
+    "issue_date": "N/A",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "",
+    "hfrp_info": "N/A",
+    "sds_url": "",
+    "sds_reference": "",
+    "original_record_id": "",
+    "original_chemical_name": "",
+    "original_company": "",
+    "original_product_code": "",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-11T18:25:17.230Z",
+    "review_notes": "",
+    "updated_at": "2026-06-11"
   }
 ]);
