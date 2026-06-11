@@ -137,6 +137,6 @@ Approved chemical appears in search
 
 Product update requests use the same flow. When the user clicks `Suggest update`, the site sends `record_id` plus the current product fields to Power Automate. Include `record_id` in the `/api/review-callback` body. If `record_id` matches an existing approved record, the backend replaces that approved record; if it matches a built-in record, the approved update keeps the same ID and the frontend displays the approved version because the last loaded record wins.
 
-To delete a product from Teams, approve an existing product update with `record_id` present and every product field blank. The backend writes a deletion marker with that same `record_id`, and the frontend hides that product after redeploy.
+To delete a product from Teams, click `Delete Product` on an existing product update card. Power Automate must forward the card response `decision` and `record_id` to `/api/review-callback`. The backend writes a deletion marker with that same `record_id`, and the frontend hides that product after redeploy. Blank approved update cards with `record_id` are still treated as deletes for backwards compatibility.
 
 Keep this workflow conservative. Do not rename environment variables or rewrite the approval/writeback/deploy-hook path without testing it end to end.

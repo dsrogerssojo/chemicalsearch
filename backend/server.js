@@ -192,7 +192,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
       },
       {
         type: 'TextBlock',
-        text: 'Edit any fields before approving. Blank fields can stay blank, but name and SDS link are required for adding or updating. For an existing product, clearing every product field and approving deletes the product card.',
+        text: 'Edit any fields before approving. Use Delete Product to remove an existing product card.',
         wrap: true
       },
       {
@@ -236,6 +236,16 @@ function buildReviewAdaptiveCard(reviewRecord) {
         title: 'Deny',
         data: {
           decision: 'denied',
+          request_id: reviewRecord.request_id,
+          record_id: reviewRecord.record_id
+        }
+      },
+      {
+        type: 'Action.Submit',
+        title: 'Delete Product',
+        style: 'destructive',
+        data: {
+          decision: 'delete',
           request_id: reviewRecord.request_id,
           record_id: reviewRecord.record_id
         }
@@ -397,8 +407,12 @@ function isDeniedDecision(decision) {
   return ['denied', 'deny', 'rejected', 'reject'].includes(decision);
 }
 
+function isDeleteDecision(decision) {
+  return ['delete', 'deleted', 'remove', 'removed'].includes(decision);
+}
+
 function isKnownDecision(decision) {
-  return ['approved', 'approve', 'denied', 'deny', 'rejected', 'reject'].includes(decision);
+  return ['approved', 'approve', 'denied', 'deny', 'rejected', 'reject', 'delete', 'deleted', 'remove', 'removed'].includes(decision);
 }
 
 app.get('/health', (req, res) => {
@@ -452,7 +466,7 @@ app.post('/api/review-callback', async (req, res) => {
     const decision = clean(req.body.decision).toLowerCase();
 
     if (!isKnownDecision(decision)) {
-      return res.status(400).json({ error: 'Decision must be approved or denied.' });
+      return res.status(400).json({ error: 'Decision must be approved, denied, or delete.' });
     }
 
     if (isDeniedDecision(decision)) {
@@ -466,11 +480,11 @@ app.post('/api/review-callback', async (req, res) => {
 
     const deleteRecordId = firstUseful(req.body.record_id, req.body.chemical?.record_id, req.body.id, req.body.chemical?.id);
 
-    if (deleteRecordId && hasBlankProductFields(req.body)) {
+    if (isDeleteDecision(decision) || (deleteRecordId && hasBlankProductFields(req.body))) {
       const record = normalizeDeletedChemical(req.body);
 
       if (!record.id) {
-        return res.status(400).json({ error: 'Blank approved update requires record_id so the product can be deleted.' });
+        return res.status(400).json({ error: 'Delete requires record_id so the product can be removed.' });
       }
 
       await upsertLocalApproved(record);
