@@ -63,7 +63,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "id": "${record_id}",
     "deleted": true,
     "status": "deleted",
-    "deleted_at": "2026-06-11T13:28:00.383Z",
+    "deleted_at": "2026-06-11T13:28:04.252Z",
     "approved_by": "david.rogers@sojoindustries.com",
     "review_notes": "",
     "request_id": "",
