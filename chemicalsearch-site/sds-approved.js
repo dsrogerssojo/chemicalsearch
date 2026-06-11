@@ -68,7 +68,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "use": "Lubricant",
     "sds_number": "N/A",
     "sds_version": "5.0",
-    "issue_date": "05/24/2018",
+    "issue_date": "05/24/2019",
     "revision_date": "07/01/2016",
     "supersedes_date": "07/01/2016",
     "composition": "Acetone, Hydrotreated Light Naphtha (Petroleum), Propane, Poly(Dimethylsiloxane, Methylcylohexane, Solvent Naphtha",
@@ -76,7 +76,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "sds_url": "https://www.uline.com/PDF/SS-18768.pdf",
     "sds_reference": "https://www.uline.com/PDF/SS-18768.pdf",
     "approved_by": "david.rogers@sojoindustries.com",
-    "approved_at": "2026-06-11T13:20:05.167Z",
+    "approved_at": "2026-06-11T13:21:27.108Z",
     "review_notes": "",
     "updated_at": "2026-06-11"
   }
