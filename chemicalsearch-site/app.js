@@ -2,6 +2,8 @@ const REVIEW_EMAIL = "safety-review@example.com";
 const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
 const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
 const INITIAL_SDS_RECORDS = Array.isArray(globalThis.SDS_RECORDS) ? [...globalThis.SDS_RECORDS] : [];
+const LOCATION_OPTIONS = ["#1", "#2", "#3", "#4"];
+const DEFAULT_LOCATION = LOCATION_OPTIONS[0];
 
 function rawClean(value) {
   return String(value || "").trim();
@@ -20,13 +22,14 @@ function productIdentities(record) {
   const name = usefulValue(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = usefulValue(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = usefulValue(record.product_code).toLowerCase();
+  const location = recordLocation(record).toLowerCase();
   const sdsCandidate = usefulValue(record.sds_url || record.sds_reference).toLowerCase();
   const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : "";
   const identities = [];
-  if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
-  if (name && company) identities.push(`name-company:${name}|${company}`);
-  if (sdsUrl) identities.push(`sds:${sdsUrl}`);
-  if (!identities.length && name) identities.push(`name:${name}`);
+  if (name && productCode) identities.push(`name-code:${location}|${name}|${productCode}`);
+  if (name && company) identities.push(`name-company:${location}|${name}|${company}`);
+  if (sdsUrl) identities.push(`sds:${location}|${sdsUrl}`);
+  if (!identities.length && name) identities.push(`name:${location}|${name}`);
   return identities;
 }
 
@@ -37,6 +40,9 @@ function productIdentity(record) {
 function sameRecordVersion(a, b) {
   const aId = recordIdentity(a);
   const bId = recordIdentity(b);
+  const aLocation = recordLocation(a);
+  const bLocation = recordLocation(b);
+  if (aLocation && bLocation && aLocation !== bLocation) return false;
   if (aId && bId && aId === bId) return true;
 
   const bProducts = new Set(productIdentities(b));
@@ -70,6 +76,8 @@ globalThis.CHEMICALSEARCH_RECORDS = records;
 
 let currentQuery = "";
 window.currentQuery = currentQuery;
+let currentLocation = DEFAULT_LOCATION;
+window.currentLocation = currentLocation;
 
 function apiBaseUrl() {
   return (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || DEFAULT_API_BASE_URL).replace(/\/$/, "");
@@ -114,6 +122,24 @@ function displayValue(value) {
 function setCurrentQuery(value) {
   currentQuery = String(value || "");
   window.currentQuery = currentQuery;
+}
+
+function cleanLocation(value) {
+  const location = cleanValue(value);
+  return LOCATION_OPTIONS.includes(location) ? location : "";
+}
+
+function recordLocation(record) {
+  return cleanLocation(record.location || record.site_location || record.facility_location);
+}
+
+function locationLabel(value) {
+  return cleanLocation(value) || "All locations";
+}
+
+function setCurrentLocation(value) {
+  currentLocation = cleanLocation(value) || DEFAULT_LOCATION;
+  window.currentLocation = currentLocation;
 }
 
 function formatDate(value) {
@@ -199,6 +225,7 @@ function searchableValues(record) {
   return [
     record.name,
     record.company,
+    recordLocation(record),
     record.product_code,
     record.cas_number,
     record.approved_by,
@@ -227,7 +254,10 @@ function searchScore(record) {
 
 function matchesRecord(record) {
   const q = normalize(currentQuery);
-  return !q || searchableValues(record).some((value) => normalize(value).includes(q));
+  const location = recordLocation(record);
+  const matchesLocation = !location || location === currentLocation;
+  const matchesQuery = !q || searchableValues(record).some((value) => normalize(value).includes(q));
+  return matchesLocation && matchesQuery;
 }
 
 function searchResults() {
@@ -283,11 +313,14 @@ function hero() {
 }
 
 function searchPanel() {
+  const locationOptions = LOCATION_OPTIONS.map((location) => `<option value="${escapeHtml(location)}" ${location === currentLocation ? "selected" : ""}>${escapeHtml(location)}</option>`).join("");
   return `
     <div class="search-panel panel">
       <form id="searchForm" class="search-row" role="search">
         <label class="sr-only" for="searchInput">Search SDS records</label>
         <input id="searchInput" class="search-input" value="${escapeHtml(currentQuery)}" placeholder="Search cleaner, bleach, company, product code, composition..." autocomplete="off" />
+        <label class="sr-only" for="locationSelect">Location</label>
+        <select id="locationSelect" class="field location-select">${locationOptions}</select>
         <button class="button primary" type="submit">Search</button>
       </form>
     </div>
@@ -320,6 +353,10 @@ function bindSearchControls() {
     setCurrentQuery(event.target.value);
     renderResults();
   });
+  document.getElementById("locationSelect")?.addEventListener("change", (event) => {
+    setCurrentLocation(event.target.value);
+    renderResults();
+  });
 }
 
 function incidentCard(title, copy) {
@@ -331,13 +368,13 @@ function renderResults() {
   const meta = document.getElementById("resultsMeta");
   const list = document.getElementById("resultsList");
   if (!meta || !list) return;
-  meta.textContent = `${results.length} result${results.length === 1 ? "" : "s"} in ${records.length} SDS records.`;
+  meta.textContent = `${results.length} result${results.length === 1 ? "" : "s"} for location ${locationLabel(currentLocation)}.`;
   list.innerHTML = results.length ? results.map(recordCard).join("") : notFoundPrompt(currentQuery);
   bindButtons(list);
 }
 
 function recordCard(record) {
-  const subline = [record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : ""].filter(Boolean).join(" | ");
+  const subline = [record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", recordLocation(record) ? `Location ${recordLocation(record)}` : ""].filter(Boolean).join(" | ");
   const risk = riskInfo(record);
   const hfrp = parseHfrp(record);
   const source = sourceInfo(record);
@@ -383,7 +420,7 @@ function renderRecord(id) {
   const source = sourceInfo(record);
   const sds = sdsStatus(record);
   const labels = ghsLabels(record).map((item) => `<span class="ghs-pill ghs-${escapeHtml(item.tag)}">${escapeHtml(item.label)}</span>`).join("");
-  const details = [["Company", record.company], ["Product code", record.product_code], ["Use", record.use], ["SDS number", record.sds_number], ["SDS version", record.sds_version], ["Issue date", record.issue_date], ["Revision date", record.revision_date], ["HFRP info", record.hfrp_info], ["Source", source.label], ["SDS status", sds.label], ["Approved by", record.approved_by], ["Approved at", formatDate(record.approved_at)], ["Updated", formatDate(record.updated_at)]];
+  const details = [["Location", locationLabel(recordLocation(record))], ["Company", record.company], ["Product code", record.product_code], ["Use", record.use], ["SDS number", record.sds_number], ["SDS version", record.sds_version], ["Issue date", record.issue_date], ["Revision date", record.revision_date], ["HFRP info", record.hfrp_info], ["Source", source.label], ["SDS status", sds.label], ["Approved by", record.approved_by], ["Approved at", formatDate(record.approved_at)], ["Updated", formatDate(record.updated_at)]];
   layout(`
     <section class="panel detail-search-panel">
       <form id="detailSearchForm" class="search-row" role="search">
@@ -428,7 +465,7 @@ function renderRequestReceipt(id) {
   if (!request) return window.renderAddChemical();
   const delivery = cleanValue(request.delivery_status || request.status);
   const statusLabel = delivery === "sent_to_teams" ? "Sent to Teams review" : delivery === "local_only" ? "Saved locally, not sent" : delivery === "saved_without_teams" ? "Saved without Teams queue" : "Saved";
-  layout(`<section class="panel receipt"><span class="eyebrow">Request receipt</span><h1>Add Chemical Request</h1><div class="banner ${delivery === "local_only" ? "request-status is-error" : "request-status is-success"}"><strong>${escapeHtml(statusLabel)}</strong><br><span>${escapeHtml(request.submit_message || "Keep this page as a local receipt for the request.")}</span></div>${summaryRows([["Request ID", request.request_id || request.id], ["Chemical", request.chemical_name], ["Product code", request.product_code], ["CAS", request.cas_number], ["Manufacturer", request.manufacturer], ["SDS link", request.sds_url], ["Created", formatDate(request.created_at)]])}<button class="button secondary" data-route="home">Back to search</button></section>`);
+  layout(`<section class="panel receipt"><span class="eyebrow">Request receipt</span><h1>Add Chemical Request</h1><div class="banner ${delivery === "local_only" ? "request-status is-error" : "request-status is-success"}"><strong>${escapeHtml(statusLabel)}</strong><br><span>${escapeHtml(request.submit_message || "Keep this page as a local receipt for the request.")}</span></div>${summaryRows([["Request ID", request.request_id || request.id], ["Chemical", request.chemical_name], ["Location", request.location], ["Product code", request.product_code], ["CAS", request.cas_number], ["Manufacturer", request.manufacturer], ["SDS link", request.sds_url], ["Created", formatDate(request.created_at)]])}<button class="button secondary" data-route="home">Back to search</button></section>`);
 }
 
 function bindButtons(scope = document) {

@@ -2,6 +2,7 @@
   const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
   const API_BASE_URL = (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || DEFAULT_API_BASE_URL).replace(/\/$/, "");
   const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
+  const LOCATION_OPTIONS = ["#1", "#2", "#3", "#4"];
 
   function apiUrl(path) { return `${API_BASE_URL}${path}`; }
   function clean(value) { return String(value || "").trim(); }
@@ -20,6 +21,16 @@
       .replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
   }
   function makeId() { return crypto?.randomUUID ? crypto.randomUUID() : `request-${Date.now()}`; }
+
+  function cleanLocation(value) {
+    const location = clean(value);
+    return LOCATION_OPTIONS.includes(location) ? location : LOCATION_OPTIONS[0];
+  }
+
+  function locationOptions(selected) {
+    const current = cleanLocation(selected);
+    return LOCATION_OPTIONS.map((location) => `<option value="${escapeHtml(location)}" ${location === current ? "selected" : ""}>${escapeHtml(location)}</option>`).join("");
+  }
 
   function setStatus(status, html, className = "") {
     if (!status) return;
@@ -48,6 +59,7 @@
         <dl class="submission-dialog-details">
           <div><dt>Request ID</dt><dd>${escapeHtml(requestId)}</dd></div>
           <div><dt>Chemical</dt><dd>${escapeHtml(request.chemical_name || "Not listed")}</dd></div>
+          <div><dt>Location</dt><dd>${escapeHtml(request.location || "Not listed")}</dd></div>
         </dl>
         <div class="submission-dialog-actions">
           <button class="button primary" type="button" data-dialog-action="receipt">View receipt</button>
@@ -84,6 +96,7 @@
       id: requestId,
       request_id: requestId,
       record_id: clean(form.elements.record_id?.value),
+      location: cleanLocation(form.elements.location?.value),
       chemical_name: clean(form.elements.chemical_name?.value),
       product_code: clean(form.elements.product_code?.value),
       cas_number: clean(form.elements.cas_number?.value),
@@ -139,6 +152,7 @@
       : "Enter the information you know from the label, SDS, supplier page, or product container. The request is sent to a supervisor for review and approval before it appears in ChemicalSearch.";
     const productName = updateRecord ? updateRecord.name : prefill;
     const manufacturer = updateRecord ? updateRecord.company || updateRecord.manufacturer : "";
+    const selectedLocation = updateRecord?.location || updateRecord?.site_location || updateRecord?.facility_location || window.currentLocation || LOCATION_OPTIONS[0];
     layout(`
       <section class="panel">
         <div class="section-heading"><div><span class="eyebrow">Supervisor review</span><h1>${escapeHtml(formTitle)}</h1><p class="lead">${escapeHtml(formIntro)}</p></div></div>
@@ -146,6 +160,7 @@
         <form id="addChemicalForm" class="form-grid" novalidate>
           <input type="hidden" name="record_id" value="${fieldValue(updateRecord, "id")}">
           <fieldset class="form-section label-full"><legend>What do you know?</legend><div class="form-section-grid">
+            <label class="label">Location <select class="field" name="location">${locationOptions(selectedLocation)}</select></label>
             <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(productName)}" autocomplete="off"></label>
             <label class="label">Product code <input class="field" name="product_code" value="${fieldValue(updateRecord, "product_code")}" autocomplete="off"></label>
             <label class="label">CAS number <input class="field" name="cas_number" value="${fieldValue(updateRecord, "cas_number")}" autocomplete="off"></label>

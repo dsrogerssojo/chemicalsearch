@@ -15,6 +15,9 @@ import {
 
 const app = express();
 const LOCAL_APPROVED_PATH = path.join(path.resolve(DATA_DIR), LOCAL_APPROVED_FILENAME);
+const LOCATION_OPTIONS = ['#1', '#2', '#3', '#4'];
+const DEFAULT_LOCATION = LOCATION_OPTIONS[0];
+const pendingRequests = new Map();
 
 app.use(cors({
   origin(origin, callback) {
@@ -38,6 +41,11 @@ function firstUseful(...values) {
   return values.map(clean).find(Boolean) || '';
 }
 
+function cleanLocation(value) {
+  const location = clean(value);
+  return LOCATION_OPTIONS.includes(location) ? location : '';
+}
+
 function slugify(value) {
   return clean(value)
     .toLowerCase()
@@ -55,14 +63,15 @@ function productIdentities(record = {}) {
   const name = useful(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = useful(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = useful(record.product_code).toLowerCase();
+  const location = cleanLocation(record.location || record.site_location || record.facility_location).toLowerCase();
   const sdsCandidate = useful(record.sds_url || record.sds_reference).toLowerCase();
   const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : '';
   const identities = [];
 
-  if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
-  if (name && company) identities.push(`name-company:${name}|${company}`);
-  if (sdsUrl) identities.push(`sds:${sdsUrl}`);
-  if (!identities.length && name) identities.push(`name:${name}`);
+  if (name && productCode) identities.push(`name-code:${location}|${name}|${productCode}`);
+  if (name && company) identities.push(`name-company:${location}|${name}|${company}`);
+  if (sdsUrl) identities.push(`sds:${location}|${sdsUrl}`);
+  if (!identities.length && name) identities.push(`name:${location}|${name}`);
 
   return identities;
 }
@@ -74,6 +83,9 @@ function productIdentity(record = {}) {
 function sameProduct(a = {}, b = {}) {
   const aId = clean(a.id);
   const bId = clean(b.id);
+  const aLocation = cleanLocation(a.location || a.site_location || a.facility_location);
+  const bLocation = cleanLocation(b.location || b.site_location || b.facility_location);
+  if (aLocation && bLocation && aLocation !== bLocation) return false;
   if (aId && bId && aId === bId) return true;
 
   const bProducts = new Set(productIdentities(b));
@@ -84,6 +96,9 @@ const PRODUCT_REVIEW_FIELDS = [
   'chemical_name',
   'name',
   'product_name',
+  'location',
+  'site_location',
+  'facility_location',
   'company',
   'manufacturer',
   'supplier',
@@ -153,6 +168,7 @@ function normalizeRequest(body = {}) {
   return {
     request_id: fields.request_id || body.request_id || crypto.randomUUID(),
     record_id: clean(fields.record_id),
+    location: cleanLocation(fields.location || fields.site_location || fields.facility_location) || DEFAULT_LOCATION,
     chemical_name: firstUseful(fields.chemical_name, fields.product_name, fields.name),
     product_code: clean(fields.product_code),
     cas_number: clean(fields.cas_number),
@@ -178,11 +194,13 @@ function normalizeApprovedChemical(input = {}) {
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
   const productCode = clean(chemical.product_code);
+  const location = cleanLocation(chemical.location || input.location || chemical.site_location || input.site_location || chemical.facility_location || input.facility_location) || DEFAULT_LOCATION;
   const now = new Date().toISOString();
 
   return {
-    id: recordId || slugify(`${name}-${company}-${productCode}`),
+    id: recordId || slugify(`${name}-${company}-${productCode}-${location}`),
     name,
+    location,
     company,
     product_code: productCode || 'N/A',
     cas_number: clean(chemical.cas_number),
@@ -210,10 +228,12 @@ function normalizeDeletedChemical(input = {}) {
   const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const productCode = clean(chemical.product_code);
+  const location = cleanLocation(chemical.location || input.location || chemical.site_location || input.site_location || chemical.facility_location || input.facility_location);
 
   return {
     id,
     name,
+    location,
     company,
     product_code: productCode,
     cas_number: clean(chemical.cas_number),
@@ -233,6 +253,7 @@ function buildReviewRecord(request) {
   return {
     request_id: request.request_id,
     record_id: request.record_id,
+    location: request.location || DEFAULT_LOCATION,
     chemical_name: request.chemical_name,
     name: request.chemical_name,
     company: request.manufacturer,
@@ -266,6 +287,34 @@ function reviewInput(id, label, value = '', options = {}) {
   };
 }
 
+function hydrateReviewInput(input = {}) {
+  const requestId = clean(input.request_id);
+  const pending = requestId ? pendingRequests.get(requestId) : null;
+
+  if (!pending) return input;
+
+  return {
+    ...pending,
+    ...input,
+    location: cleanLocation(input.location) || pending.location,
+    chemical: {
+      ...pending,
+      ...input.chemical,
+      ...input
+    }
+  };
+}
+
+function reviewLocationInput(value = DEFAULT_LOCATION) {
+  return {
+    type: 'Input.ChoiceSet',
+    id: 'location',
+    label: 'Location',
+    value: cleanLocation(value) || DEFAULT_LOCATION,
+    choices: LOCATION_OPTIONS.map((location) => ({ title: location, value: location }))
+  };
+}
+
 function buildReviewAdaptiveCard(reviewRecord) {
   return {
     type: 'AdaptiveCard',
@@ -292,6 +341,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
           { title: 'Submitted', value: reviewRecord.submitted_at || 'Not listed' }
         ]
       },
+      reviewLocationInput(reviewRecord.location),
       reviewInput('chemical_name', 'Chemical/product name', reviewRecord.chemical_name),
       reviewInput('company', 'Company/manufacturer', reviewRecord.company),
       reviewInput('product_code', 'Product code', reviewRecord.product_code),
@@ -317,7 +367,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'approved',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
+          record_id: reviewRecord.record_id,
+          location: reviewRecord.location
         }
       },
       {
@@ -327,7 +378,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'denied',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
+          record_id: reviewRecord.record_id,
+          location: reviewRecord.location
         }
       },
       {
@@ -338,7 +390,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'delete',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
+          record_id: reviewRecord.record_id,
+          location: reviewRecord.location
         }
       }
     ]
@@ -353,7 +406,7 @@ function buildPowerAutomateReviewPayload(request) {
     ...request,
     ...reviewRecord,
     secret: process.env.POWER_AUTOMATE_SHARED_SECRET || '',
-    review_fields: adaptiveCard.body.filter((item) => item.type === 'Input.Text'),
+    review_fields: adaptiveCard.body.filter((item) => item.type === 'Input.Text' || item.type === 'Input.ChoiceSet'),
     adaptive_card: adaptiveCard,
     card_version: adaptiveCard.version,
     instructions: 'Reviewer should edit fields in Teams before approving. Forward all submitted input fields to /api/review-callback.'
@@ -525,6 +578,7 @@ app.post('/api/submit-request', async (req, res) => {
   try {
     const request = normalizeRequest(req.body);
     const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
+    pendingRequests.set(request.request_id, request);
 
     if (!webhookUrl) {
       return res.status(202).json({
@@ -558,7 +612,7 @@ app.post('/api/submit-request', async (req, res) => {
 
 app.post('/api/review-callback', async (req, res) => {
   try {
-    const reviewInput = normalizeReviewInput(req.body);
+    const reviewInput = hydrateReviewInput(normalizeReviewInput(req.body));
     const expectedSecret = process.env.REVIEW_CALLBACK_SECRET || '';
     const providedSecret = req.get('x-review-secret') || reviewInput.secret || '';
 
@@ -573,6 +627,7 @@ app.post('/api/review-callback', async (req, res) => {
     }
 
     if (isDeniedDecision(decision)) {
+      pendingRequests.delete(clean(reviewInput.request_id));
       return res.json({
         ok: true,
         decision: 'denied',
@@ -593,6 +648,7 @@ app.post('/api/review-callback', async (req, res) => {
       await upsertLocalApproved(record);
       const github = await commitApprovedToGithub(record, { delete: true });
       const frontend_deploy = await triggerFrontendDeploy(github);
+      pendingRequests.delete(clean(reviewInput.request_id));
 
       return res.json({
         ok: true,
@@ -613,6 +669,7 @@ app.post('/api/review-callback', async (req, res) => {
     await upsertLocalApproved(record);
     const github = await commitApprovedToGithub(record);
     const frontend_deploy = await triggerFrontendDeploy(github);
+    pendingRequests.delete(clean(reviewInput.request_id));
 
     res.json({
       ok: true,

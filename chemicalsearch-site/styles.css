@@ -31,13 +31,22 @@ body { }
 
 .search-row .button,
 .search-row button[type='submit'] {
-  order: 2 !important;
+  order: 3 !important;
   flex: 0 0 auto !important;
   width: auto !important;
   height: 52px !important;
   min-width: 128px !important;
   padding: 0 26px !important;
   white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.location-select {
+  order: 2 !important;
+  flex: 0 0 112px !important;
+  width: 112px !important;
+  min-width: 112px !important;
+  height: 52px !important;
   box-sizing: border-box !important;
 }
 
@@ -347,6 +356,7 @@ body:not(.is-home-page) .emergency-strip {
   }
 
   .search-input,
+  .location-select,
   .search-row .button,
   .search-row button[type='submit'] {
     width: 100% !important;
