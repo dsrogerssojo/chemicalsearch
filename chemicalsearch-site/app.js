@@ -72,6 +72,7 @@ function buildRecordSet(items) {
 
 const baseRecords = INITIAL_SDS_RECORDS.filter((record) => !isWorkflowRecord(record));
 let records = buildRecordSet(INITIAL_SDS_RECORDS);
+let approvedRecordsSignature = "";
 globalThis.CHEMICALSEARCH_RECORDS = records;
 
 let currentQuery = "";
@@ -87,12 +88,40 @@ async function refreshApprovedRecords() {
     if (!response.ok) throw new Error(`Approved records request failed: ${response.status}`);
     const approved = await response.json();
     if (!Array.isArray(approved)) return;
+    const signature = JSON.stringify(approved);
+    if (signature === approvedRecordsSignature) return;
+    approvedRecordsSignature = signature;
     records = buildRecordSet(baseRecords.concat(approved));
     globalThis.CHEMICALSEARCH_RECORDS = records;
-    route();
+    refreshCurrentView();
   } catch (error) {
     console.warn(error);
   }
+}
+
+function currentRoute() {
+  const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
+  return { page, id };
+}
+
+function refreshCurrentView() {
+  const { page } = currentRoute();
+
+  if (page === "add-chemical" || page === "request") return;
+  if (!page && document.getElementById("resultsList")) {
+    renderResults();
+    return;
+  }
+
+  route();
+}
+
+function startApprovedRecordsPolling() {
+  setInterval(refreshApprovedRecords, 5000);
+  window.addEventListener("focus", refreshApprovedRecords);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshApprovedRecords();
+  });
 }
 
 function escapeHtml(value) {
@@ -466,3 +495,4 @@ window.refreshApprovedRecords = refreshApprovedRecords;
 window.addEventListener("hashchange", route);
 route();
 refreshApprovedRecords();
+startApprovedRecordsPolling();
