@@ -20,13 +20,19 @@ function productIdentities(record) {
   const name = usefulValue(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = usefulValue(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = usefulValue(record.product_code).toLowerCase();
+  const originalName = usefulValue(record.original_chemical_name || record.original_name).toLowerCase();
+  const originalCompany = usefulValue(record.original_company || record.original_manufacturer).toLowerCase();
+  const originalProductCode = usefulValue(record.original_product_code).toLowerCase();
   const sdsCandidate = usefulValue(record.sds_url || record.sds_reference).toLowerCase();
   const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : "";
   const identities = [];
   if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
   if (name && company) identities.push(`name-company:${name}|${company}`);
+  if (originalName && originalProductCode) identities.push(`name-code:${originalName}|${originalProductCode}`);
+  if (originalName && originalCompany) identities.push(`name-company:${originalName}|${originalCompany}`);
   if (sdsUrl) identities.push(`sds:${sdsUrl}`);
   if (!identities.length && name) identities.push(`name:${name}`);
+  if (!identities.length && originalName) identities.push(`name:${originalName}`);
   return identities;
 }
 

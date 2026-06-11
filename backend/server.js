@@ -55,14 +55,20 @@ function productIdentities(record = {}) {
   const name = useful(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = useful(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = useful(record.product_code).toLowerCase();
+  const originalName = useful(record.original_chemical_name || record.original_name).toLowerCase();
+  const originalCompany = useful(record.original_company || record.original_manufacturer).toLowerCase();
+  const originalProductCode = useful(record.original_product_code).toLowerCase();
   const sdsCandidate = useful(record.sds_url || record.sds_reference).toLowerCase();
   const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : '';
   const identities = [];
 
   if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
   if (name && company) identities.push(`name-company:${name}|${company}`);
+  if (originalName && originalProductCode) identities.push(`name-code:${originalName}|${originalProductCode}`);
+  if (originalName && originalCompany) identities.push(`name-company:${originalName}|${originalCompany}`);
   if (sdsUrl) identities.push(`sds:${sdsUrl}`);
   if (!identities.length && name) identities.push(`name:${name}`);
+  if (!identities.length && originalName) identities.push(`name:${originalName}`);
 
   return identities;
 }
@@ -153,6 +159,10 @@ function normalizeRequest(body = {}) {
   return {
     request_id: fields.request_id || body.request_id || crypto.randomUUID(),
     record_id: clean(fields.record_id),
+    original_record_id: clean(fields.original_record_id),
+    original_chemical_name: firstUseful(fields.original_chemical_name, fields.original_name),
+    original_company: firstUseful(fields.original_company, fields.original_manufacturer),
+    original_product_code: clean(fields.original_product_code),
     chemical_name: firstUseful(fields.chemical_name, fields.product_name, fields.name),
     product_code: clean(fields.product_code),
     cas_number: clean(fields.cas_number),
@@ -176,7 +186,15 @@ function normalizeApprovedChemical(input = {}) {
   const chemical = input.chemical || input;
   const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
-  const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
+  const recordId = firstUseful(
+    chemical.record_id,
+    input.record_id,
+    chemical.original_record_id,
+    input.original_record_id,
+    chemical.existing_record_id,
+    input.existing_record_id,
+    chemical.id
+  );
   const productCode = clean(chemical.product_code);
   const now = new Date().toISOString();
 
@@ -196,6 +214,10 @@ function normalizeApprovedChemical(input = {}) {
     hfrp_info: clean(chemical.hfrp_info) || 'N/A',
     sds_url: clean(chemical.sds_url),
     sds_reference: clean(chemical.sds_url),
+    original_record_id: clean(chemical.original_record_id || input.original_record_id),
+    original_chemical_name: clean(chemical.original_chemical_name || input.original_chemical_name),
+    original_company: clean(chemical.original_company || input.original_company),
+    original_product_code: clean(chemical.original_product_code || input.original_product_code),
     approved_by: clean(input.reviewer || input.approved_by),
     approved_at: clean(input.approved_at) || now,
     review_notes: clean(input.review_notes),
@@ -206,7 +228,15 @@ function normalizeApprovedChemical(input = {}) {
 function normalizeDeletedChemical(input = {}) {
   const chemical = input.chemical || input;
   const now = new Date().toISOString();
-  const id = firstUseful(chemical.record_id, input.record_id, chemical.id);
+  const id = firstUseful(
+    chemical.record_id,
+    input.record_id,
+    chemical.original_record_id,
+    input.original_record_id,
+    chemical.existing_record_id,
+    input.existing_record_id,
+    chemical.id
+  );
   const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const productCode = clean(chemical.product_code);
@@ -219,6 +249,10 @@ function normalizeDeletedChemical(input = {}) {
     cas_number: clean(chemical.cas_number),
     sds_url: clean(chemical.sds_url),
     sds_reference: clean(chemical.sds_url),
+    original_record_id: clean(chemical.original_record_id || input.original_record_id),
+    original_chemical_name: clean(chemical.original_chemical_name || input.original_chemical_name),
+    original_company: clean(chemical.original_company || input.original_company),
+    original_product_code: clean(chemical.original_product_code || input.original_product_code),
     deleted: true,
     status: 'deleted',
     deleted_at: now,
@@ -233,6 +267,10 @@ function buildReviewRecord(request) {
   return {
     request_id: request.request_id,
     record_id: request.record_id,
+    original_record_id: request.original_record_id || request.record_id,
+    original_chemical_name: request.original_chemical_name,
+    original_company: request.original_company,
+    original_product_code: request.original_product_code,
     chemical_name: request.chemical_name,
     name: request.chemical_name,
     company: request.manufacturer,
@@ -292,6 +330,11 @@ function buildReviewAdaptiveCard(reviewRecord) {
           { title: 'Submitted', value: reviewRecord.submitted_at || 'Not listed' }
         ]
       },
+      reviewInput('record_id', 'Product record ID - keep for edits/deletes', reviewRecord.record_id || reviewRecord.original_record_id),
+      reviewInput('original_record_id', 'Original product ID - do not change', reviewRecord.original_record_id || reviewRecord.record_id),
+      reviewInput('original_chemical_name', 'Original product name - do not change', reviewRecord.original_chemical_name),
+      reviewInput('original_company', 'Original company - do not change', reviewRecord.original_company),
+      reviewInput('original_product_code', 'Original product code - do not change', reviewRecord.original_product_code),
       reviewInput('chemical_name', 'Chemical/product name', reviewRecord.chemical_name),
       reviewInput('company', 'Company/manufacturer', reviewRecord.company),
       reviewInput('product_code', 'Product code', reviewRecord.product_code),
@@ -317,7 +360,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'approved',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
+          record_id: reviewRecord.record_id,
+          original_record_id: reviewRecord.original_record_id || reviewRecord.record_id
         }
       },
       {
@@ -327,7 +371,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'denied',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
+          record_id: reviewRecord.record_id,
+          original_record_id: reviewRecord.original_record_id || reviewRecord.record_id
         }
       },
       {
@@ -338,7 +383,8 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'delete',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
+          record_id: reviewRecord.record_id,
+          original_record_id: reviewRecord.original_record_id || reviewRecord.record_id
         }
       }
     ]
