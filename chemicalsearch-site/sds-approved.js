@@ -61,12 +61,23 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
   },
   {
     "id": "${record_id}",
-    "deleted": true,
-    "status": "deleted",
-    "deleted_at": "2026-06-11T13:28:06.961Z",
+    "name": "30 Seconds Mold & Mildew Remover",
+    "company": "30 Seconds Cleaners",
+    "product_code": "30S11",
+    "cas_number": "",
+    "use": "Office Cleaning",
+    "sds_number": "N/A",
+    "sds_version": "1.0",
+    "issue_date": "01/10/2023",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "Sodium hypochlorite",
+    "hfrp_info": "3/0/0/0",
+    "sds_url": "https://30secondscleaners.com/mwdownloads/download/link/id/2308",
+    "sds_reference": "https://30secondscleaners.com/mwdownloads/download/link/id/2308",
     "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-11T13:30:24.886Z",
     "review_notes": "",
-    "request_id": "",
     "updated_at": "2026-06-11"
   }
 ]);
