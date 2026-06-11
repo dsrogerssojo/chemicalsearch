@@ -19,5 +19,26 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-11T18:09:09.543Z",
     "review_notes": "",
     "updated_at": "2026-06-11"
+  },
+  {
+    "id": "test2-n-a",
+    "name": "test2",
+    "company": "",
+    "product_code": "N/A",
+    "cas_number": "",
+    "use": "Pending classification",
+    "sds_number": "N/A",
+    "sds_version": "N/A",
+    "issue_date": "N/A",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "",
+    "hfrp_info": "N/A",
+    "sds_url": "",
+    "sds_reference": "",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-11T18:09:32.667Z",
+    "review_notes": "",
+    "updated_at": "2026-06-11"
   }
 ]);
