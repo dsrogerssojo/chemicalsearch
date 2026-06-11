@@ -298,6 +298,19 @@ body:not(.is-home-page) .emergency-strip {
   gap: 10px !important;
 }
 
+.submission-dialog-actions .button.secondary {
+  background: #ffffff !important;
+  border-color: #344055 !important;
+  color: #05070b !important;
+}
+
+.submission-dialog-actions .button.secondary:hover,
+.submission-dialog-actions .button.secondary:focus-visible {
+  background: #f2f5f9 !important;
+  border-color: #344055 !important;
+  color: #05070b !important;
+}
+
 @media (max-width: 900px) {
   #homeButton {
     top: 10px !important;
