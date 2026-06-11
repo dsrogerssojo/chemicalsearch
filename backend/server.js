@@ -44,6 +44,31 @@ function slugify(value) {
     .slice(0, 80) || `chemical-${Date.now()}`;
 }
 
+const PRODUCT_REVIEW_FIELDS = [
+  'chemical_name',
+  'name',
+  'product_name',
+  'company',
+  'manufacturer',
+  'supplier',
+  'product_code',
+  'cas_number',
+  'use',
+  'sds_number',
+  'sds_version',
+  'issue_date',
+  'revision_date',
+  'supersedes_date',
+  'hfrp_info',
+  'sds_url',
+  'composition'
+];
+
+function hasBlankProductFields(input = {}) {
+  const chemical = input.chemical || input;
+  return PRODUCT_REVIEW_FIELDS.every((field) => !clean(chemical[field]));
+}
+
 function normalizeRequest(body = {}) {
   const fields = body.fields || body;
 
@@ -99,6 +124,23 @@ function normalizeApprovedChemical(input = {}) {
   };
 }
 
+function normalizeDeletedChemical(input = {}) {
+  const chemical = input.chemical || input;
+  const now = new Date().toISOString();
+  const id = firstUseful(chemical.record_id, input.record_id, chemical.id);
+
+  return {
+    id,
+    deleted: true,
+    status: 'deleted',
+    deleted_at: now,
+    approved_by: clean(input.reviewer || input.approved_by),
+    review_notes: clean(input.review_notes),
+    request_id: clean(input.request_id),
+    updated_at: now.slice(0, 10)
+  };
+}
+
 function buildReviewRecord(request) {
   return {
     request_id: request.request_id,
@@ -150,7 +192,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
       },
       {
         type: 'TextBlock',
-        text: 'Edit any fields before approving. Blank fields can stay blank, but name and SDS link are required for approval.',
+        text: 'Edit any fields before approving. Blank fields can stay blank, but name and SDS link are required for adding or updating. For an existing product, clearing every product field and approving deletes the product card.',
         wrap: true
       },
       {
@@ -182,7 +224,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
     actions: [
       {
         type: 'Action.Submit',
-        title: 'Approve and Add Chemical',
+        title: 'Approve Changes',
         data: {
           decision: 'approved',
           request_id: reviewRecord.request_id,
@@ -255,7 +297,7 @@ function approvedJs(records) {
   return `globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat(${JSON.stringify(records, null, 2)});\n`;
 }
 
-async function commitApprovedToGithub(record) {
+async function commitApprovedToGithub(record, options = {}) {
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPO;
   const filePath = process.env.GITHUB_APPROVED_FILE || DEFAULT_APPROVED_FILE;
@@ -303,7 +345,7 @@ async function commitApprovedToGithub(record) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: `Approve chemical: ${record.name}`,
+      message: options.delete ? `Delete chemical record: ${record.id}` : `Approve chemical: ${record.name}`,
       content: Buffer.from(approvedJs(records)).toString('base64'),
       sha,
       branch
@@ -419,6 +461,29 @@ app.post('/api/review-callback', async (req, res) => {
         decision: 'denied',
         request_id: req.body.request_id,
         message: 'Denial received. No chemical record was added.'
+      });
+    }
+
+    const deleteRecordId = firstUseful(req.body.record_id, req.body.chemical?.record_id, req.body.id, req.body.chemical?.id);
+
+    if (deleteRecordId && hasBlankProductFields(req.body)) {
+      const record = normalizeDeletedChemical(req.body);
+
+      if (!record.id) {
+        return res.status(400).json({ error: 'Blank approved update requires record_id so the product can be deleted.' });
+      }
+
+      await upsertLocalApproved(record);
+      const github = await commitApprovedToGithub(record, { delete: true });
+      const frontend_deploy = await triggerFrontendDeploy(github);
+
+      return res.json({
+        ok: true,
+        decision: 'deleted',
+        record_id: record.id,
+        record,
+        github,
+        frontend_deploy
       });
     }
 

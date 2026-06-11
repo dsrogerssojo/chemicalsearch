@@ -9,6 +9,10 @@ function recordIdentity(record) {
   return rawClean(record.id) || [record.name, record.company, record.product_code, record.sds_url].map(rawClean).join("|").toLowerCase();
 }
 
+function isDeletedRecord(record) {
+  return record.deleted === true || rawClean(record.status).toLowerCase() === "deleted" || Boolean(rawClean(record.deleted_at));
+}
+
 function lastRecordVersions(items) {
   const byId = new Map();
   items.forEach((record) => {
@@ -19,7 +23,7 @@ function lastRecordVersions(items) {
 }
 
 const records = Array.isArray(globalThis.SDS_RECORDS)
-  ? lastRecordVersions(globalThis.SDS_RECORDS).sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
+  ? lastRecordVersions(globalThis.SDS_RECORDS).filter((record) => !isDeletedRecord(record)).sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
   : [];
 
 globalThis.CHEMICALSEARCH_RECORDS = records;
