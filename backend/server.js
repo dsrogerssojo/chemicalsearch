@@ -312,6 +312,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
     actions: [
       {
         type: 'Action.Submit',
+        id: 'approved',
         title: 'Approve Changes',
         data: {
           decision: 'approved',
@@ -321,6 +322,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
       },
       {
         type: 'Action.Submit',
+        id: 'denied',
         title: 'Deny',
         data: {
           decision: 'denied',
@@ -330,6 +332,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
       },
       {
         type: 'Action.Submit',
+        id: 'delete',
         title: 'Delete Product',
         style: 'destructive',
         data: {
@@ -502,6 +505,18 @@ function isKnownDecision(decision) {
   return ['approved', 'approve', 'denied', 'deny', 'rejected', 'reject', 'delete', 'deleted', 'remove', 'removed'].includes(decision);
 }
 
+function normalizeDecision(input = {}) {
+  const rawDecision = firstUseful(input.decision, input.submitActionId, input.action, input.title).toLowerCase();
+  const compact = rawDecision.replace(/[^a-z]/g, '');
+
+  if (['approve', 'approved', 'approvechanges', 'submitapprove'].includes(compact)) return 'approved';
+  if (['deny', 'denied', 'reject', 'rejected'].includes(compact)) return 'denied';
+  if (['delete', 'deleted', 'remove', 'removed', 'deleteproduct'].includes(compact)) return 'delete';
+  if (!rawDecision && !hasBlankProductFields(input)) return 'approved';
+
+  return rawDecision;
+}
+
 app.get('/health', (req, res) => {
   res.json({ ok: true, service: 'chemicalsearch-backend' });
 });
@@ -551,7 +566,7 @@ app.post('/api/review-callback', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized review callback.' });
     }
 
-    const decision = clean(reviewInput.decision).toLowerCase();
+    const decision = normalizeDecision(reviewInput);
 
     if (!isKnownDecision(decision)) {
       return res.status(400).json({ error: 'Decision must be approved, denied, or delete.' });

@@ -1,5 +1,7 @@
 const REVIEW_EMAIL = "safety-review@example.com";
 const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
+const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
+const INITIAL_SDS_RECORDS = Array.isArray(globalThis.SDS_RECORDS) ? [...globalThis.SDS_RECORDS] : [];
 
 function rawClean(value) {
   return String(value || "").trim();
@@ -56,14 +58,36 @@ function lastRecordVersions(items) {
   }, []);
 }
 
-const records = Array.isArray(globalThis.SDS_RECORDS)
-  ? lastRecordVersions(globalThis.SDS_RECORDS).filter((record) => !isDeletedRecord(record)).sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
-  : [];
+function buildRecordSet(items) {
+  return lastRecordVersions(items)
+    .filter((record) => !isDeletedRecord(record))
+    .sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+}
 
+const baseRecords = INITIAL_SDS_RECORDS.filter((record) => !isWorkflowRecord(record));
+let records = buildRecordSet(INITIAL_SDS_RECORDS);
 globalThis.CHEMICALSEARCH_RECORDS = records;
 
 let currentQuery = "";
 window.currentQuery = currentQuery;
+
+function apiBaseUrl() {
+  return (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || DEFAULT_API_BASE_URL).replace(/\/$/, "");
+}
+
+async function refreshApprovedRecords() {
+  try {
+    const response = await fetch(`${apiBaseUrl()}/api/approved-chemicals`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Approved records request failed: ${response.status}`);
+    const approved = await response.json();
+    if (!Array.isArray(approved)) return;
+    records = buildRecordSet(baseRecords.concat(approved));
+    globalThis.CHEMICALSEARCH_RECORDS = records;
+    route();
+  } catch (error) {
+    console.warn(error);
+  }
+}
 
 function escapeHtml(value) {
   return String(value || "")
@@ -401,7 +425,7 @@ function renderAddChemical(prefill = currentQuery) {
 
 function renderRequestReceipt(id) {
   const request = loadRequests().find((item) => item.id === id || item.request_id === id);
-  if (!request) return renderAddChemical();
+  if (!request) return window.renderAddChemical();
   const delivery = cleanValue(request.delivery_status || request.status);
   const statusLabel = delivery === "sent_to_teams" ? "Sent to Teams review" : delivery === "local_only" ? "Saved locally, not sent" : delivery === "saved_without_teams" ? "Saved without Teams queue" : "Saved";
   layout(`<section class="panel receipt"><span class="eyebrow">Request receipt</span><h1>Add Chemical Request</h1><div class="banner ${delivery === "local_only" ? "request-status is-error" : "request-status is-success"}"><strong>${escapeHtml(statusLabel)}</strong><br><span>${escapeHtml(request.submit_message || "Keep this page as a local receipt for the request.")}</span></div>${summaryRows([["Request ID", request.request_id || request.id], ["Chemical", request.chemical_name], ["Product code", request.product_code], ["CAS", request.cas_number], ["Manufacturer", request.manufacturer], ["SDS link", request.sds_url], ["Created", formatDate(request.created_at)]])}<button class="button secondary" data-route="home">Back to search</button></section>`);
@@ -425,11 +449,14 @@ function route() {
   const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
   if (!page) renderHome();
   else if (page === "chemical") renderRecord(id);
-  else if (page === "add-chemical") renderAddChemical(id || currentQuery);
+  else if (page === "add-chemical") window.renderAddChemical(id || currentQuery);
   else if (page === "request") renderRequestReceipt(id);
   else renderHome();
 }
 
 injectStyles();
+window.renderAddChemical = renderAddChemical;
+window.refreshApprovedRecords = refreshApprovedRecords;
 window.addEventListener("hashchange", route);
 route();
+refreshApprovedRecords();
