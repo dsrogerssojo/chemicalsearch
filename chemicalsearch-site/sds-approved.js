@@ -61,12 +61,23 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
   },
   {
     "id": "${record_id}",
-    "deleted": true,
-    "status": "deleted",
-    "deleted_at": "2026-06-11T13:19:30.406Z",
+    "name": "3M Silicone Spra",
+    "company": "3M",
+    "product_code": "62-4699-4930-9 (8)",
+    "cas_number": "",
+    "use": "Lubricant",
+    "sds_number": "N/A",
+    "sds_version": "5.0",
+    "issue_date": "05/24/2018",
+    "revision_date": "07/01/2016",
+    "supersedes_date": "07/01/2016",
+    "composition": "Acetone, Hydrotreated Light Naphtha (Petroleum), Propane, Poly(Dimethylsiloxane, Methylcylohexane, Solvent Naphtha",
+    "hfrp_info": "2/4/0/0",
+    "sds_url": "https://www.uline.com/PDF/SS-18768.pdf",
+    "sds_reference": "https://www.uline.com/PDF/SS-18768.pdf",
     "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-11T13:20:05.167Z",
     "review_notes": "",
-    "request_id": "",
     "updated_at": "2026-06-11"
   }
 ]);
