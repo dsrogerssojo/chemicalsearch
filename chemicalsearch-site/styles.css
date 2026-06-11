@@ -41,21 +41,6 @@ body { }
   box-sizing: border-box !important;
 }
 
-.quick-searches {
-  margin-top: 12px !important;
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-}
-
-.quick-chip {
-  height: 36px !important;
-  padding: 0 14px !important;
-  white-space: nowrap !important;
-}
-
 #homeButton {
   position: fixed !important;
   top: 14px !important;
@@ -412,7 +397,6 @@ body:not(.is-home-page) .emergency-strip {
   .hero,
   .footer,
   .search-panel,
-  .filter-toolbar,
   .results-panel > .section-heading,
   .cards,
   .incident-grid,

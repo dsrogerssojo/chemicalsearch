@@ -1,8 +1,6 @@
 /* Professional UI polish for action controls and contact information. */
 
 .button,
-.quick-chip,
-.filter-chip,
 .hotline,
 .source-pill,
 .ghs-pill,
@@ -31,9 +29,7 @@
 }
 
 .button.primary:hover,
-.button.secondary:hover,
-.quick-chip:hover,
-.filter-chip:hover {
+.button.secondary:hover {
   transform: none !important;
   filter: none !important;
 }
@@ -49,26 +45,10 @@
 }
 
 .button:focus-visible,
-.quick-chip:focus-visible,
-.filter-chip:focus-visible,
 .hotline:focus-visible,
 .chemical-card:focus-visible {
   outline: 2px solid rgba(255,255,255,.78) !important;
   outline-offset: 3px !important;
-}
-
-.quick-chip,
-.filter-chip {
-  border-radius: 8px !important;
-  font-size: .9rem !important;
-  font-weight: 700 !important;
-  padding: 8px 12px !important;
-}
-
-.filter-chip.is-selected {
-  background: #f7f8fb !important;
-  color: #080b10 !important;
-  border-color: #f7f8fb !important;
 }
 
 .emergency-strip {

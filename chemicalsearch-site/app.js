@@ -6,8 +6,6 @@ const records = Array.isArray(globalThis.SDS_RECORDS)
   : [];
 
 let currentQuery = "";
-let currentFilter = "all";
-let currentSort = "name";
 window.currentQuery = currentQuery;
 
 function escapeHtml(value) {
@@ -148,16 +146,12 @@ function searchScore(record) {
 
 function matchesRecord(record) {
   const q = normalize(currentQuery);
-  const matchesQuery = !q || searchableValues(record).some((value) => normalize(value).includes(q));
-  const matchesFilter = currentFilter === "all" || inferTags(record).includes(currentFilter) || riskInfo(record).label.toLowerCase() === currentFilter;
-  return matchesQuery && matchesFilter;
+  return !q || searchableValues(record).some((value) => normalize(value).includes(q));
 }
 
 function searchResults() {
   const results = records.filter(matchesRecord);
   return results.sort((a, b) => {
-    if (currentSort === "risk") return riskInfo(b).rank - riskInfo(a).rank || String(a.name || "").localeCompare(String(b.name || ""));
-    if (currentSort === "updated") return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
     return searchScore(a) - searchScore(b) || String(a.name || "").localeCompare(String(b.name || ""));
   });
 }
@@ -215,7 +209,6 @@ function searchPanel() {
         <input id="searchInput" class="search-input" value="${escapeHtml(currentQuery)}" placeholder="Search cleaner, bleach, company, product code, composition..." autocomplete="off" />
         <button class="button primary" type="submit">Search</button>
       </form>
-      <div class="quick-searches">${["Cleaner", "Bleach", "Lubricant", "Corrosive", "Flammable"].map((query) => `<button class="quick-chip" data-query="${escapeHtml(query)}">${escapeHtml(query)}</button>`).join("")}</div>
     </div>
   `;
 }
@@ -226,10 +219,6 @@ function renderHome() {
       ${searchPanel()}
       <div class="section-heading">
         <div><span class="eyebrow">Safety library</span><h2 id="resultsTitle">Chemical Records</h2><p id="resultsMeta" class="meta"></p></div>
-      </div>
-      <div class="filter-toolbar">
-        <div class="filter-tabs">${[["all", "All"], ["high", "High risk"], ["flammable", "Flammable"], ["corrosive", "Corrosive"], ["oxidizer", "Oxidizer"], ["irritant", "Irritant"]].map(([value, label]) => `<button class="filter-chip ${currentFilter === value ? "is-selected" : ""}" data-filter="${value}" type="button">${label}</button>`).join("")}</div>
-        <label class="sort-control">Sort <select id="sortSelect"><option value="name" ${currentSort === "name" ? "selected" : ""}>Name</option><option value="risk" ${currentSort === "risk" ? "selected" : ""}>Risk level</option><option value="updated" ${currentSort === "updated" ? "selected" : ""}>Recently updated</option></select></label>
       </div>
       <div id="resultsList" class="cards" aria-live="polite"></div>
     </section>
@@ -248,23 +237,6 @@ function bindSearchControls() {
   });
   document.getElementById("searchInput")?.addEventListener("input", (event) => {
     setCurrentQuery(event.target.value);
-    renderResults();
-  });
-  document.querySelectorAll("[data-query]").forEach((button) => {
-    button.addEventListener("click", () => {
-      setCurrentQuery(button.dataset.query);
-      document.getElementById("searchInput").value = currentQuery;
-      renderResults();
-    });
-  });
-  document.querySelectorAll("[data-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      currentFilter = button.dataset.filter;
-      renderHome();
-    });
-  });
-  document.getElementById("sortSelect")?.addEventListener("change", (event) => {
-    currentSort = event.target.value;
     renderResults();
   });
 }

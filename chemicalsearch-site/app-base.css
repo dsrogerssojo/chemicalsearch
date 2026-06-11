@@ -19,12 +19,12 @@ a{color:#111}
 .brand-copy{display:grid}
 .brand-title{font-weight:900}
 .brand-subtitle{font-size:.8rem;color:#bdbdbd}
-.nav-actions,.form-actions,.quick-searches,.filter-tabs,.card-badges,.detail-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.nav-actions,.form-actions,.card-badges,.detail-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .button{min-height:40px;border:1px solid #111;border-radius:10px;padding:0 13px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#111}
 .button.primary{background:#000;color:#fff;border-color:#000}
 .button.secondary{background:#fff;border-color:#9a9a9a;color:#111}
 .button.compact{min-height:34px;font-size:.9rem}
-.button:hover,.quick-chip:hover,.filter-chip:hover{transform:translateY(-1px)}
+.button:hover{transform:translateY(-1px)}
 .emergency-strip{background:#111;border-bottom:1px solid #222}
 .emergency-strip-inner{padding:8px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .hotline{min-height:42px;border-radius:9px;padding:8px 10px;text-decoration:none;color:#111;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #d8d8d8;text-align:left;background:#fff}
@@ -49,13 +49,7 @@ a{color:#111}
 .search-input::placeholder,.field::placeholder,.textarea::placeholder{color:#777}
 .search-input:focus,.field:focus,.textarea:focus,select:focus{outline:2px solid #000;outline-offset:1px}
 .textarea{min-height:100px;resize:vertical}
-.quick-searches{margin-top:8px}
-.quick-chip,.filter-chip{min-height:34px;border:1px solid #b8b8b8;border-radius:999px;background:#fff;color:#111;padding:0 12px;font-weight:800}
-.filter-chip.is-selected,.quick-chip:hover{background:#000;color:#fff;border-color:#000}
-.section-heading,.filter-toolbar,.detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.filter-toolbar{margin-bottom:12px}
-.sort-control{display:flex;align-items:center;gap:8px;color:var(--muted)}
-.sort-control select{min-height:36px;border:1px solid #b8b8b8;border-radius:999px;padding:0 12px;background:#fff;color:#111}
+.section-heading,.detail-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .meta{color:var(--muted);font-size:.92rem;line-height:1.35}
 .cards{display:grid;gap:10px}
 .chemical-card{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:#111;text-align:left;display:grid;grid-template-columns:8px 1fr;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.08)}
@@ -110,9 +104,8 @@ a{color:#111}
 
 @media(max-width:820px){
   .emergency-strip-inner,.search-row,.incident-grid,.hazard-overview,.sds-section-grid,.form-grid{grid-template-columns:1fr}
-  .section-heading,.filter-toolbar,.detail-header{display:block}
+  .section-heading,.detail-header{display:block}
   .detail-actions{margin-top:12px}
-  .sort-control{margin-top:8px}
   .hero-inner{padding:14px 16px}
   .topbar-inner{align-items:flex-start;flex-direction:column}
 }
