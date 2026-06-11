@@ -14,15 +14,22 @@ function recordIdentity(record) {
   return rawClean(record.id);
 }
 
-function productIdentity(record) {
+function productIdentities(record) {
   const name = usefulValue(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = usefulValue(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = usefulValue(record.product_code).toLowerCase();
-  const sdsUrl = usefulValue(record.sds_url || record.sds_reference).toLowerCase();
-  if (name && productCode) return `name-code:${name}|${productCode}`;
-  if (name && company) return `name-company:${name}|${company}`;
-  if (sdsUrl) return `sds:${sdsUrl}`;
-  return name ? `name:${name}` : "";
+  const sdsCandidate = usefulValue(record.sds_url || record.sds_reference).toLowerCase();
+  const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : "";
+  const identities = [];
+  if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
+  if (name && company) identities.push(`name-company:${name}|${company}`);
+  if (sdsUrl) identities.push(`sds:${sdsUrl}`);
+  if (!identities.length && name) identities.push(`name:${name}`);
+  return identities;
+}
+
+function productIdentity(record) {
+  return productIdentities(record)[0] || "";
 }
 
 function sameRecordVersion(a, b) {
@@ -30,17 +37,21 @@ function sameRecordVersion(a, b) {
   const bId = recordIdentity(b);
   if (aId && bId && aId === bId) return true;
 
-  const aProduct = productIdentity(a);
-  const bProduct = productIdentity(b);
-  return Boolean(aProduct && bProduct && aProduct === bProduct);
+  const bProducts = new Set(productIdentities(b));
+  return productIdentities(a).some((identity) => bProducts.has(identity));
 }
 
 function isDeletedRecord(record) {
   return record.deleted === true || rawClean(record.status).toLowerCase() === "deleted" || Boolean(rawClean(record.deleted_at));
 }
 
+function isWorkflowRecord(record) {
+  return isDeletedRecord(record) || Boolean(rawClean(record.approved_at) || rawClean(record.approved_by));
+}
+
 function lastRecordVersions(items) {
   return items.reduce((versions, record) => {
+    if (!isWorkflowRecord(record)) return [...versions, record];
     return [...versions.filter((item) => !sameRecordVersion(item, record)), record];
   }, []);
 }

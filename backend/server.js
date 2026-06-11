@@ -29,7 +29,9 @@ app.use(cors({
 app.use(express.json({ limit: REQUEST_BODY_LIMIT }));
 
 function clean(value) {
-  return String(value || '').trim();
+  const text = String(value || '').trim();
+  if (/^\$\{[^}]+\}$/.test(text) || /^@\{[^}]+\}$/.test(text)) return '';
+  return text;
 }
 
 function firstUseful(...values) {
@@ -49,16 +51,24 @@ function useful(value) {
   return text && text.toLowerCase() !== 'n/a' ? text : '';
 }
 
-function productIdentity(record = {}) {
+function productIdentities(record = {}) {
   const name = useful(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = useful(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = useful(record.product_code).toLowerCase();
-  const sdsUrl = useful(record.sds_url || record.sds_reference).toLowerCase();
+  const sdsCandidate = useful(record.sds_url || record.sds_reference).toLowerCase();
+  const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : '';
+  const identities = [];
 
-  if (name && productCode) return `name-code:${name}|${productCode}`;
-  if (name && company) return `name-company:${name}|${company}`;
-  if (sdsUrl) return `sds:${sdsUrl}`;
-  return name ? `name:${name}` : '';
+  if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
+  if (name && company) identities.push(`name-company:${name}|${company}`);
+  if (sdsUrl) identities.push(`sds:${sdsUrl}`);
+  if (!identities.length && name) identities.push(`name:${name}`);
+
+  return identities;
+}
+
+function productIdentity(record = {}) {
+  return productIdentities(record)[0] || '';
 }
 
 function sameProduct(a = {}, b = {}) {
@@ -66,9 +76,8 @@ function sameProduct(a = {}, b = {}) {
   const bId = clean(b.id);
   if (aId && bId && aId === bId) return true;
 
-  const aProduct = productIdentity(a);
-  const bProduct = productIdentity(b);
-  return Boolean(aProduct && bProduct && aProduct === bProduct);
+  const bProducts = new Set(productIdentities(b));
+  return productIdentities(a).some((identity) => bProducts.has(identity));
 }
 
 const PRODUCT_REVIEW_FIELDS = [
@@ -94,6 +103,48 @@ const PRODUCT_REVIEW_FIELDS = [
 function hasBlankProductFields(input = {}) {
   const chemical = input.chemical || input;
   return PRODUCT_REVIEW_FIELDS.every((field) => !clean(chemical[field]));
+}
+
+function objectValue(value) {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+}
+
+function hasKeys(value) {
+  return Object.keys(value).length > 0;
+}
+
+function normalizeReviewInput(input = {}) {
+  const body = objectValue(input.body);
+  const inputData = objectValue(input.data);
+  const bodyData = objectValue(body.data);
+  const data = hasKeys(inputData) ? inputData : bodyData;
+  const inputFields = objectValue(input.fields);
+  const bodyFields = objectValue(body.fields);
+  const dataFields = objectValue(data.fields);
+  const fields = hasKeys(inputFields) ? inputFields : hasKeys(bodyFields) ? bodyFields : dataFields;
+  const inputChemical = objectValue(input.chemical);
+  const bodyChemical = objectValue(body.chemical);
+  const dataChemical = objectValue(data.chemical);
+  const fieldChemical = objectValue(fields.chemical);
+  const chemical = hasKeys(inputChemical) ? inputChemical : hasKeys(bodyChemical) ? bodyChemical : hasKeys(dataChemical) ? dataChemical : fieldChemical;
+  const responder = objectValue(input.responder || body.responder);
+  const merged = {
+    ...input,
+    ...body,
+    ...data,
+    ...fields,
+    ...chemical
+  };
+
+  return {
+    ...merged,
+    chemical: {
+      ...merged,
+      ...chemical
+    },
+    approved_by: firstUseful(input.approved_by, body.approved_by, data.approved_by, fields.approved_by, responder.email),
+    reviewer: firstUseful(input.reviewer, body.reviewer, data.reviewer, fields.reviewer, responder.email)
+  };
 }
 
 function normalizeRequest(body = {}) {
@@ -156,9 +207,18 @@ function normalizeDeletedChemical(input = {}) {
   const chemical = input.chemical || input;
   const now = new Date().toISOString();
   const id = firstUseful(chemical.record_id, input.record_id, chemical.id);
+  const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
+  const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
+  const productCode = clean(chemical.product_code);
 
   return {
     id,
+    name,
+    company,
+    product_code: productCode,
+    cas_number: clean(chemical.cas_number),
+    sds_url: clean(chemical.sds_url),
+    sds_reference: clean(chemical.sds_url),
     deleted: true,
     status: 'deleted',
     deleted_at: now,
@@ -382,7 +442,7 @@ async function commitApprovedToGithub(record, options = {}) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      message: options.delete ? `Delete chemical record: ${record.id}` : `Approve chemical: ${record.name}`,
+      message: options.delete ? `Delete chemical record: ${record.id || record.name || 'unknown chemical'}` : `Approve chemical: ${record.name}`,
       content: Buffer.from(approvedJs(records)).toString('base64'),
       sha,
       branch
@@ -483,14 +543,15 @@ app.post('/api/submit-request', async (req, res) => {
 
 app.post('/api/review-callback', async (req, res) => {
   try {
+    const reviewInput = normalizeReviewInput(req.body);
     const expectedSecret = process.env.REVIEW_CALLBACK_SECRET || '';
-    const providedSecret = req.get('x-review-secret') || req.body.secret || '';
+    const providedSecret = req.get('x-review-secret') || reviewInput.secret || '';
 
     if (expectedSecret && providedSecret !== expectedSecret) {
       return res.status(401).json({ error: 'Unauthorized review callback.' });
     }
 
-    const decision = clean(req.body.decision).toLowerCase();
+    const decision = clean(reviewInput.decision).toLowerCase();
 
     if (!isKnownDecision(decision)) {
       return res.status(400).json({ error: 'Decision must be approved, denied, or delete.' });
@@ -500,18 +561,18 @@ app.post('/api/review-callback', async (req, res) => {
       return res.json({
         ok: true,
         decision: 'denied',
-        request_id: req.body.request_id,
+        request_id: reviewInput.request_id,
         message: 'Denial received. No chemical record was added.'
       });
     }
 
-    const deleteRecordId = firstUseful(req.body.record_id, req.body.chemical?.record_id, req.body.id, req.body.chemical?.id);
+    const deleteRecordId = firstUseful(reviewInput.record_id, reviewInput.chemical?.record_id, reviewInput.id, reviewInput.chemical?.id);
 
-    if (isDeleteDecision(decision) || (deleteRecordId && hasBlankProductFields(req.body))) {
-      const record = normalizeDeletedChemical(req.body);
+    if (isDeleteDecision(decision) || (deleteRecordId && hasBlankProductFields(reviewInput))) {
+      const record = normalizeDeletedChemical(reviewInput);
 
-      if (!record.id) {
-        return res.status(400).json({ error: 'Delete requires record_id so the product can be removed.' });
+      if (!record.id && !productIdentity(record)) {
+        return res.status(400).json({ error: 'Delete requires record_id or product details so the product can be removed.' });
       }
 
       await upsertLocalApproved(record);
@@ -521,14 +582,14 @@ app.post('/api/review-callback', async (req, res) => {
       return res.json({
         ok: true,
         decision: 'deleted',
-        record_id: record.id,
+        record_id: record.id || '',
         record,
         github,
         frontend_deploy
       });
     }
 
-    const record = normalizeApprovedChemical(req.body);
+    const record = normalizeApprovedChemical(reviewInput);
 
     if (!record.name) {
       return res.status(400).json({ error: 'Approved chemical requires at least a product name.' });
