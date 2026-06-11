@@ -21,10 +21,10 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
   },
   {
     "id": "${record_id}",
-    "name": "Test Chemical",
+    "name": "test2",
     "company": "",
     "product_code": "N/A",
-    "cas_number": "123",
+    "cas_number": "",
     "use": "Pending classification",
     "sds_number": "N/A",
     "sds_version": "N/A",
@@ -33,10 +33,10 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "supersedes_date": "N/A",
     "composition": "",
     "hfrp_info": "N/A",
-    "sds_url": "https://example.com/test-sds.pdf",
-    "sds_reference": "https://example.com/test-sds.pdf",
+    "sds_url": "",
+    "sds_reference": "",
     "approved_by": "david.rogers@sojoindustries.com",
-    "approved_at": "2026-06-11T17:12:06.076Z",
+    "approved_at": "2026-06-11T17:16:09.900Z",
     "review_notes": "",
     "updated_at": "2026-06-11"
   }
