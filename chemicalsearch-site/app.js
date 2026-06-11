@@ -5,8 +5,34 @@ function rawClean(value) {
   return String(value || "").trim();
 }
 
+function usefulValue(value) {
+  const text = rawClean(value);
+  return text && text.toLowerCase() !== "n/a" ? text : "";
+}
+
 function recordIdentity(record) {
-  return rawClean(record.id) || [record.name, record.company, record.product_code, record.sds_url].map(rawClean).join("|").toLowerCase();
+  return rawClean(record.id);
+}
+
+function productIdentity(record) {
+  const name = usefulValue(record.name || record.chemical_name || record.product_name).toLowerCase();
+  const company = usefulValue(record.company || record.manufacturer || record.supplier).toLowerCase();
+  const productCode = usefulValue(record.product_code).toLowerCase();
+  const sdsUrl = usefulValue(record.sds_url || record.sds_reference).toLowerCase();
+  if (name && productCode) return `name-code:${name}|${productCode}`;
+  if (name && company) return `name-company:${name}|${company}`;
+  if (sdsUrl) return `sds:${sdsUrl}`;
+  return name ? `name:${name}` : "";
+}
+
+function sameRecordVersion(a, b) {
+  const aId = recordIdentity(a);
+  const bId = recordIdentity(b);
+  if (aId && bId && aId === bId) return true;
+
+  const aProduct = productIdentity(a);
+  const bProduct = productIdentity(b);
+  return Boolean(aProduct && bProduct && aProduct === bProduct);
 }
 
 function isDeletedRecord(record) {
@@ -14,12 +40,9 @@ function isDeletedRecord(record) {
 }
 
 function lastRecordVersions(items) {
-  const byId = new Map();
-  items.forEach((record) => {
-    const key = recordIdentity(record);
-    if (key) byId.set(key, record);
-  });
-  return [...byId.values()];
+  return items.reduce((versions, record) => {
+    return [...versions.filter((item) => !sameRecordVersion(item, record)), record];
+  }, []);
 }
 
 const records = Array.isArray(globalThis.SDS_RECORDS)

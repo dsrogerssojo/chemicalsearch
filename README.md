@@ -141,4 +141,6 @@ To delete a product from Teams, click `Delete Product` on an existing product up
 
 Approved add/update callbacks require a product name. SDS links are optional; records without one appear as `SDS missing`.
 
+Approved edits replace previous cards by `record_id` first, then by matching product identity such as product name plus product code or manufacturer. This prevents duplicate cards when a supervisor edits an existing product.
+
 Keep this workflow conservative. Do not rename environment variables or rewrite the approval/writeback/deploy-hook path without testing it end to end.

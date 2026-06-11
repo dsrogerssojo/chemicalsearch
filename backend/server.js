@@ -44,6 +44,33 @@ function slugify(value) {
     .slice(0, 80) || `chemical-${Date.now()}`;
 }
 
+function useful(value) {
+  const text = clean(value);
+  return text && text.toLowerCase() !== 'n/a' ? text : '';
+}
+
+function productIdentity(record = {}) {
+  const name = useful(record.name || record.chemical_name || record.product_name).toLowerCase();
+  const company = useful(record.company || record.manufacturer || record.supplier).toLowerCase();
+  const productCode = useful(record.product_code).toLowerCase();
+  const sdsUrl = useful(record.sds_url || record.sds_reference).toLowerCase();
+
+  if (name && productCode) return `name-code:${name}|${productCode}`;
+  if (name && company) return `name-company:${name}|${company}`;
+  if (sdsUrl) return `sds:${sdsUrl}`;
+  return name ? `name:${name}` : '';
+}
+
+function sameProduct(a = {}, b = {}) {
+  const aId = clean(a.id);
+  const bId = clean(b.id);
+  if (aId && bId && aId === bId) return true;
+
+  const aProduct = productIdentity(a);
+  const bProduct = productIdentity(b);
+  return Boolean(aProduct && bProduct && aProduct === bProduct);
+}
+
 const PRODUCT_REVIEW_FIELDS = [
   'chemical_name',
   'name',
@@ -99,13 +126,14 @@ function normalizeApprovedChemical(input = {}) {
   const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
+  const productCode = clean(chemical.product_code);
   const now = new Date().toISOString();
 
   return {
-    id: recordId || slugify(`${name}-${company}-${Date.now()}`),
+    id: recordId || slugify(`${name}-${company}-${productCode}`),
     name,
     company,
-    product_code: clean(chemical.product_code) || 'N/A',
+    product_code: productCode || 'N/A',
     cas_number: clean(chemical.cas_number),
     use: clean(chemical.use) || 'Pending classification',
     sds_number: clean(chemical.sds_number) || 'N/A',
@@ -291,8 +319,7 @@ async function readLocalApproved() {
 }
 
 function upsertRecord(records, record) {
-  const id = clean(record.id);
-  records = records.filter((item) => clean(item.id) !== id);
+  records = records.filter((item) => !sameProduct(item, record));
   records.push(record);
   return records;
 }
