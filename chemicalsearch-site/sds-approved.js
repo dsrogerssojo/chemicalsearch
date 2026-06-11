@@ -48,5 +48,25 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-11T18:25:17.230Z",
     "review_notes": "",
     "updated_at": "2026-06-11"
+  },
+  {
+    "id": "",
+    "name": "test",
+    "company": "testtest2",
+    "product_code": "test",
+    "cas_number": "",
+    "sds_url": "test",
+    "sds_reference": "test",
+    "original_record_id": "",
+    "original_chemical_name": "",
+    "original_company": "",
+    "original_product_code": "",
+    "deleted": true,
+    "status": "deleted",
+    "deleted_at": "2026-06-11T18:28:26.434Z",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "review_notes": "",
+    "request_id": "",
+    "updated_at": "2026-06-11"
   }
 ]);
