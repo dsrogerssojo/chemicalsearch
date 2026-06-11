@@ -58,5 +58,15 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-10T18:22:56.136Z",
     "review_notes": "",
     "updated_at": "2026-06-10"
+  },
+  {
+    "id": "${record_id}",
+    "deleted": true,
+    "status": "deleted",
+    "deleted_at": "2026-06-11T13:19:30.406Z",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "review_notes": "",
+    "request_id": "",
+    "updated_at": "2026-06-11"
   }
 ]);
