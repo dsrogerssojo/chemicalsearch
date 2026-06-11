@@ -84,10 +84,6 @@
       id: requestId,
       request_id: requestId,
       record_id: clean(form.elements.record_id?.value),
-      original_record_id: clean(form.elements.original_record_id?.value),
-      original_chemical_name: clean(form.elements.original_chemical_name?.value),
-      original_company: clean(form.elements.original_company?.value),
-      original_product_code: clean(form.elements.original_product_code?.value),
       chemical_name: clean(form.elements.chemical_name?.value),
       product_code: clean(form.elements.product_code?.value),
       cas_number: clean(form.elements.cas_number?.value),
@@ -149,10 +145,6 @@
         <div id="requestStatus" class="banner request-status"><strong>Put in whatever you know.</strong><br><span>${updateRecord ? "Blanking a field asks the supervisor to remove that detail from the approved product card." : "Partial details are okay. A supervisor will verify the SDS information and approve the record before it is added to the searchable library."}</span></div>
         <form id="addChemicalForm" class="form-grid" novalidate>
           <input type="hidden" name="record_id" value="${fieldValue(updateRecord, "id")}">
-          <input type="hidden" name="original_record_id" value="${fieldValue(updateRecord, "id")}">
-          <input type="hidden" name="original_chemical_name" value="${fieldValue(updateRecord, "name")}">
-          <input type="hidden" name="original_company" value="${escapeHtml(manufacturer)}">
-          <input type="hidden" name="original_product_code" value="${fieldValue(updateRecord, "product_code")}">
           <fieldset class="form-section label-full"><legend>What do you know?</legend><div class="form-section-grid">
             <label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(productName)}" autocomplete="off"></label>
             <label class="label">Product code <input class="field" name="product_code" value="${fieldValue(updateRecord, "product_code")}" autocomplete="off"></label>

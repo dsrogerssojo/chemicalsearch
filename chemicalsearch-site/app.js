@@ -20,19 +20,13 @@ function productIdentities(record) {
   const name = usefulValue(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = usefulValue(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = usefulValue(record.product_code).toLowerCase();
-  const originalName = usefulValue(record.original_chemical_name || record.original_name).toLowerCase();
-  const originalCompany = usefulValue(record.original_company || record.original_manufacturer).toLowerCase();
-  const originalProductCode = usefulValue(record.original_product_code).toLowerCase();
   const sdsCandidate = usefulValue(record.sds_url || record.sds_reference).toLowerCase();
   const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : "";
   const identities = [];
   if (name && productCode) identities.push(`name-code:${name}|${productCode}`);
   if (name && company) identities.push(`name-company:${name}|${company}`);
-  if (originalName && originalProductCode) identities.push(`name-code:${originalName}|${originalProductCode}`);
-  if (originalName && originalCompany) identities.push(`name-company:${originalName}|${originalCompany}`);
   if (sdsUrl) identities.push(`sds:${sdsUrl}`);
   if (!identities.length && name) identities.push(`name:${name}`);
-  if (!identities.length && originalName) identities.push(`name:${originalName}`);
   return identities;
 }
 
@@ -72,7 +66,6 @@ function buildRecordSet(items) {
 
 const baseRecords = INITIAL_SDS_RECORDS.filter((record) => !isWorkflowRecord(record));
 let records = buildRecordSet(INITIAL_SDS_RECORDS);
-let approvedRecordsSignature = "";
 globalThis.CHEMICALSEARCH_RECORDS = records;
 
 let currentQuery = "";
@@ -88,40 +81,12 @@ async function refreshApprovedRecords() {
     if (!response.ok) throw new Error(`Approved records request failed: ${response.status}`);
     const approved = await response.json();
     if (!Array.isArray(approved)) return;
-    const signature = JSON.stringify(approved);
-    if (signature === approvedRecordsSignature) return;
-    approvedRecordsSignature = signature;
     records = buildRecordSet(baseRecords.concat(approved));
     globalThis.CHEMICALSEARCH_RECORDS = records;
-    refreshCurrentView();
+    route();
   } catch (error) {
     console.warn(error);
   }
-}
-
-function currentRoute() {
-  const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
-  return { page, id };
-}
-
-function refreshCurrentView() {
-  const { page } = currentRoute();
-
-  if (page === "add-chemical" || page === "request") return;
-  if (!page && document.getElementById("resultsList")) {
-    renderResults();
-    return;
-  }
-
-  route();
-}
-
-function startApprovedRecordsPolling() {
-  setInterval(refreshApprovedRecords, 5000);
-  window.addEventListener("focus", refreshApprovedRecords);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) refreshApprovedRecords();
-  });
 }
 
 function escapeHtml(value) {
@@ -495,4 +460,3 @@ window.refreshApprovedRecords = refreshApprovedRecords;
 window.addEventListener("hashchange", route);
 route();
 refreshApprovedRecords();
-startApprovedRecordsPolling();
