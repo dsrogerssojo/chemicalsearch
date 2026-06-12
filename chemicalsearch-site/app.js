@@ -181,8 +181,8 @@ function sourceInfo(record) {
 
 function sdsStatus(record) {
   return cleanValue(record.sds_url)
-    ? { label: "SDS linked", className: "sds-linked" }
-    : { label: "SDS missing", className: "sds-missing" };
+    ? { label: "SDS linked" }
+    : { label: "SDS missing" };
 }
 
 function loadRequests() {
@@ -213,10 +213,10 @@ function parseHfrp(record) {
 function riskInfo(record) {
   const hfrp = parseHfrp(record);
   const max = Math.max(hfrp.health, hfrp.fire, hfrp.reactivity);
-  if (max >= 4) return { label: "Extreme", className: "risk-extreme", rank: 4 };
-  if (max === 3) return { label: "High", className: "risk-high", rank: 3 };
-  if (max === 2) return { label: "Moderate", className: "risk-moderate", rank: 2 };
-  return { label: "Low", className: "risk-low", rank: 1 };
+  if (max >= 4) return { label: "Extreme", rank: 4 };
+  if (max === 3) return { label: "High", rank: 3 };
+  if (max === 2) return { label: "Moderate", rank: 2 };
+  return { label: "Low", rank: 1 };
 }
 
 function inferTags(record) {
@@ -385,15 +385,12 @@ function renderResults() {
 function recordCard(record) {
   const subline = [record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", recordLocation(record) ? `Location ${recordLocation(record)}` : ""].filter(Boolean).join(" | ");
   const risk = riskInfo(record);
-  const hfrp = parseHfrp(record);
-  const sds = sdsStatus(record);
   return `
     <button class="chemical-card hazard-${risk.label.toLowerCase()}" data-chemical-id="${escapeHtml(record.id)}">
       <span class="hazard-rail"></span>
       <span class="card-content">
         <strong class="chemical-name">${escapeHtml(record.name)}</strong>
         <span class="meta">${escapeHtml(subline || "Product details")}</span>
-        <span class="card-badges"><span class="risk-pill ${risk.className}">${risk.label}</span>${hfrp.raw ? `<span class="ghs-pill">HFRP ${escapeHtml(hfrp.raw)}</span>` : ""}<span class="source-pill ${sds.className}">${escapeHtml(sds.label)}</span></span>
         <span class="card-preview"><span><strong>Use:</strong> ${displayValue(record.use)}</span><span><strong>Composition:</strong> ${displayValue(record.composition)}</span></span>
         <span class="card-footer"><span>Updated ${escapeHtml(formatDate(record.updated_at))}</span><span class="open-label">Open SDS record</span></span>
       </span>
@@ -434,7 +431,7 @@ function renderRecord(id) {
         <button class="button primary" type="submit">Search</button>
       </form>
     </section>
-    <section class="detail-header panel"><div><span class="eyebrow">SDS record</span><h1 class="detail-title">${escapeHtml(record.name)}</h1><p class="detail-meta">${escapeHtml([record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", record.use].filter(Boolean).join(" | "))}</p><div class="card-badges"><span class="risk-pill ${risk.className}">${risk.label}</span></div></div><div class="detail-actions">${record.sds_url ? `<a class="button primary" href="${escapeHtml(record.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}<button class="button secondary" data-route="add-chemical" data-update-chemical-id="${escapeHtml(record.id)}">Suggest update</button><button class="button secondary" onclick="window.print()">Print</button></div></section>
+    <section class="detail-header panel"><div><span class="eyebrow">SDS record</span><h1 class="detail-title">${escapeHtml(record.name)}</h1><p class="detail-meta">${escapeHtml([record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", record.use].filter(Boolean).join(" | "))}</p></div><div class="detail-actions">${record.sds_url ? `<a class="button primary" href="${escapeHtml(record.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}<button class="button secondary" data-route="add-chemical" data-update-chemical-id="${escapeHtml(record.id)}">Suggest update</button><button class="button secondary" onclick="window.print()">Print</button></div></section>
     <div class="hazard-overview">${nfpaDiamond(record)}<section class="panel"><h2>Quick Safety Summary</h2><p><strong>Primary tags:</strong> ${ghsLabels(record).map((item) => escapeHtml(item.label)).join(", ")}</p><p><strong>Composition:</strong> ${displayValue(record.composition)}</p><p><strong>Record source:</strong> ${escapeHtml(source.label)}. <strong>SDS status:</strong> ${escapeHtml(sds.label)}.</p><p class="meta">Use the linked SDS for exact PPE, handling, storage, exposure controls, disposal, and emergency procedures.</p></section></div>
     <div class="sds-section-grid"><section class="panel"><h2>Identification</h2>${summaryRows(details)}</section><section class="panel"><h2>Hazard Identification</h2><p>Priority: <strong>${risk.label}</strong>. Tags: ${ghsLabels(record).map((item) => escapeHtml(item.label)).join(", ")}.</p></section><section class="panel"><h2>Composition</h2><p>${displayValue(record.composition)}</p></section><section class="panel"><h2>First-Aid Reference</h2><p>Use the current SDS and emergency instructions for route-specific first aid.</p></section><section class="panel"><h2>Handling / Storage</h2><p>Consult the official SDS for handling, storage, incompatibilities, and disposal.</p></section><section class="panel"><h2>SDS Link</h2>${sdsPanel(record)}</section></div>
   `, { pageClass: "detail-page" });

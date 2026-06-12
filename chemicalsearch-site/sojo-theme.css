@@ -101,12 +101,6 @@ body { font-family: Inter, Arial, Helvetica, sans-serif !important; }
 .card-footer { color: var(--sojo-muted) !important; }
 .open-label { color: #ffffff !important; }
 
-.risk-pill,.ghs-pill { border-radius: 999px !important; font-weight: 900 !important; border: 1px solid transparent !important; padding: 4px 9px !important; }
-.risk-low { background:#eaf7ef !important; color:#28784a !important; border-color:#bde5cb !important; }
-.risk-moderate { background:#fff7da !important; color:#9a6500 !important; border-color:#f1d77a !important; }
-.risk-high,.risk-extreme { background:#fff0ed !important; color:#b42318 !important; border-color:#f2b8b0 !important; }
-.ghs-pill { background:#eaf4ff !important; color:#0d4d7d !important; border-color:#b8d7f2 !important; }
-
 .incident-grid,.sds-section-grid,.hazard-overview { gap: 16px !important; }
 .incident-card,.sds-section-grid .panel,.hazard-overview .panel,.detail-header { border-radius: 16px !important; border: 1px solid var(--sojo-line) !important; background: var(--sojo-panel-soft) !important; padding: 18px !important; }
 .summary-list div { border-bottom-color: var(--sojo-line) !important; }

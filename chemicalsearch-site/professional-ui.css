@@ -1,10 +1,7 @@
 /* Professional UI polish for action controls and contact information. */
 
 .button,
-.hotline,
-.source-pill,
-.ghs-pill,
-.risk-pill {
+.hotline {
   letter-spacing: 0 !important;
   text-transform: none !important;
 }
@@ -181,19 +178,6 @@ body:not(.is-home-page) .emergency-strip {
   min-height: 44px !important;
   min-width: 104px !important;
   padding-inline: 16px !important;
-}
-
-.card-badges {
-  gap: 8px !important;
-}
-
-.risk-pill,
-.ghs-pill,
-.source-pill {
-  border-radius: 999px !important;
-  font-size: .8rem !important;
-  font-weight: 800 !important;
-  padding: 5px 10px !important;
 }
 
 .form-actions {
