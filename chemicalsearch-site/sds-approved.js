@@ -16,25 +16,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "updated_at": "2026-06-11"
   },
   {
-    "id": "",
+    "id": "test-langhorne-pa",
     "name": "test",
-    "company": "",
-    "product_code": "N/A",
-    "cas_number": "",
-    "sds_url": "",
-    "sds_reference": "",
-    "deleted": true,
-    "status": "deleted",
-    "deleted_at": "2026-06-11T18:55:20.312Z",
-    "approved_by": "david.rogers@sojoindustries.com",
-    "review_notes": "",
-    "request_id": "",
-    "updated_at": "2026-06-11"
-  },
-  {
-    "id": "test-1",
-    "name": "test",
-    "location": "#1",
+    "location": "Langhorne - PA",
     "company": "",
     "product_code": "N/A",
     "cas_number": "",
@@ -49,7 +33,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "sds_url": "",
     "sds_reference": "",
     "approved_by": "david.rogers@sojoindustries.com",
-    "approved_at": "2026-06-12T12:07:20.959Z",
+    "approved_at": "2026-06-12T12:14:57.756Z",
     "review_notes": "",
     "updated_at": "2026-06-12"
   }
