@@ -13,7 +13,7 @@ const requiredFiles = [
   "chemicalsearch-site/app-base.css",
   "chemicalsearch-site/styles.css",
   "chemicalsearch-site/sojo-theme.css",
-  "chemicalsearch-site/runtime-config.js",
+  "chemicalsearch-site/professional-ui.css",
   "chemicalsearch-site/app.js",
   "chemicalsearch-site/request-client.js",
   "chemicalsearch-site/layout-fixes.js",
@@ -43,7 +43,17 @@ if (missingRefs.length) {
   process.exit(1);
 }
 
-for (const file of ["backend/server.js", "backend/config.js"]) {
+const javascriptFiles = [
+  "backend/server.js",
+  "backend/config.js",
+  "chemicalsearch-site/app.js",
+  "chemicalsearch-site/request-client.js",
+  "chemicalsearch-site/layout-fixes.js",
+  "chemicalsearch-site/sds-approved.js",
+  ...Array.from({ length: 6 }, (_, index) => `chemicalsearch-site/sds-data-${index + 1}.js`)
+];
+
+for (const file of javascriptFiles) {
   const result = spawnSync(process.execPath, ["--check", file], { cwd: root, stdio: "inherit" });
   if (result.status !== 0) process.exit(result.status || 1);
 }

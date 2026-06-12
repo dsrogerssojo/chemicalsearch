@@ -183,8 +183,7 @@ body:not(.is-home-page) .emergency-strip {
   padding-inline: 16px !important;
 }
 
-.card-badges,
-.record-status-row {
+.card-badges {
   gap: 8px !important;
 }
 

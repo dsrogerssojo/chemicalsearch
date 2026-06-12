@@ -1,4 +1,3 @@
-const REVIEW_EMAIL = "safety-review@example.com";
 const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
 const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
 const INITIAL_SDS_RECORDS = Array.isArray(globalThis.SDS_RECORDS) ? [...globalThis.SDS_RECORDS] : [];
@@ -195,14 +194,6 @@ function loadRequests() {
   }
 }
 
-function saveRequests(requests) {
-  localStorage.setItem(REQUEST_KEY, JSON.stringify(requests));
-}
-
-function makeId() {
-  return globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `request-${Date.now()}`;
-}
-
 function parseHfrp(record) {
   const raw = cleanValue(record.hfrp_info);
   const parts = raw.split("/").map((part) => part.trim());
@@ -288,11 +279,6 @@ function searchResults() {
   return results.sort((a, b) => {
     return searchScore(a) - searchScore(b) || String(a.name || "").localeCompare(String(b.name || ""));
   });
-}
-
-function injectStyles() {
-  // Base app styles now live in app-base.css.
-  // Keep this no-op shim so existing startup flow remains unchanged.
 }
 
 function layout(content, options = {}) {
@@ -400,17 +386,14 @@ function recordCard(record) {
   const subline = [record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", recordLocation(record) ? `Location ${recordLocation(record)}` : ""].filter(Boolean).join(" | ");
   const risk = riskInfo(record);
   const hfrp = parseHfrp(record);
-  const source = sourceInfo(record);
   const sds = sdsStatus(record);
-  const labels = ghsLabels(record).map((item) => `<span class="ghs-pill ghs-${escapeHtml(item.tag)}">${escapeHtml(item.label)}</span>`).join("");
   return `
     <button class="chemical-card hazard-${risk.label.toLowerCase()}" data-chemical-id="${escapeHtml(record.id)}">
       <span class="hazard-rail"></span>
       <span class="card-content">
         <strong class="chemical-name">${escapeHtml(record.name)}</strong>
         <span class="meta">${escapeHtml(subline || "Product details")}</span>
-        <span class="card-badges"><span class="risk-pill ${risk.className}">${risk.label}</span>${labels}${hfrp.raw ? `<span class="ghs-pill">HFRP ${escapeHtml(hfrp.raw)}</span>` : ""}</span>
-        <span class="record-status-row"><span class="source-pill ${source.className}">${escapeHtml(source.label)}</span><span class="source-pill ${sds.className}">${escapeHtml(sds.label)}</span></span>
+        <span class="card-badges"><span class="risk-pill ${risk.className}">${risk.label}</span>${hfrp.raw ? `<span class="ghs-pill">HFRP ${escapeHtml(hfrp.raw)}</span>` : ""}<span class="source-pill ${sds.className}">${escapeHtml(sds.label)}</span></span>
         <span class="card-preview"><span><strong>Use:</strong> ${displayValue(record.use)}</span><span><strong>Composition:</strong> ${displayValue(record.composition)}</span></span>
         <span class="card-footer"><span>Updated ${escapeHtml(formatDate(record.updated_at))}</span><span class="open-label">Open SDS record</span></span>
       </span>
@@ -442,7 +425,6 @@ function renderRecord(id) {
   const risk = riskInfo(record);
   const source = sourceInfo(record);
   const sds = sdsStatus(record);
-  const labels = ghsLabels(record).map((item) => `<span class="ghs-pill ghs-${escapeHtml(item.tag)}">${escapeHtml(item.label)}</span>`).join("");
   const details = [["Location", locationLabel(recordLocation(record))], ["Company", record.company], ["Product code", record.product_code], ["Use", record.use], ["SDS number", record.sds_number], ["SDS version", record.sds_version], ["Issue date", record.issue_date], ["Revision date", record.revision_date], ["HFRP info", record.hfrp_info], ["Source", source.label], ["SDS status", sds.label], ["Approved by", record.approved_by], ["Approved at", formatDate(record.approved_at)], ["Updated", formatDate(record.updated_at)]];
   layout(`
     <section class="panel detail-search-panel">
@@ -452,7 +434,7 @@ function renderRecord(id) {
         <button class="button primary" type="submit">Search</button>
       </form>
     </section>
-    <section class="detail-header panel"><div><span class="eyebrow">SDS record</span><h1 class="detail-title">${escapeHtml(record.name)}</h1><p class="detail-meta">${escapeHtml([record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", record.use].filter(Boolean).join(" | "))}</p><div class="card-badges"><span class="risk-pill ${risk.className}">${risk.label}</span>${labels}</div></div><div class="detail-actions">${record.sds_url ? `<a class="button primary" href="${escapeHtml(record.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}<button class="button secondary" data-route="add-chemical" data-update-chemical-id="${escapeHtml(record.id)}">Suggest update</button><button class="button secondary" onclick="window.print()">Print</button></div></section>
+    <section class="detail-header panel"><div><span class="eyebrow">SDS record</span><h1 class="detail-title">${escapeHtml(record.name)}</h1><p class="detail-meta">${escapeHtml([record.company, cleanValue(record.product_code) ? `Code ${record.product_code}` : "", record.use].filter(Boolean).join(" | "))}</p><div class="card-badges"><span class="risk-pill ${risk.className}">${risk.label}</span></div></div><div class="detail-actions">${record.sds_url ? `<a class="button primary" href="${escapeHtml(record.sds_url)}" target="_blank" rel="noreferrer">Open SDS</a>` : ""}<button class="button secondary" data-route="add-chemical" data-update-chemical-id="${escapeHtml(record.id)}">Suggest update</button><button class="button secondary" onclick="window.print()">Print</button></div></section>
     <div class="hazard-overview">${nfpaDiamond(record)}<section class="panel"><h2>Quick Safety Summary</h2><p><strong>Primary tags:</strong> ${ghsLabels(record).map((item) => escapeHtml(item.label)).join(", ")}</p><p><strong>Composition:</strong> ${displayValue(record.composition)}</p><p><strong>Record source:</strong> ${escapeHtml(source.label)}. <strong>SDS status:</strong> ${escapeHtml(sds.label)}.</p><p class="meta">Use the linked SDS for exact PPE, handling, storage, exposure controls, disposal, and emergency procedures.</p></section></div>
     <div class="sds-section-grid"><section class="panel"><h2>Identification</h2>${summaryRows(details)}</section><section class="panel"><h2>Hazard Identification</h2><p>Priority: <strong>${risk.label}</strong>. Tags: ${ghsLabels(record).map((item) => escapeHtml(item.label)).join(", ")}.</p></section><section class="panel"><h2>Composition</h2><p>${displayValue(record.composition)}</p></section><section class="panel"><h2>First-Aid Reference</h2><p>Use the current SDS and emergency instructions for route-specific first aid.</p></section><section class="panel"><h2>Handling / Storage</h2><p>Consult the official SDS for handling, storage, incompatibilities, and disposal.</p></section><section class="panel"><h2>SDS Link</h2>${sdsPanel(record)}</section></div>
   `, { pageClass: "detail-page" });
@@ -463,29 +445,12 @@ function renderRecord(id) {
   });
 }
 
-function renderAddChemical(prefill = currentQuery) {
-  const updateRecord = records.find((item) => item.id === prefill);
-  const record = updateRecord || {};
-  const title = updateRecord ? "Suggest Product Update" : "Add or Update Chemical";
-  const name = updateRecord ? record.name : prefill;
-  layout(`<section class="panel"><div class="section-heading"><div><span class="eyebrow">Supervisor review</span><h1>${escapeHtml(title)}</h1><p class="lead">Enter the information you know from the label, SDS, supplier page, or product container. The request is sent to a supervisor for review and approval before it appears in ChemicalSearch.</p></div></div><div id="requestStatus" class="banner request-status"><strong>Put in whatever you know.</strong><br><span>Partial details are okay. A supervisor will verify the SDS information and approve the record before it is added to the searchable library.</span></div><form id="addChemicalForm" class="form-grid"><input type="hidden" name="record_id" value="${escapeHtml(record.id || "")}"><label class="label">Chemical or product name <input class="field" name="chemical_name" value="${escapeHtml(name || "")}"></label><label class="label">Product code <input class="field" name="product_code" value="${escapeHtml(record.product_code || "")}"></label><label class="label">CAS number <input class="field" name="cas_number" value="${escapeHtml(record.cas_number || "")}"></label><label class="label">Manufacturer / supplier <input class="field" name="manufacturer" value="${escapeHtml(record.company || record.manufacturer || "")}"></label><label class="label">SDS link <input class="field" name="sds_url" value="${escapeHtml(record.sds_url || "")}"></label><label class="label">Composition / active ingredient <input class="field" name="composition" value="${escapeHtml(record.composition || "")}"></label><label class="label">Use / classification <input class="field" name="use" value="${escapeHtml(record.use || "")}"></label><label class="label">HFRP / NFPA info <input class="field" name="hfrp_info" value="${escapeHtml(record.hfrp_info || "")}"></label><label class="label">Your email <input class="field" name="requested_by" type="email"></label><label class="label label-full">Notes <textarea class="textarea" name="notes" placeholder="Location, label details, why it is needed, or anything the reviewer should verify"></textarea></label><div class="form-actions label-full"><button class="button primary" type="submit">Save request receipt</button><button class="button secondary" type="button" data-route="home">Cancel</button></div></form></section>`);
-  const form = document.getElementById("addChemicalForm");
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const data = new FormData(form);
-    const request = Object.fromEntries(data.entries());
-    request.id = makeId();
-    request.created_at = new Date().toISOString();
-    const requests = loadRequests();
-    requests.push(request);
-    saveRequests(requests);
-    location.hash = `#/request/${request.id}`;
-  });
-}
-
 function renderRequestReceipt(id) {
   const request = loadRequests().find((item) => item.id === id || item.request_id === id);
-  if (!request) return window.renderAddChemical();
+  if (!request) {
+    location.hash = "#/add-chemical";
+    return;
+  }
   const delivery = cleanValue(request.delivery_status || request.status);
   const statusLabel = delivery === "sent_to_teams" ? "Sent to Teams review" : delivery === "local_only" ? "Saved locally, not sent" : delivery === "saved_without_teams" ? "Saved without Teams queue" : "Saved";
   layout(`<section class="panel receipt"><span class="eyebrow">Request receipt</span><h1>Add Chemical Request</h1><div class="banner ${delivery === "local_only" ? "request-status is-error" : "request-status is-success"}"><strong>${escapeHtml(statusLabel)}</strong><br><span>${escapeHtml(request.submit_message || "Keep this page as a local receipt for the request.")}</span></div>${summaryRows([["Request ID", request.request_id || request.id], ["Chemical", request.chemical_name], ["Location", request.location], ["Product code", request.product_code], ["CAS", request.cas_number], ["Manufacturer", request.manufacturer], ["SDS link", request.sds_url], ["Created", formatDate(request.created_at)]])}<button class="button secondary" data-route="home">Back to search</button></section>`);
@@ -509,13 +474,11 @@ function route() {
   const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
   if (!page) renderHome();
   else if (page === "chemical") renderRecord(id);
-  else if (page === "add-chemical") window.renderAddChemical(id || currentQuery);
+  else if (page === "add-chemical") window.renderAddChemical?.(id || currentQuery);
   else if (page === "request") renderRequestReceipt(id);
   else renderHome();
 }
 
-injectStyles();
-window.renderAddChemical = renderAddChemical;
 window.refreshApprovedRecords = refreshApprovedRecords;
 window.addEventListener("hashchange", route);
 route();

@@ -26,10 +26,10 @@ A `Cannot GET /` response at the backend root is normal. Use `/health`.
 
 ```text
 chemicalsearch-site/index.html          Static shell and asset loading
-chemicalsearch-site/runtime-config.js   Runtime API URL override from localStorage
 chemicalsearch-site/app-base.css        Base app styles
 chemicalsearch-site/styles.css          Layout, print, and fix styles
 chemicalsearch-site/sojo-theme.css      SOJO visual theme
+chemicalsearch-site/professional-ui.css Action-control and responsive UI polish
 chemicalsearch-site/app.js              Main rendering, routing, search, details, request receipts
 chemicalsearch-site/request-client.js   Add/update request form and supervisor review submission
 chemicalsearch-site/layout-fixes.js     SOJO logo placement and Home button behavior
@@ -77,7 +77,7 @@ Run this from the repository root before deploying:
 node tools/validate-deploy.mjs
 ```
 
-The script checks required frontend/backend files, verifies `index.html` asset references, and syntax-checks backend JavaScript.
+The script checks required frontend/backend files, verifies `index.html` asset references, and syntax-checks all deployed JavaScript.
 
 ## Environment Variables
 
@@ -109,7 +109,7 @@ chemicalsearch-site: static site from chemicalsearch-site/
 Render backend commands:
 
 ```text
-Build: npm install
+Build: npm ci
 Start: npm start
 ```
 
