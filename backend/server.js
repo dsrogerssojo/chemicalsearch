@@ -355,9 +355,11 @@ function hydrateReviewInput(input = {}) {
 function reviewLocationInput(value = DEFAULT_LOCATION) {
   return {
     type: 'Input.ChoiceSet',
-    id: 'selected_location',
+    id: 'location',
     label: 'Location',
     value: cleanLocation(value) || DEFAULT_LOCATION,
+    isRequired: true,
+    errorMessage: 'Choose the location for this product.',
     choices: LOCATION_OPTIONS.map((location) => ({ title: location, value: location }))
   };
 }
@@ -369,7 +371,6 @@ function reviewActionData(decision, reviewRecord) {
     decision,
     request_id: reviewRecord.request_id,
     record_id: reviewRecord.record_id,
-    location: submittedLocation,
     submitted_location: submittedLocation
   };
 }
