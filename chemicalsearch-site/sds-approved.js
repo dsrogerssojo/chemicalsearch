@@ -59,5 +59,28 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-12T13:17:18.449Z",
     "review_notes": "",
     "updated_at": "2026-06-12"
+  },
+  {
+    "id": "test2-test2-whiteland-in",
+    "name": "test2",
+    "location": "Whiteland - IN",
+    "company": "",
+    "product_code": "test2",
+    "cas_number": "test2",
+    "use": "Pending classification",
+    "sds_number": "N/A",
+    "sds_version": "N/A",
+    "issue_date": "N/A",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "",
+    "hfrp_info": "N/A",
+    "sds_url": "",
+    "sds_reference": "",
+    "request_id": "whiteland-in--201ba2d8-1218-44b4-abe3-6344bb1f8263",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-12T13:17:45.974Z",
+    "review_notes": "",
+    "updated_at": "2026-06-12"
   }
 ]);
