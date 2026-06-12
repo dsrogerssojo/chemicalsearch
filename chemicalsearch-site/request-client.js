@@ -115,11 +115,17 @@
 
   function formFields(form) {
     const requestId = form.dataset.requestId || makeId();
+    const selectedLocation = cleanLocation(form.elements.location?.value);
     return {
       id: requestId,
       request_id: requestId,
       record_id: clean(form.elements.record_id?.value),
-      location: cleanLocation(form.elements.location?.value),
+      location: selectedLocation,
+      selected_location: selectedLocation,
+      submitted_location: selectedLocation,
+      original_location: selectedLocation,
+      site_location: selectedLocation,
+      facility_location: selectedLocation,
       chemical_name: clean(form.elements.chemical_name?.value),
       product_code: clean(form.elements.product_code?.value),
       cas_number: clean(form.elements.cas_number?.value),

@@ -119,11 +119,6 @@ const PRODUCT_REVIEW_FIELDS = [
   'chemical_name',
   'name',
   'product_name',
-  'location',
-  'selected_location',
-  'submitted_location',
-  'site_location',
-  'facility_location',
   'company',
   'manufacturer',
   'supplier',
@@ -193,7 +188,7 @@ function normalizeRequest(body = {}) {
   return {
     request_id: fields.request_id || body.request_id || crypto.randomUUID(),
     record_id: clean(fields.record_id),
-    location: cleanLocation(fields.location || fields.site_location || fields.facility_location) || DEFAULT_LOCATION,
+    location: cleanLocation(fields.location || fields.selected_location || fields.submitted_location || fields.original_location || fields.site_location || fields.facility_location) || DEFAULT_LOCATION,
     chemical_name: firstUseful(fields.chemical_name, fields.product_name, fields.name),
     product_code: clean(fields.product_code),
     cas_number: clean(fields.cas_number),
@@ -220,12 +215,14 @@ function normalizeApprovedChemical(input = {}) {
   const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
   const productCode = clean(chemical.product_code);
   const location = cleanLocation(
-    chemical.selected_location ||
-    input.selected_location ||
-    chemical.location ||
-    input.location ||
+    chemical.original_location ||
+    input.original_location ||
     chemical.submitted_location ||
     input.submitted_location ||
+    chemical.location ||
+    input.location ||
+    chemical.selected_location ||
+    input.selected_location ||
     chemical.site_location ||
     input.site_location ||
     chemical.facility_location ||
@@ -265,12 +262,14 @@ function normalizeDeletedChemical(input = {}) {
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const productCode = clean(chemical.product_code);
   const location = cleanLocation(
-    chemical.selected_location ||
-    input.selected_location ||
-    chemical.location ||
-    input.location ||
+    chemical.original_location ||
+    input.original_location ||
     chemical.submitted_location ||
     input.submitted_location ||
+    chemical.location ||
+    input.location ||
+    chemical.selected_location ||
+    input.selected_location ||
     chemical.site_location ||
     input.site_location ||
     chemical.facility_location ||
@@ -301,6 +300,11 @@ function buildReviewRecord(request) {
     request_id: request.request_id,
     record_id: request.record_id,
     location: request.location || DEFAULT_LOCATION,
+    selected_location: request.location || DEFAULT_LOCATION,
+    submitted_location: request.location || DEFAULT_LOCATION,
+    original_location: request.location || DEFAULT_LOCATION,
+    site_location: request.location || DEFAULT_LOCATION,
+    facility_location: request.location || DEFAULT_LOCATION,
     chemical_name: request.chemical_name,
     name: request.chemical_name,
     company: request.manufacturer,
@@ -343,24 +347,17 @@ function hydrateReviewInput(input = {}) {
   return {
     ...pending,
     ...input,
-    location: cleanLocation(input.selected_location || input.location || input.submitted_location) || pending.location,
+    location: pending.location,
+    selected_location: pending.location,
+    submitted_location: pending.location,
+    original_location: pending.location,
+    site_location: pending.location,
+    facility_location: pending.location,
     chemical: {
       ...pending,
       ...input.chemical,
       ...input
     }
-  };
-}
-
-function reviewLocationInput(value = DEFAULT_LOCATION) {
-  return {
-    type: 'Input.ChoiceSet',
-    id: 'location',
-    label: 'Location',
-    value: cleanLocation(value) || DEFAULT_LOCATION,
-    isRequired: true,
-    errorMessage: 'Choose the location for this product.',
-    choices: LOCATION_OPTIONS.map((location) => ({ title: location, value: location }))
   };
 }
 
@@ -371,7 +368,12 @@ function reviewActionData(decision, reviewRecord) {
     decision,
     request_id: reviewRecord.request_id,
     record_id: reviewRecord.record_id,
-    submitted_location: submittedLocation
+    location: submittedLocation,
+    selected_location: submittedLocation,
+    submitted_location: submittedLocation,
+    original_location: submittedLocation,
+    site_location: submittedLocation,
+    facility_location: submittedLocation
   };
 }
 
@@ -397,11 +399,11 @@ function buildReviewAdaptiveCard(reviewRecord) {
         facts: [
           { title: 'Request ID', value: reviewRecord.request_id || '' },
           { title: 'Product record ID', value: reviewRecord.record_id || 'New product' },
+          { title: 'Location', value: reviewRecord.location || DEFAULT_LOCATION },
           { title: 'Requested by', value: reviewRecord.requested_by || 'Not listed' },
           { title: 'Submitted', value: reviewRecord.submitted_at || 'Not listed' }
         ]
       },
-      reviewLocationInput(reviewRecord.location),
       reviewInput('chemical_name', 'Chemical/product name', reviewRecord.chemical_name),
       reviewInput('company', 'Company/manufacturer', reviewRecord.company),
       reviewInput('product_code', 'Product code', reviewRecord.product_code),
