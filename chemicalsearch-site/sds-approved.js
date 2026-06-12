@@ -105,5 +105,28 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-12T13:18:17.069Z",
     "review_notes": "",
     "updated_at": "2026-06-12"
+  },
+  {
+    "id": "test3-redlands-ca",
+    "name": "test3",
+    "location": "Redlands - CA",
+    "company": "",
+    "product_code": "N/A",
+    "cas_number": "",
+    "use": "Pending classification",
+    "sds_number": "N/A",
+    "sds_version": "N/A",
+    "issue_date": "N/A",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "",
+    "hfrp_info": "N/A",
+    "sds_url": "",
+    "sds_reference": "",
+    "request_id": "redlands-ca--d139de92-99ad-41e3-98ff-6acbbb04c01e",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-12T13:18:46.558Z",
+    "review_notes": "",
+    "updated_at": "2026-06-12"
   }
 ]);
