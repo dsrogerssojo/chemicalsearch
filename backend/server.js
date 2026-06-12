@@ -120,6 +120,8 @@ const PRODUCT_REVIEW_FIELDS = [
   'name',
   'product_name',
   'location',
+  'selected_location',
+  'submitted_location',
   'site_location',
   'facility_location',
   'company',
@@ -217,7 +219,18 @@ function normalizeApprovedChemical(input = {}) {
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
   const productCode = clean(chemical.product_code);
-  const location = cleanLocation(chemical.location || input.location || chemical.site_location || input.site_location || chemical.facility_location || input.facility_location) || DEFAULT_LOCATION;
+  const location = cleanLocation(
+    chemical.selected_location ||
+    input.selected_location ||
+    chemical.location ||
+    input.location ||
+    chemical.submitted_location ||
+    input.submitted_location ||
+    chemical.site_location ||
+    input.site_location ||
+    chemical.facility_location ||
+    input.facility_location
+  ) || DEFAULT_LOCATION;
   const now = new Date().toISOString();
 
   return {
@@ -251,7 +264,18 @@ function normalizeDeletedChemical(input = {}) {
   const name = firstUseful(chemical.name, chemical.chemical_name, chemical.product_name);
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const productCode = clean(chemical.product_code);
-  const location = cleanLocation(chemical.location || input.location || chemical.site_location || input.site_location || chemical.facility_location || input.facility_location);
+  const location = cleanLocation(
+    chemical.selected_location ||
+    input.selected_location ||
+    chemical.location ||
+    input.location ||
+    chemical.submitted_location ||
+    input.submitted_location ||
+    chemical.site_location ||
+    input.site_location ||
+    chemical.facility_location ||
+    input.facility_location
+  );
 
   return {
     id,
@@ -319,7 +343,7 @@ function hydrateReviewInput(input = {}) {
   return {
     ...pending,
     ...input,
-    location: cleanLocation(input.location) || pending.location,
+    location: cleanLocation(input.selected_location || input.location || input.submitted_location) || pending.location,
     chemical: {
       ...pending,
       ...input.chemical,
@@ -331,10 +355,22 @@ function hydrateReviewInput(input = {}) {
 function reviewLocationInput(value = DEFAULT_LOCATION) {
   return {
     type: 'Input.ChoiceSet',
-    id: 'location',
+    id: 'selected_location',
     label: 'Location',
     value: cleanLocation(value) || DEFAULT_LOCATION,
     choices: LOCATION_OPTIONS.map((location) => ({ title: location, value: location }))
+  };
+}
+
+function reviewActionData(decision, reviewRecord) {
+  const submittedLocation = cleanLocation(reviewRecord.location) || DEFAULT_LOCATION;
+
+  return {
+    decision,
+    request_id: reviewRecord.request_id,
+    record_id: reviewRecord.record_id,
+    location: submittedLocation,
+    submitted_location: submittedLocation
   };
 }
 
@@ -387,32 +423,20 @@ function buildReviewAdaptiveCard(reviewRecord) {
         type: 'Action.Submit',
         id: 'approved',
         title: 'Approve Changes',
-        data: {
-          decision: 'approved',
-          request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
-        }
+        data: reviewActionData('approved', reviewRecord)
       },
       {
         type: 'Action.Submit',
         id: 'denied',
         title: 'Deny',
-        data: {
-          decision: 'denied',
-          request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
-        }
+        data: reviewActionData('denied', reviewRecord)
       },
       {
         type: 'Action.Submit',
         id: 'delete',
         title: 'Delete Product',
         style: 'destructive',
-        data: {
-          decision: 'delete',
-          request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id
-        }
+        data: reviewActionData('delete', reviewRecord)
       }
     ]
   };
