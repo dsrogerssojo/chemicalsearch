@@ -2,7 +2,29 @@
   const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
   const API_BASE_URL = (window.CHEMICALSEARCH_API_URL || localStorage.getItem("chemicalsearch.apiBaseUrl") || DEFAULT_API_BASE_URL).replace(/\/$/, "");
   const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
-  const LOCATION_OPTIONS = ["#1", "#2", "#3", "#4"];
+  const LOCATION_OPTIONS = ["Langhorne - PA", "Whiteland - IN", "Temple - TX", "Redlands - CA"];
+  const LOCATION_ALIASES = new Map([
+    ["#1", "Langhorne - PA"],
+    ["1", "Langhorne - PA"],
+    ["langhorne", "Langhorne - PA"],
+    ["langhorne - pa", "Langhorne - PA"],
+    ["langhorne-pa", "Langhorne - PA"],
+    ["#2", "Whiteland - IN"],
+    ["2", "Whiteland - IN"],
+    ["whiteland", "Whiteland - IN"],
+    ["whiteland - in", "Whiteland - IN"],
+    ["whiteland-in", "Whiteland - IN"],
+    ["#3", "Temple - TX"],
+    ["3", "Temple - TX"],
+    ["temple", "Temple - TX"],
+    ["temple - tx", "Temple - TX"],
+    ["temple-tx", "Temple - TX"],
+    ["#4", "Redlands - CA"],
+    ["4", "Redlands - CA"],
+    ["redlands", "Redlands - CA"],
+    ["redlands - ca", "Redlands - CA"],
+    ["redlands-ca", "Redlands - CA"]
+  ]);
 
   function apiUrl(path) { return `${API_BASE_URL}${path}`; }
   function clean(value) { return String(value || "").trim(); }
@@ -24,7 +46,8 @@
 
   function cleanLocation(value) {
     const location = clean(value);
-    return LOCATION_OPTIONS.includes(location) ? location : LOCATION_OPTIONS[0];
+    if (LOCATION_OPTIONS.includes(location)) return location;
+    return LOCATION_ALIASES.get(location.toLowerCase()) || LOCATION_OPTIONS[0];
   }
 
   function locationOptions(selected) {

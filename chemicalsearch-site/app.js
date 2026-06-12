@@ -2,8 +2,30 @@ const REVIEW_EMAIL = "safety-review@example.com";
 const REQUEST_KEY = "chemicalSdsLookup.requests.v1";
 const DEFAULT_API_BASE_URL = "https://chemicalsearch-backend.onrender.com";
 const INITIAL_SDS_RECORDS = Array.isArray(globalThis.SDS_RECORDS) ? [...globalThis.SDS_RECORDS] : [];
-const LOCATION_OPTIONS = ["#1", "#2", "#3", "#4"];
+const LOCATION_OPTIONS = ["Langhorne - PA", "Whiteland - IN", "Temple - TX", "Redlands - CA"];
 const DEFAULT_LOCATION = LOCATION_OPTIONS[0];
+const LOCATION_ALIASES = new Map([
+  ["#1", "Langhorne - PA"],
+  ["1", "Langhorne - PA"],
+  ["langhorne", "Langhorne - PA"],
+  ["langhorne - pa", "Langhorne - PA"],
+  ["langhorne-pa", "Langhorne - PA"],
+  ["#2", "Whiteland - IN"],
+  ["2", "Whiteland - IN"],
+  ["whiteland", "Whiteland - IN"],
+  ["whiteland - in", "Whiteland - IN"],
+  ["whiteland-in", "Whiteland - IN"],
+  ["#3", "Temple - TX"],
+  ["3", "Temple - TX"],
+  ["temple", "Temple - TX"],
+  ["temple - tx", "Temple - TX"],
+  ["temple-tx", "Temple - TX"],
+  ["#4", "Redlands - CA"],
+  ["4", "Redlands - CA"],
+  ["redlands", "Redlands - CA"],
+  ["redlands - ca", "Redlands - CA"],
+  ["redlands-ca", "Redlands - CA"]
+]);
 
 function rawClean(value) {
   return String(value || "").trim();
@@ -126,11 +148,12 @@ function setCurrentQuery(value) {
 
 function cleanLocation(value) {
   const location = cleanValue(value);
-  return LOCATION_OPTIONS.includes(location) ? location : "";
+  if (LOCATION_OPTIONS.includes(location)) return location;
+  return LOCATION_ALIASES.get(location.toLowerCase()) || "";
 }
 
 function recordLocation(record) {
-  return cleanLocation(record.location || record.site_location || record.facility_location);
+  return cleanLocation(record.location || record.site_location || record.facility_location) || DEFAULT_LOCATION;
 }
 
 function locationLabel(value) {
@@ -255,7 +278,7 @@ function searchScore(record) {
 function matchesRecord(record) {
   const q = normalize(currentQuery);
   const location = recordLocation(record);
-  const matchesLocation = !location || location === currentLocation;
+  const matchesLocation = location === currentLocation;
   const matchesQuery = !q || searchableValues(record).some((value) => normalize(value).includes(q));
   return matchesLocation && matchesQuery;
 }

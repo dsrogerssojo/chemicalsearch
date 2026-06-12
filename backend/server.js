@@ -15,8 +15,30 @@ import {
 
 const app = express();
 const LOCAL_APPROVED_PATH = path.join(path.resolve(DATA_DIR), LOCAL_APPROVED_FILENAME);
-const LOCATION_OPTIONS = ['#1', '#2', '#3', '#4'];
+const LOCATION_OPTIONS = ['Langhorne - PA', 'Whiteland - IN', 'Temple - TX', 'Redlands - CA'];
 const DEFAULT_LOCATION = LOCATION_OPTIONS[0];
+const LOCATION_ALIASES = new Map([
+  ['#1', 'Langhorne - PA'],
+  ['1', 'Langhorne - PA'],
+  ['langhorne', 'Langhorne - PA'],
+  ['langhorne - pa', 'Langhorne - PA'],
+  ['langhorne-pa', 'Langhorne - PA'],
+  ['#2', 'Whiteland - IN'],
+  ['2', 'Whiteland - IN'],
+  ['whiteland', 'Whiteland - IN'],
+  ['whiteland - in', 'Whiteland - IN'],
+  ['whiteland-in', 'Whiteland - IN'],
+  ['#3', 'Temple - TX'],
+  ['3', 'Temple - TX'],
+  ['temple', 'Temple - TX'],
+  ['temple - tx', 'Temple - TX'],
+  ['temple-tx', 'Temple - TX'],
+  ['#4', 'Redlands - CA'],
+  ['4', 'Redlands - CA'],
+  ['redlands', 'Redlands - CA'],
+  ['redlands - ca', 'Redlands - CA'],
+  ['redlands-ca', 'Redlands - CA']
+]);
 const pendingRequests = new Map();
 
 app.use(cors({
@@ -43,7 +65,8 @@ function firstUseful(...values) {
 
 function cleanLocation(value) {
   const location = clean(value);
-  return LOCATION_OPTIONS.includes(location) ? location : '';
+  if (LOCATION_OPTIONS.includes(location)) return location;
+  return LOCATION_ALIASES.get(location.toLowerCase()) || '';
 }
 
 function slugify(value) {
@@ -63,7 +86,7 @@ function productIdentities(record = {}) {
   const name = useful(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = useful(record.company || record.manufacturer || record.supplier).toLowerCase();
   const productCode = useful(record.product_code).toLowerCase();
-  const location = cleanLocation(record.location || record.site_location || record.facility_location).toLowerCase();
+  const location = (cleanLocation(record.location || record.site_location || record.facility_location) || DEFAULT_LOCATION).toLowerCase();
   const sdsCandidate = useful(record.sds_url || record.sds_reference).toLowerCase();
   const sdsUrl = /^https?:\/\//.test(sdsCandidate) ? sdsCandidate : '';
   const identities = [];
@@ -83,9 +106,9 @@ function productIdentity(record = {}) {
 function sameProduct(a = {}, b = {}) {
   const aId = clean(a.id);
   const bId = clean(b.id);
-  const aLocation = cleanLocation(a.location || a.site_location || a.facility_location);
-  const bLocation = cleanLocation(b.location || b.site_location || b.facility_location);
-  if (aLocation && bLocation && aLocation !== bLocation) return false;
+  const aLocation = cleanLocation(a.location || a.site_location || a.facility_location) || DEFAULT_LOCATION;
+  const bLocation = cleanLocation(b.location || b.site_location || b.facility_location) || DEFAULT_LOCATION;
+  if (aLocation !== bLocation) return false;
   if (aId && bId && aId === bId) return true;
 
   const bProducts = new Set(productIdentities(b));
@@ -367,8 +390,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'approved',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id,
-          location: reviewRecord.location
+          record_id: reviewRecord.record_id
         }
       },
       {
@@ -378,8 +400,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'denied',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id,
-          location: reviewRecord.location
+          record_id: reviewRecord.record_id
         }
       },
       {
@@ -390,8 +411,7 @@ function buildReviewAdaptiveCard(reviewRecord) {
         data: {
           decision: 'delete',
           request_id: reviewRecord.request_id,
-          record_id: reviewRecord.record_id,
-          location: reviewRecord.location
+          record_id: reviewRecord.record_id
         }
       }
     ]
