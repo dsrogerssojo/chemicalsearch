@@ -36,5 +36,27 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "approved_at": "2026-06-12T12:15:25.214Z",
     "review_notes": "",
     "updated_at": "2026-06-12"
+  },
+  {
+    "id": "test2-n-a-langhorne-pa",
+    "name": "test2",
+    "location": "Langhorne - PA",
+    "company": "",
+    "product_code": "N/A",
+    "cas_number": "",
+    "use": "Pending classification",
+    "sds_number": "N/A",
+    "sds_version": "N/A",
+    "issue_date": "N/A",
+    "revision_date": "N/A",
+    "supersedes_date": "N/A",
+    "composition": "",
+    "hfrp_info": "N/A",
+    "sds_url": "",
+    "sds_reference": "",
+    "approved_by": "david.rogers@sojoindustries.com",
+    "approved_at": "2026-06-12T12:16:01.097Z",
+    "review_notes": "",
+    "updated_at": "2026-06-12"
   }
 ]);
