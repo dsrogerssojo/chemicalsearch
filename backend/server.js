@@ -15,6 +15,7 @@ import {
 
 const app = express();
 const LOCAL_APPROVED_PATH = path.join(path.resolve(DATA_DIR), LOCAL_APPROVED_FILENAME);
+const LOCAL_PENDING_PATH = path.join(path.resolve(DATA_DIR), 'pending-requests.json');
 const LOCATION_OPTIONS = ['Langhorne - PA', 'Whiteland - IN', 'Temple - TX', 'Redlands - CA'];
 const DEFAULT_LOCATION = LOCATION_OPTIONS[0];
 const LOCATION_ALIASES = new Map([
@@ -39,6 +40,10 @@ const LOCATION_ALIASES = new Map([
   ['redlands - ca', 'Redlands - CA'],
   ['redlands-ca', 'Redlands - CA']
 ]);
+const LOCATION_KEYS = new Map(LOCATION_OPTIONS.map((location) => [
+  location.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+  location
+]));
 const pendingRequests = new Map();
 
 app.use(cors({
@@ -66,7 +71,19 @@ function firstUseful(...values) {
 function cleanLocation(value) {
   const location = clean(value);
   if (LOCATION_OPTIONS.includes(location)) return location;
-  return LOCATION_ALIASES.get(location.toLowerCase()) || '';
+  const key = location.toLowerCase();
+  return LOCATION_ALIASES.get(key) || LOCATION_KEYS.get(key) || '';
+}
+
+function locationFromRequestId(value) {
+  const requestId = clean(value).toLowerCase();
+  if (!requestId) return '';
+
+  for (const [key, location] of LOCATION_KEYS) {
+    if (requestId.startsWith(`${key}--`)) return location;
+  }
+
+  return '';
 }
 
 function slugify(value) {
@@ -188,7 +205,7 @@ function normalizeRequest(body = {}) {
   return {
     request_id: fields.request_id || body.request_id || crypto.randomUUID(),
     record_id: clean(fields.record_id),
-    location: cleanLocation(fields.location || fields.selected_location || fields.submitted_location || fields.original_location || fields.site_location || fields.facility_location) || DEFAULT_LOCATION,
+    location: locationFromRequestId(fields.request_id || body.request_id) || cleanLocation(fields.location || fields.selected_location || fields.submitted_location || fields.original_location || fields.site_location || fields.facility_location) || DEFAULT_LOCATION,
     chemical_name: firstUseful(fields.chemical_name, fields.product_name, fields.name),
     product_code: clean(fields.product_code),
     cas_number: clean(fields.cas_number),
@@ -215,18 +232,19 @@ function normalizeApprovedChemical(input = {}) {
   const recordId = firstUseful(chemical.record_id, input.record_id, chemical.id);
   const productCode = clean(chemical.product_code);
   const location = cleanLocation(
-    chemical.original_location ||
+    locationFromRequestId(input.request_id || chemical.request_id) ||
     input.original_location ||
-    chemical.submitted_location ||
     input.submitted_location ||
-    chemical.location ||
     input.location ||
-    chemical.selected_location ||
     input.selected_location ||
-    chemical.site_location ||
     input.site_location ||
-    chemical.facility_location ||
-    input.facility_location
+    input.facility_location ||
+    chemical.original_location ||
+    chemical.submitted_location ||
+    chemical.location ||
+    chemical.selected_location ||
+    chemical.site_location ||
+    chemical.facility_location
   ) || DEFAULT_LOCATION;
   const now = new Date().toISOString();
 
@@ -262,18 +280,19 @@ function normalizeDeletedChemical(input = {}) {
   const company = firstUseful(chemical.company, chemical.manufacturer, chemical.supplier);
   const productCode = clean(chemical.product_code);
   const location = cleanLocation(
-    chemical.original_location ||
+    locationFromRequestId(input.request_id || chemical.request_id) ||
     input.original_location ||
-    chemical.submitted_location ||
     input.submitted_location ||
-    chemical.location ||
     input.location ||
-    chemical.selected_location ||
     input.selected_location ||
-    chemical.site_location ||
     input.site_location ||
-    chemical.facility_location ||
-    input.facility_location
+    input.facility_location ||
+    chemical.original_location ||
+    chemical.submitted_location ||
+    chemical.location ||
+    chemical.selected_location ||
+    chemical.site_location ||
+    chemical.facility_location
   );
 
   return {
@@ -338,25 +357,32 @@ function reviewInput(id, label, value = '', options = {}) {
   };
 }
 
-function hydrateReviewInput(input = {}) {
+async function hydrateReviewInput(input = {}) {
   const requestId = clean(input.request_id);
-  const pending = requestId ? pendingRequests.get(requestId) : null;
+  const pending = requestId ? await getPendingRequest(requestId) : null;
 
   if (!pending) return input;
+  const location = cleanLocation(pending.location) || DEFAULT_LOCATION;
 
   return {
     ...pending,
     ...input,
-    location: pending.location,
-    selected_location: pending.location,
-    submitted_location: pending.location,
-    original_location: pending.location,
-    site_location: pending.location,
-    facility_location: pending.location,
+    location,
+    selected_location: location,
+    submitted_location: location,
+    original_location: location,
+    site_location: location,
+    facility_location: location,
     chemical: {
       ...pending,
       ...input.chemical,
-      ...input
+      ...input,
+      location,
+      selected_location: location,
+      submitted_location: location,
+      original_location: location,
+      site_location: location,
+      facility_location: location
     }
   };
 }
@@ -478,6 +504,57 @@ async function readLocalApproved() {
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
+  }
+}
+
+async function readPendingRequests() {
+  await fs.mkdir(path.resolve(DATA_DIR), { recursive: true });
+
+  try {
+    const parsed = JSON.parse(await fs.readFile(LOCAL_PENDING_PATH, 'utf8'));
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+async function writePendingRequests(requests) {
+  await fs.mkdir(path.resolve(DATA_DIR), { recursive: true });
+  await fs.writeFile(LOCAL_PENDING_PATH, `${JSON.stringify(requests, null, 2)}\n`);
+}
+
+async function rememberPendingRequest(request) {
+  const requestId = clean(request.request_id);
+  if (!requestId) return;
+
+  pendingRequests.set(requestId, request);
+  const requests = await readPendingRequests();
+  requests[requestId] = request;
+  await writePendingRequests(requests);
+}
+
+async function getPendingRequest(requestId) {
+  const key = clean(requestId);
+  if (!key) return null;
+
+  const cached = pendingRequests.get(key);
+  if (cached) return cached;
+
+  const requests = await readPendingRequests();
+  const request = requests[key] || null;
+  if (request) pendingRequests.set(key, request);
+  return request;
+}
+
+async function forgetPendingRequest(requestId) {
+  const key = clean(requestId);
+  if (!key) return;
+
+  pendingRequests.delete(key);
+  const requests = await readPendingRequests();
+  if (requests[key]) {
+    delete requests[key];
+    await writePendingRequests(requests);
   }
 }
 
@@ -625,7 +702,7 @@ app.post('/api/submit-request', async (req, res) => {
   try {
     const request = normalizeRequest(req.body);
     const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL;
-    pendingRequests.set(request.request_id, request);
+    await rememberPendingRequest(request);
 
     if (!webhookUrl) {
       return res.status(202).json({
@@ -659,7 +736,7 @@ app.post('/api/submit-request', async (req, res) => {
 
 app.post('/api/review-callback', async (req, res) => {
   try {
-    const reviewInput = hydrateReviewInput(normalizeReviewInput(req.body));
+    const reviewInput = await hydrateReviewInput(normalizeReviewInput(req.body));
     const expectedSecret = process.env.REVIEW_CALLBACK_SECRET || '';
     const providedSecret = req.get('x-review-secret') || reviewInput.secret || '';
 
@@ -674,7 +751,7 @@ app.post('/api/review-callback', async (req, res) => {
     }
 
     if (isDeniedDecision(decision)) {
-      pendingRequests.delete(clean(reviewInput.request_id));
+      await forgetPendingRequest(reviewInput.request_id);
       return res.json({
         ok: true,
         decision: 'denied',
@@ -695,7 +772,7 @@ app.post('/api/review-callback', async (req, res) => {
       await upsertLocalApproved(record);
       const github = await commitApprovedToGithub(record, { delete: true });
       const frontend_deploy = await triggerFrontendDeploy(github);
-      pendingRequests.delete(clean(reviewInput.request_id));
+      await forgetPendingRequest(reviewInput.request_id);
 
       return res.json({
         ok: true,
@@ -716,7 +793,7 @@ app.post('/api/review-callback', async (req, res) => {
     await upsertLocalApproved(record);
     const github = await commitApprovedToGithub(record);
     const frontend_deploy = await triggerFrontendDeploy(github);
-    pendingRequests.delete(clean(reviewInput.request_id));
+    await forgetPendingRequest(reviewInput.request_id);
 
     res.json({
       ok: true,

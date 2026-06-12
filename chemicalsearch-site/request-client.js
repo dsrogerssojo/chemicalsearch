@@ -50,6 +50,10 @@
     return LOCATION_ALIASES.get(location.toLowerCase()) || LOCATION_OPTIONS[0];
   }
 
+  function locationKey(value) {
+    return cleanLocation(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
   function locationOptions(selected) {
     const current = cleanLocation(selected);
     return LOCATION_OPTIONS.map((location) => `<option value="${escapeHtml(location)}" ${location === current ? "selected" : ""}>${escapeHtml(location)}</option>`).join("");
@@ -114,13 +118,15 @@
   }
 
   function formFields(form) {
-    const requestId = form.dataset.requestId || makeId();
     const selectedLocation = cleanLocation(form.elements.location?.value);
+    const baseRequestId = clean(form.dataset.requestId || makeId()).replace(/^(langhorne-pa|whiteland-in|temple-tx|redlands-ca)--/, "");
+    const requestId = `${locationKey(selectedLocation)}--${baseRequestId}`;
     return {
       id: requestId,
       request_id: requestId,
       record_id: clean(form.elements.record_id?.value),
       location: selectedLocation,
+      location_key: locationKey(selectedLocation),
       selected_location: selectedLocation,
       submitted_location: selectedLocation,
       original_location: selectedLocation,
