@@ -55,7 +55,7 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "sds_url": "",
     "sds_reference": "",
     "approved_by": "david.rogers@sojoindustries.com",
-    "approved_at": "2026-06-12T12:36:55.333Z",
+    "approved_at": "2026-06-12T13:10:02.337Z",
     "review_notes": "",
     "updated_at": "2026-06-12"
   }
