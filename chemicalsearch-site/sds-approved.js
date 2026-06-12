@@ -54,8 +54,9 @@ globalThis.SDS_RECORDS = (globalThis.SDS_RECORDS || []).concat([
     "hfrp_info": "N/A",
     "sds_url": "",
     "sds_reference": "",
+    "request_id": "",
     "approved_by": "david.rogers@sojoindustries.com",
-    "approved_at": "2026-06-12T13:12:18.532Z",
+    "approved_at": "2026-06-12T13:17:18.449Z",
     "review_notes": "",
     "updated_at": "2026-06-12"
   }
