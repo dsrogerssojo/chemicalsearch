@@ -99,6 +99,10 @@ function useful(value) {
   return text && text.toLowerCase() !== 'n/a' ? text : '';
 }
 
+function comparable(value) {
+  return useful(value).toLowerCase();
+}
+
 function productIdentities(record = {}) {
   const name = useful(record.name || record.chemical_name || record.product_name).toLowerCase();
   const company = useful(record.company || record.manufacturer || record.supplier).toLowerCase();
@@ -265,6 +269,7 @@ function normalizeApprovedChemical(input = {}) {
     hfrp_info: clean(chemical.hfrp_info) || 'N/A',
     sds_url: clean(chemical.sds_url),
     sds_reference: clean(chemical.sds_url),
+    request_id: clean(input.request_id),
     approved_by: clean(input.reviewer || input.approved_by),
     approved_at: clean(input.approved_at) || now,
     review_notes: clean(input.review_notes),
@@ -358,15 +363,16 @@ function reviewInput(id, label, value = '', options = {}) {
 }
 
 async function hydrateReviewInput(input = {}) {
-  const requestId = clean(input.request_id);
-  const pending = requestId ? await getPendingRequest(requestId) : null;
+  const pending = await findPendingRequest(input);
 
   if (!pending) return input;
   const location = cleanLocation(pending.location) || DEFAULT_LOCATION;
+  const requestId = clean(pending.request_id) || clean(input.request_id);
 
   return {
     ...pending,
     ...input,
+    request_id: requestId,
     location,
     selected_location: location,
     submitted_location: location,
@@ -377,6 +383,7 @@ async function hydrateReviewInput(input = {}) {
       ...pending,
       ...input.chemical,
       ...input,
+      request_id: requestId,
       location,
       selected_location: location,
       submitted_location: location,
@@ -544,6 +551,43 @@ async function getPendingRequest(requestId) {
   const request = requests[key] || null;
   if (request) pendingRequests.set(key, request);
   return request;
+}
+
+function pendingRequestMatchScore(request = {}, input = {}) {
+  const chemical = input.chemical || input;
+  const requestRecordId = comparable(request.record_id);
+  const inputRecordId = comparable(firstUseful(input.record_id, chemical.record_id, input.id, chemical.id));
+  const requestName = comparable(request.chemical_name);
+  const inputName = comparable(firstUseful(chemical.chemical_name, chemical.name, chemical.product_name));
+  const requestCode = comparable(request.product_code);
+  const inputCode = comparable(chemical.product_code);
+  const requestCompany = comparable(request.manufacturer);
+  const inputCompany = comparable(firstUseful(chemical.company, chemical.manufacturer, chemical.supplier));
+
+  if (inputRecordId && requestRecordId === inputRecordId) return 100;
+  if (!inputName || requestName !== inputName) return 0;
+
+  let score = 50;
+  if (inputCode && requestCode === inputCode) score += 20;
+  if (inputCompany && requestCompany === inputCompany) score += 10;
+  return score;
+}
+
+async function findPendingRequest(input = {}) {
+  const requestId = clean(input.request_id);
+  if (requestId) {
+    const exact = await getPendingRequest(requestId);
+    if (exact) return exact;
+  }
+
+  const requests = Object.values(await readPendingRequests());
+  return requests
+    .map((request) => ({ request, score: pendingRequestMatchScore(request, input) }))
+    .filter((candidate) => candidate.score > 0)
+    .sort((a, b) => {
+      if (a.score !== b.score) return b.score - a.score;
+      return String(b.request.submitted_at || '').localeCompare(String(a.request.submitted_at || ''));
+    })[0]?.request || null;
 }
 
 async function forgetPendingRequest(requestId) {
